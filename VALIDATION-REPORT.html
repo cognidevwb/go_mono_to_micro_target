@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Monolith decomposition — sign-off</title>
+<style>
+:root { --ink:#1b1b1b; --muted:#5b5b5b; --rule:#dcdcdc; --accent:#1a5fb4;
+        --pass:#1a7f37; --fail:#b3261e; --unver:#8a5300; --wash:#f6f8fb; }
+* { box-sizing:border-box; }
+body { margin:0; background:#ffffff; color:var(--ink);
+       font-family:"Charter","Bitstream Charter","Iowan Old Style",Georgia,serif;
+       font-size:16px; line-height:1.55; }
+main { max-width:60rem; margin:0 auto; padding:3rem 1.5rem 5rem; }
+h1 { font-size:1.85rem; line-height:1.25; margin:0 0 .35rem; font-weight:600; }
+h2 { font-size:1.2rem; margin:2.75rem 0 .75rem; font-weight:600;
+     padding-bottom:.35rem; border-bottom:2px solid var(--accent); }
+h3 { font-size:1rem; margin:1.75rem 0 .5rem; font-weight:600; color:var(--accent); }
+p { margin:.6rem 0; }
+.sub { color:var(--muted); margin:0 0 1.75rem; }
+.banner { border:1px solid var(--rule); border-left:6px solid var(--accent);
+          background:var(--wash); padding:1rem 1.25rem; margin:1.5rem 0 1rem; }
+.banner.pass { border-left-color:var(--pass); }
+.banner.fail { border-left-color:var(--fail); }
+.banner.unverified { border-left-color:var(--unver); }
+.verdict { font-size:1.35rem; font-weight:700; letter-spacing:.02em; margin:0 0 .35rem; }
+.banner.pass .verdict { color:var(--pass); }
+.banner.fail .verdict { color:var(--fail); }
+.banner.unverified .verdict { color:var(--unver); }
+a { color:var(--accent); text-decoration:none; border-bottom:1px solid transparent; }
+.docbar { margin:.15rem 0 1rem; font-size:.9rem; }
+.docbar a, .docbar b { margin-right:1rem; }
+.docbar b { font-weight:600; }
+a:hover { border-bottom-color:var(--accent); }
+tr:target { background:color-mix(in srgb, var(--accent) 10%, transparent); }
+tr:target td:first-child { box-shadow:inset 3px 0 0 var(--accent); }
+.tally { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+         font-size:.9rem; color:var(--muted); margin:.5rem 0 0; }
+dl.facts { display:grid; grid-template-columns:11rem 1fr; gap:.3rem 1rem; margin:1rem 0 0;
+           font-size:.92rem; }
+dl.facts dt { color:var(--muted); }
+dl.facts dd { margin:0; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+              word-break:break-all; }
+.scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+table { border-collapse:collapse; width:100%; font-size:.92rem; margin:.5rem 0 1.5rem; }
+th, td { text-align:left; vertical-align:top; padding:.55rem .7rem;
+         border-bottom:1px solid var(--rule); }
+th { font-weight:600; color:var(--muted); font-size:.82rem; text-transform:uppercase;
+     letter-spacing:.04em; border-bottom:1px solid var(--ink); white-space:nowrap; }
+td.evidence { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+              font-size:.82rem; color:var(--muted); word-break:break-word; }
+td.verdict-cell { white-space:nowrap; font-weight:600; font-size:.82rem; letter-spacing:.03em; }
+td.verdict-cell.pass { color:var(--pass); }
+td.verdict-cell.fail { color:var(--fail); }
+td.verdict-cell.unverified { color:var(--unver); }
+.detail { display:block; color:var(--muted); font-size:.85rem; margin-top:.2rem; }
+.reason { display:block; color:var(--fail); font-size:.85rem; margin-top:.2rem; }
+td.verdict-cell.unverified + td .reason { color:var(--unver); }
+ul.plain { margin:.5rem 0 1rem; padding-left:1.2rem; }
+ul.plain li { margin:.3rem 0; }
+table.map { border-collapse:collapse; width:100%; margin:.6rem 0 1.2rem; font-size:.86rem; }
+table.map th { text-align:left; font-size:.72rem; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); border-bottom:1px solid var(--ink); padding:.4rem .6rem; white-space:nowrap; }
+table.map td { border-bottom:1px solid var(--rule); padding:.35rem .6rem; vertical-align:top; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:.82rem; }
+table.map td:last-child { text-align:right; font-variant-numeric:tabular-nums; }
+p.unavailable { font-size:.83rem; color:var(--muted); }
+table.findings { border-collapse:collapse; margin:.5rem 0 .3rem; width:100%; }
+table.findings td { border-bottom:1px solid var(--rule); padding:.35rem .5rem; vertical-align:top; font-size:.88rem; }
+table.findings td.f-label { white-space:nowrap; width:1%; padding-right:1rem; }
+p.f-more { font-size:.82rem; color:var(--muted); margin:.1rem 0 .6rem; }
+ul.plain code { font-size:.85rem; }
+pre { background:var(--wash); border:1px solid var(--rule); padding:.9rem 1rem;
+      overflow-x:auto; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      font-size:.82rem; line-height:1.5; margin:.5rem 0 1rem; }
+footer { margin-top:3rem; padding-top:1rem; border-top:1px solid var(--rule);
+         color:var(--muted); font-size:.85rem; }
+</style>
+</head>
+<body>
+<main>
+<h1>Monolith decomposition — sign-off</h1>
+<div class="docbar"><a href="index.html">← the documentation</a></div><p class="sub">Verification record. Each item states the condition examined, the record consulted, and the result.</p>
+<div class="banner unverified">
+<p class="verdict">INCOMPLETE</p>
+<p>One or more conditions could not be examined, because the records they rely on were absent or unreadable. Those conditions are neither satisfied nor unsatisfied, and are listed below.</p>
+<p class="tally">78 MET &middot; 0 NOT MET &middot; <a href="#not-verified">2 NOT VERIFIED</a> &middot; 80 conditions examined</p>
+<dl class="facts">
+<dt>Playbook</dt><dd>modernization-go-monolith</dd>
+<dt>Repository</dt><dd>monolith-shop-jev</dd>
+<dt>Project path</dt><dd>/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev</dd>
+<dt>Commit</dt><dd>4ff9068a1570490835b148a9712388644e778b31</dd>
+<dt>Generated (UTC)</dt><dd>2026-09-26T03:58:48Z</dd>
+</dl>
+</div>
+<h2>Scope</h2>
+<p>The monolith was read, cut into bounded-context services deterministically, briefed before approval, moved in verbatim, wired only at the marked seams, and rebuilt and vetted.</p>
+<h3>Phases executed</h3>
+<p>The ledger records 37 phase(s) reaching terminal state Ok. A phase absent from this list either did not run or did not finish Ok.</p>
+<div class="scroll">
+<table>
+<thead><tr><th>Phase</th><th>Terminal state</th></tr></thead>
+<tbody>
+<tr><td><code>advisory-scan</code></td><td>Ok</td></tr>
+<tr><td><code>baseline</code></td><td>Ok</td></tr>
+<tr><td><code>briefing</code></td><td>Ok</td></tr>
+<tr><td><code>capture</code></td><td>Ok</td></tr>
+<tr><td><code>cicd-facts</code></td><td>Ok</td></tr>
+<tr><td><code>classify</code></td><td>Ok</td></tr>
+<tr><td><code>closing-review</code></td><td>Ok</td></tr>
+<tr><td><code>contracts-check</code></td><td>Ok</td></tr>
+<tr><td><code>contracts-manifest</code></td><td>Ok</td></tr>
+<tr><td><code>cve</code></td><td>Ok</td></tr>
+<tr><td><code>develop</code></td><td>Ok</td></tr>
+<tr><td><code>expand-plan</code></td><td>Ok</td></tr>
+<tr><td><code>feasibility</code></td><td>Ok</td></tr>
+<tr><td><code>gates</code></td><td>Ok</td></tr>
+<tr><td><code>knowledge</code></td><td>Ok</td></tr>
+<tr><td><code>map-services</code></td><td>Ok</td></tr>
+<tr><td><code>patterns</code></td><td>Ok</td></tr>
+<tr><td><code>plan-apply</code></td><td>Ok</td></tr>
+<tr><td><code>plan-decomposition</code></td><td>Ok</td></tr>
+<tr><td><code>plan-tasks</code></td><td>Ok</td></tr>
+<tr><td><code>playbook-baseline</code></td><td>Ok</td></tr>
+<tr><td><code>playbook-integrity</code></td><td>Ok</td></tr>
+<tr><td><code>port-monolith</code></td><td>Ok</td></tr>
+<tr><td><code>publish-briefing</code></td><td>Ok</td></tr>
+<tr><td><code>reconcile-map</code></td><td>Ok</td></tr>
+<tr><td><code>record-status</code></td><td>Ok</td></tr>
+<tr><td><code>scaffold-services</code></td><td>Ok</td></tr>
+<tr><td><code>scorecard</code></td><td>Ok</td></tr>
+<tr><td><code>security-bumps</code></td><td>Ok</td></tr>
+<tr><td><code>seed-context</code></td><td>Ok</td></tr>
+<tr><td><code>setup-environment</code></td><td>Ok</td></tr>
+<tr><td><code>setup-toolchain</code></td><td>Ok</td></tr>
+<tr><td><code>understand</code></td><td>Ok</td></tr>
+<tr><td><code>understand-delivered</code></td><td>Ok</td></tr>
+<tr><td><code>validate-requirement</code></td><td>Ok</td></tr>
+<tr><td><code>verify</code></td><td>Ok</td></tr>
+<tr><td><code>verify-build-inheritance</code></td><td>Ok</td></tr>
+</tbody>
+</table>
+</div>
+<h2>Schedule of conditions</h2>
+<h3>Structural intelligence — the monolith was read</h3>
+<div class="scroll">
+<table>
+<thead><tr><th>Condition</th><th>Record consulted</th><th>Result</th></tr></thead>
+<tbody>
+<tr id="c-si-present">
+<td>The structural pass read this repository.</td>
+<td class="evidence">.cognidev/understand/index.json · 24693 bytes</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-si-graph-parses">
+<td>The Go symbol graph (receiver-bound call edges) the decomposition plans against was written and is readable.</td>
+<td class="evidence">.cognidev/understand/graph.json parses as JSON</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-understand-ran">
+<td>The structural phase ran to completion in this run.</td>
+<td class="evidence">.cognidev/run/phases.json · phase `understand` → Ok</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h3>Build environment — proved before planning</h3>
+<div class="scroll">
+<table>
+<thead><tr><th>Condition</th><th>Record consulted</th><th>Result</th></tr></thead>
+<tbody>
+<tr id="c-env-gate-ran">
+<td>A Go toolchain that can build the generated services was proved available before anything was planned. The gate exits non-zero when no host toolchain, user-local toolchain or Docker can be made ready, so reaching terminal Ok is the proof.</td>
+<td class="evidence">.cognidev/run/phases.json · phase `setup-environment` → Ok</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-env-recorded">
+<td>The build mode the whole run uses was written down, so develop and verify build the same way.</td>
+<td class="evidence">.cognidev/env.json · 226 bytes</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h3>The machine — what it can build, and what it cannot</h3>
+<div class="scroll">
+<table>
+<thead><tr><th>Condition</th><th>Record consulted</th><th>Result</th></tr></thead>
+<tbody>
+<tr id="c-runtime-target-chosen">
+<td>A target Go version was settled on and written down, so the scaffolder, the build and the version gate all mean the same thing by it. `setup-environment` records the version it actually proved a toolchain for — the highest go/toolchain directive in the tree or the `go_version` answer.</td>
+<td class="evidence">.cognidev/env.json · 226 bytes · `go_version` present</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-feasibility-recorded">
+<td>What the services will need at run time beyond their own code — a container runtime, a database, a broker, a cloud sign-in — was checked and recorded. A requirement this machine cannot answer for reads NOT DETERMINABLE HERE; it is never reported as available.</td>
+<td class="evidence">.cognidev/feature/feasibility.json · 3858 bytes</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-knowledge-indexed">
+<td>The failure signatures this playbook knows about were indexed against the chosen Go version, so a build error that has been seen before is matched rather than re-diagnosed.</td>
+<td class="evidence">.cognidev/feature/knowledge.json · 10627 bytes</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h3>The map — computed from the shards, not proposed by a model</h3>
+<div class="scroll">
+<table>
+<thead><tr><th>Condition</th><th>Record consulted</th><th>Result</th></tr></thead>
+<tbody>
+<tr id="c-map-ran">
+<td>The deterministic mapper ran to completion.</td>
+<td class="evidence">.cognidev/run/phases.json · phase `map-services` → Ok</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-map-frozen">
+<td>The authoritative source-to-service map is on disk and readable.</td>
+<td class="evidence">.cognidev/feature/service-map.json parses as JSON</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-map-has-services">
+<td>The map assigned the monolith to at least one bounded-context service — it did not discover a decomposition and then drop it.<span class="detail">5 service(s) mapped</span></td>
+<td class="evidence">.cognidev/feature/service-map.json · /services → 5</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-plan-expanded">
+<td>The compact map was expanded into the full per-file plan the generators consume.</td>
+<td class="evidence">.cognidev/feature/plan.json parses as JSON</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-plan-files">
+<td>The expanded plan names the files to be written — a plan with no files would generate nothing while reporting success.<span class="detail">71 file(s) planned</span></td>
+<td class="evidence">.cognidev/feature/plan.json · /files → 71</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h3>Architecture — which patterns this cut applies, and why</h3>
+<div class="scroll">
+<table>
+<thead><tr><th>Condition</th><th>Record consulted</th><th>Result</th></tr></thead>
+<tbody>
+<tr id="c-patterns-ran">
+<td>The pattern selector ran to completion. It exits non-zero when a shipped card is malformed, so terminal Ok also proves the whole catalog loaded.</td>
+<td class="evidence">.cognidev/run/phases.json · phase `patterns` → Ok</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-patterns-written">
+<td>The selected patterns were written and are readable.</td>
+<td class="evidence">.cognidev/feature/patterns.json parses as JSON</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-patterns-selected-something">
+<td>At least one architecture pattern was selected for this decomposition. A cut that applies no named pattern is one nobody can review.<span class="detail">40 pattern(s) apply</span></td>
+<td class="evidence">.cognidev/feature/patterns.json · /selected → 40</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-patterns-rejected-something">
+<td>Patterns were also considered and left out, each with its reason — the catalog was filtered, not recited.<span class="detail">19 pattern(s) considered and not applied</span></td>
+<td class="evidence">.cognidev/feature/patterns.json · /considered → 19</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h3>The briefing — the cut was explained before it was approved</h3>
+<div class="scroll">
+<table>
+<thead><tr><th>Condition</th><th>Record consulted</th><th>Result</th></tr></thead>
+<tbody>
+<tr id="c-briefing-ran">
+<td>The briefing phase ran to completion before the approval gate.</td>
+<td class="evidence">.cognidev/run/phases.json · phase `briefing` → Ok</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-briefing-table">
+<td>The service-by-service table the briefing shows was written.</td>
+<td class="evidence">.cognidev/feature/briefing.json parses as JSON</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-briefing-steps">
+<td>The ordered step list — what will happen, and which step is a model rather than a deterministic move — was written.</td>
+<td class="evidence">.cognidev/feature/steps.json parses as JSON</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-briefing-published">
+<td>The documents were published after the plan was approved, not before it.</td>
+<td class="evidence">.cognidev/run/phases.json · phase `publish-briefing` → Ok</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-briefing-document">
+<td>The committable briefing document was written into the repository.</td>
+<td class="evidence">DECOMPOSITION-BRIEFING.html · 22754 bytes</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-briefing-docs-folder">
+<td>The plan was written as files in the customer&#39;s own folder, not only as a screen they had to be looking at.</td>
+<td class="evidence">cognidev/docs/README.md · 841 bytes</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-briefing-what-changes">
+<td>The mapping document — what moves where, and every call that becomes a network hop — is on disk.</td>
+<td class="evidence">cognidev/docs/what-changes.md · 2035 bytes</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-briefing-the-plan">
+<td>The extraction order, and the reason for that order, is on disk.</td>
+<td class="evidence">cognidev/docs/the-plan.md · 1304 bytes</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-briefing-learning">
+<td>What the team has to understand once this lands — each pattern, why it applies here, and the file to read — is on disk.</td>
+<td class="evidence">cognidev/docs/what-you-learn.md · 14290 bytes</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-briefing-choices">
+<td>What the run was told and what it decided on the user&#39;s behalf were both written down.</td>
+<td class="evidence">cognidev/docs/your-choices.yaml · 1344 bytes</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-plan-reviewed">
+<td>A human saw the plan before any file was written — the review gate is terminal-Ok only after approval.</td>
+<td class="evidence">.cognidev/run/phases.json · phase `plan-tasks` → Ok</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h3>The platform — generated filled, before any domain code</h3>
+<div class="scroll">
+<table>
+<thead><tr><th>Condition</th><th>Record consulted</th><th>Result</th></tr></thead>
+<tbody>
+<tr id="c-scaffold-ran">
+<td>The platform scaffolder ran to completion.</td>
+<td class="evidence">.cognidev/run/phases.json · phase `scaffold-services` → Ok</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-services-exist">
+<td>Service projects were written to disk.</td>
+<td class="evidence">services · 5 entries</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-kernel-exists">
+<td>The pkg/ shared kernel — the contract DTOs every service exchanges, and nothing else — was generated.</td>
+<td class="evidence">pkg · 7 entries</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-workspace-exists">
+<td>The go.work workspace that builds every service module together was generated.</td>
+<td class="evidence">go.work · 139 bytes</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h3>The before-state — what the monolith did before the cut</h3>
+<div class="scroll">
+<table>
+<thead><tr><th>Condition</th><th>Record consulted</th><th>Result</th></tr></thead>
+<tbody>
+<tr id="c-baseline-recorded">
+<td>The monolith was built, and where a test suite exists it was run, BEFORE anything was cut — so the after-state has something to be compared against.</td>
+<td class="evidence">.cognidev/feature/go-baseline.json parses as JSON</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-baseline-command-recorded">
+<td>The exact command the before-state used was written down. A before and an after measured by different commands are not a comparison.</td>
+<td class="evidence">.cognidev/feature/go-baseline.json · 200 bytes · `command` present</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h3>The port — your code was moved, not rewritten</h3>
+<div class="scroll">
+<table>
+<thead><tr><th>Condition</th><th>Record consulted</th><th>Result</th></tr></thead>
+<tbody>
+<tr id="c-port-ran">
+<td>The porter ran to completion.</td>
+<td class="evidence">.cognidev/run/phases.json · phase `port-monolith` → Ok</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-port-report">
+<td>What was moved verbatim, what was generated, and what was left marked for the model are all recorded.</td>
+<td class="evidence">.cognidev/feature/port-report.json parses as JSON</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-port-moved-something">
+<td>Lines of the monolith&#39;s own code were actually relocated into the services.<span class="detail">954 line(s) moved verbatim</span></td>
+<td class="evidence">.cognidev/feature/port-report.json · /summary/lines_ported_verbatim → 954</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-contracts-baseline">
+<td>The cross-service contract shapes were snapshotted BEFORE develop could change them, so the drift check has a real baseline.</td>
+<td class="evidence">.cognidev/feature/contracts.lock.json parses as JSON</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h3>The record — what each task actually did</h3>
+<div class="scroll">
+<table>
+<thead><tr><th>Condition</th><th>Record consulted</th><th>Result</th></tr></thead>
+<tbody>
+<tr id="c-status-ran">
+<td>The status pass ran after develop.</td>
+<td class="evidence">.cognidev/run/phases.json · phase `record-status` → Ok</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-status-index">
+<td>The per-task record was written, including how many of the planned tasks never ran.</td>
+<td class="evidence">cognidev/docs/status/README.md · 1575 bytes</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-migration-log">
+<td>What moved out of the monolith was written down in the order it moved, as a committable log. Built from the same per-task outcomes as the records above, so the two cannot disagree; a task the loop never reached has no entry, and the gap between the plan&#39;s count and the log&#39;s is the report that it did not run.</td>
+<td class="evidence">MIGRATION-LOG.md · 2306 bytes</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h3>The result — it compiles</h3>
+<div class="scroll">
+<table>
+<thead><tr><th>Condition</th><th>Record consulted</th><th>Result</th></tr></thead>
+<tbody>
+<tr id="c-verify-ran">
+<td>`go build ./...` and `go vet ./...` succeeded across every generated module. go-verify exits non-zero when any module fails to compile, so reaching terminal Ok is the proof — not the report&#39;s own wording.</td>
+<td class="evidence">.cognidev/run/phases.json · phase `verify` → Ok</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-drift-checked">
+<td>The contract shapes were recomputed after develop and diffed against the baseline, so a consumer left depending on a changed provider was marked rather than shipped silently.</td>
+<td class="evidence">.cognidev/feature/contracts-drift.json parses as JSON</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h3>The build outcome — written down, not just printed</h3>
+<div class="scroll">
+<table>
+<thead><tr><th>Condition</th><th>Record consulted</th><th>Result</th></tr></thead>
+<tbody>
+<tr id="c-verify-shard">
+<td>The build and test outcome was recorded as data, not only as a report. A markdown file is for a person; the scorecard and the closing review both need the numbers.</td>
+<td class="evidence">.cognidev/feature/verify.json parses as JSON</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-verify-build-green">
+<td>Every module in the generated workspace compiled.<span class="detail">at least one module in the generated workspace failed to compile</span></td>
+<td class="evidence">.cognidev/feature/verify.json · /build_ok → true</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h3>The measured tree — what a green build does not prove</h3>
+<div class="scroll">
+<table>
+<thead><tr><th>Condition</th><th>Record consulted</th><th>Result</th></tr></thead>
+<tbody>
+<tr id="c-gates-ran">
+<td>The finished tree was measured against the checks a reviewer would run by hand.</td>
+<td class="evidence">.cognidev/run/phases.json · phase `gates` → Ok</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-gates-written">
+<td>Every measurement, its count and its offenders were written down, including the ones that could not run and why.</td>
+<td class="evidence">.cognidev/feature/gates.json parses as JSON</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-cross-calls-converted">
+<td>Every call that crossed a context boundary in the monolith is a real HTTP call in the services. A client whose body is still a marker compiles perfectly and does nothing.<span class="detail">0 declared cross-context call edge(s) are not real HTTP calls</span></td>
+<td class="evidence">.cognidev/feature/gates.json · /scalars/cross_context_calls_converted → 0</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-clients-registered">
+<td>Every generated client is constructed and wired into its service in main.go. A client nothing constructs compiles and leaves a nil interface that panics on the first request.<span class="detail">0 generated client(s) are never constructed in main.go</span></td>
+<td class="evidence">.cognidev/feature/gates.json · /scalars/clients_wired_in_main → 0</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-sagas-present">
+<td>Every cross-context transaction the plan declared has an orchestrator that names each of its participants. Two databases are not one db.Transaction, and the compiler has no opinion about it.<span class="detail">0 problem(s) across the declared sagas</span></td>
+<td class="evidence">.cognidev/feature/gates.json · /scalars/sagas_at_commit_points → 0</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-no-seams-left">
+<td>No seam is still a marker.<span class="detail">0 marker(s) left unimplemented in the generated tree</span></td>
+<td class="evidence">.cognidev/feature/gates.json · /scalars/no_residual_seam_markers → 0</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-services-independent-of-monolith">
+<td>No generated service imports the monolith module. A service that imports it cannot be deployed without it, cannot be versioned apart from it, and every boundary above is a directory name.<span class="detail">0 import(s) from a generated module into the monolith</span></td>
+<td class="evidence">.cognidev/feature/gates.json · /scalars/no_service_references_the_monolith → 0</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-no-cross-service-reference">
+<td>No service module imports another service module — these would be one deployable, not two.<span class="detail">0 cross-service module import(s)</span></td>
+<td class="evidence">.cognidev/feature/gates.json · /scalars/no_cross_service_module_import → 0</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-service-names-are-domains">
+<td>Every service name names a domain rather than a source folder. A service called `libraries` is the monolith&#39;s directory tree with a prefix.<span class="detail">0 service name(s) describe a folder</span></td>
+<td class="evidence">.cognidev/feature/gates.json · /scalars/service_names_are_domains_not_folders → 0</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-data-owned-per-service">
+<td>Every service that owns entities opens its own database connection and reads no other service&#39;s tables.<span class="detail">0 data-ownership breach(es)</span></td>
+<td class="evidence">.cognidev/feature/gates.json · /scalars/every_service_owns_its_database → 0</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-services-in-the-workspace">
+<td>Every planned service is a module listed in go.work. A module go.work never mentions is a directory, and `go build` succeeding says nothing about it.<span class="detail">0 planned service(s) go.work does not list</span></td>
+<td class="evidence">.cognidev/feature/gates.json · /scalars/every_planned_service_is_in_the_workspace → 0</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-go-version-is-the-chosen-one">
+<td>Every generated module declares the Go version the run chose.<span class="detail">0 generated module(s) on the wrong Go version</span></td>
+<td class="evidence">.cognidev/feature/gates.json · /scalars/go_version_is_the_chosen_one → 0</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-gateway-reaches-everything">
+<td>The gateway has a route and a cluster for every service. One without a route is unreachable from outside the cluster, and the gateway starts happily without it.<span class="detail">0 service(s) unreachable through the gateway</span></td>
+<td class="evidence">.cognidev/feature/gates.json · /scalars/gateway_routes_cover_every_service → 0</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-no-monolith-import">
+<td>No service still imports a monolith package path.<span class="detail">0 surviving monolith import(s)</span></td>
+<td class="evidence">.cognidev/feature/gates.json · /scalars/no_monolith_import_left_in_services → 0</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-nothing-silenced">
+<td>Nothing was switched off to make the tree compile — no blanket //nolint, no vet analyzer disabled, no linter switched off in .golangci.yml.<span class="detail">0 wholesale suppression(s)</span></td>
+<td class="evidence">.cognidev/feature/gates.json · /scalars/no_wholesale_warning_suppression → 0</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-tests-came-over">
+<td>Every service has a _test.go file with a test in it. A cut that moved the production code and left the tests behind cannot show a service still does what it did.<span class="detail">0 service(s) that cannot show they still work</span></td>
+<td class="evidence">.cognidev/feature/gates.json · /scalars/tests_came_over → 0</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-no-test-switched-off">
+<td>No test that came over from the monolith was switched off during the run — none gained an unconditional t.Skip, a new skip call or a build constraint, and none was deleted — compared, file by file, with the monolith&#39;s version on the frozen `source` branch.<span class="detail">(not recorded) ported test(s) switched off during the run</span></td>
+<td class="evidence">.cognidev/feature/gates.json · /scalars/no_test_newly_disabled<span class="reason">the pointer resolves to nothing</span></td>
+<td class="verdict-cell unverified">NOT VERIFIED</td>
+</tr>
+<tr id="c-sagas-compensate">
+<td>Every saga step that writes has a compensation that undoes it, run in reverse. A saga with no compensation is a distributed transaction that cannot roll back.<span class="detail">0 saga step(s) with no compensation</span></td>
+<td class="evidence">.cognidev/feature/gates.json · /scalars/sagas_have_compensations → 0</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-services-build-and-vet">
+<td>Every service module builds and passes `go vet` on its own, not only as part of the workspace.<span class="detail">0 service module(s) that do not build or vet</span></td>
+<td class="evidence">.cognidev/feature/gates.json · /scalars/services_build_and_vet → 0</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-services-tests-pass">
+<td>The services&#39; test suites pass. Measured only when the tests ran; a run that did not execute them reads NOT VERIFIED.<span class="detail">0 failing test(s) across the services</span></td>
+<td class="evidence">.cognidev/feature/gates.json · /scalars/services_tests_pass → 0</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-health-endpoints">
+<td>Every service exposes a liveness and a readiness endpoint, so the platform can tell a starting service from a dead one.<span class="detail">0 service(s) missing /healthz or /readyz</span></td>
+<td class="evidence">.cognidev/feature/gates.json · /scalars/health_endpoints_present → 0</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-containers-hardened">
+<td>Every service image is distroless (or minimal) and runs as a non-root user.<span class="detail">0 Dockerfile(s) not distroless/non-root</span></td>
+<td class="evidence">.cognidev/feature/gates.json · /scalars/containers_distroless_nonroot → 0</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-shared-state-owned">
+<td>Every package-level mutable value the monolith shared (a map behind a mutex, a cache) has exactly one owning service; nobody else holds a drifting copy.<span class="detail">0 shared mutable value(s) held by more than one service</span></td>
+<td class="evidence">.cognidev/feature/gates.json · /scalars/shared_state_has_an_owner → 0</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-events-use-outbox">
+<td>Every event that crosses a service boundary is published through the transactional outbox, never as a dual write after the commit.<span class="detail">0 crossing event(s) published without the outbox</span></td>
+<td class="evidence">.cognidev/feature/gates.json · /scalars/events_use_outbox → 0</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-contracts-no-drift">
+<td>No consumer depends on a provider contract shape that changed after the baseline was taken.<span class="detail">0 contract drift(s) a consumer still depends on</span></td>
+<td class="evidence">.cognidev/feature/gates.json · /scalars/contracts_no_drift → 0</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-readiness-gates-pass">
+<td>The 22 readiness gates this playbook declares in `gates/validate.yaml` all pass — go.work exists, the gateway proxies something, every service is containerised, the decisions are recorded, and no secret was committed. A missing or unusable gates file fails this too: a gates file nothing executes reads as a guarantee and enforces nothing.<span class="detail">0 declared readiness gate(s) failed at severity `fail`</span></td>
+<td class="evidence">.cognidev/feature/gates.json · /scalars/declarative_readiness_gates → 0</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h3>Advisories — what the cut inherited, and then multiplied</h3>
+<div class="scroll">
+<table>
+<thead><tr><th>Condition</th><th>Record consulted</th><th>Result</th></tr></thead>
+<tbody>
+<tr id="c-cve-recorded">
+<td>Whether the modules were checked against the advisory database — and if not, why not — was written down.</td>
+<td class="evidence">.cognidev/feature/cve.json parses as JSON</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-security-bumps-recorded">
+<td>What the security step bumped, pinned, reverted or could not fix — or that it changed nothing because the scan did not run — was written down.</td>
+<td class="evidence">.cognidev/feature/security-bumps.json parses as JSON</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-no-called-or-critical-advisory">
+<td>No advisory the services&#39; code calls, and no critical advisory whose reachability is unproven, is in the resolved module graph. This is claimed only when the scan actually ran; an offline run publishes no count and this reads NOT VERIFIED.<span class="detail">(not recorded) called or critical advisory/advisories</span></td>
+<td class="evidence">.cognidev/feature/gates.json · /scalars/known_vulnerable_dependencies<span class="reason">the pointer resolves to nothing</span></td>
+<td class="verdict-cell unverified">NOT VERIFIED</td>
+</tr>
+<tr id="c-advisories-in-graph-stated">
+<td>Every advisory the scan found in the resolved module graph — called or not — is counted here from cve.json and listed there by module, severity and reachability; none is hidden by the filter above.<span class="detail">0 advisory/advisories in the resolved module graph (cve.json)</span></td>
+<td class="evidence">.cognidev/feature/cve.json · /findings → 0</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h3>The grade — where the cut was strong, and where it was thin</h3>
+<div class="scroll">
+<table>
+<thead><tr><th>Condition</th><th>Record consulted</th><th>Result</th></tr></thead>
+<tbody>
+<tr id="c-scorecard-written">
+<td>Each stage of the cut was graded on completeness, correctness and restraint. An axis nothing measured reads as unmeasured; it never counts as clean.</td>
+<td class="evidence">MIGRATION-SCORECARD.md · 7189 bytes</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-scorecard-shard">
+<td>The grid was written as data as well as prose.</td>
+<td class="evidence">.cognidev/feature/scorecard.json parses as JSON</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-no-failing-stage">
+<td>No stage of the cut came out failing.<span class="detail">0 stage(s) of the cut graded FAIL</span></td>
+<td class="evidence">.cognidev/feature/scorecard.json · /counts/red → 0</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+<tr id="c-closing-review-written">
+<td>Everything the checks found and could not fix was turned into next steps for this repository. Advice only — nothing was edited, nothing was claimed fixed, and this verdict was decided before it ran.</td>
+<td class="evidence">.cognidev/feature/closing-review.json · 139 bytes</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h3>The run did not modify the playbook that ran it</h3>
+<div class="scroll">
+<table>
+<thead><tr><th>Condition</th><th>Record consulted</th><th>Result</th></tr></thead>
+<tbody>
+<tr id="c-integrity-ran">
+<td>This playbook&#39;s own files were re-fingerprinted and compared against the baseline taken before the run started. A playbook that edits itself mid-run invalidates every claim above.</td>
+<td class="evidence">.cognidev/run/phases.json · phase `playbook-integrity` → Ok</td>
+<td class="verdict-cell pass">MET</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h2 id="not-verified">Conditions not verified</h2>
+<p>Neither confirmed nor contradicted, because the record each relies on was absent or unreadable. These are not satisfied conditions and must not be read as such.</p>
+<ul class="plain">
+<li><strong><a href="#c-no-test-switched-off">no-test-switched-off</a></strong> — No test that came over from the monolith was switched off during the run — none gained an unconditional t.Skip, a new skip call or a build constraint, and none was deleted — compared, file by file, with the monolith&#39;s version on the frozen `source` branch. <code>.cognidev/feature/gates.json · /scalars/no_test_newly_disabled</code> — the pointer resolves to nothing</li>
+<li><strong><a href="#c-no-called-or-critical-advisory">no-called-or-critical-advisory</a></strong> — No advisory the services&#39; code calls, and no critical advisory whose reachability is unproven, is in the resolved module graph. This is claimed only when the scan actually ran; an offline run publishes no count and this reads NOT VERIFIED. <code>.cognidev/feature/gates.json · /scalars/known_vulnerable_dependencies</code> — the pointer resolves to nothing</li>
+</ul>
+<h2>Basis and limitations</h2>
+<p><strong>Basis.</strong> Each condition is evaluated by reading a record produced by this run — a file, a count, an exit status — and comparing it with the condition as stated. No result is entered by hand, and no condition passes because it was not examined: where the record is missing, the result is recorded as not verified.</p>
+<p><strong>Confidence.</strong> A satisfied condition establishes that the stated property held for this run, on this input, at the time the record was written. It is evidence about what was examined and nothing more. It does not establish that the schedule is complete, that the output is fit for a particular purpose, or that properties nobody listed are sound.</p>
+<p><strong>Limitations.</strong> The schedule is written by the playbook author and is not exhaustive. Figures derived from a language model vary between runs on identical input and are stated as findings of this run, not as properties of the system. Reading the output remains necessary; this record is not a substitute for it.</p>
+<h2>Reproduction</h2>
+<p>The invocation was not recorded. The following is the equivalent command for the playbook and project this record was written against:</p>
+<pre>playbook_test \
+  --playbook /Users/rajasekharkarawalla/dev/2026/cognidev/.cw-worktrees/pb-go-jev-mono/playbooks-v2/modernization-go-monolith \
+  --project  /Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev</pre>
+<footer>signoff-report 0.1.0, 2026-09-26T03:58:48Z (UTC).</footer>
+</main>
+</body>
+</html>

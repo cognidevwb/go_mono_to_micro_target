@@ -1,0 +1,295 @@
+{
+  "churn": {
+    "base": "source",
+    "changed": 627,
+    "lines_added": 79642,
+    "lines_removed": 28,
+    "planned": 619,
+    "unplanned": [
+      ".dockerignore",
+      ".editorconfig",
+      ".githooks/pre-commit",
+      "contracts/events/envelope.schema.json",
+      "contracts/events/order.placed.schema.json",
+      "contracts/openapi/catalog-service.json",
+      "contracts/openapi/customers-service.json",
+      "contracts/openapi/orders-service.json"
+    ]
+  },
+  "counts": {
+    "green": 11,
+    "red": 0,
+    "total": 12,
+    "unmeasured": 0
+  },
+  "kpis": [
+    {
+      "basis": "verify.json: build_ok",
+      "grade": "green",
+      "name": "Build",
+      "target": "green",
+      "value": "green"
+    },
+    {
+      "basis": "all 5 planned service(s) are modules in go.work",
+      "grade": "green",
+      "name": "Services in go.work",
+      "target": "all",
+      "value": "5 of 5"
+    },
+    {
+      "basis": "none of 5 service module(s) depend on anything outside the generated tree",
+      "grade": "green",
+      "name": "Services independent of the monolith",
+      "target": "all",
+      "value": "yes"
+    },
+    {
+      "basis": "no marker left across 184 generated file(s)",
+      "grade": "green",
+      "name": "Seams still to fill",
+      "target": "0",
+      "value": "0"
+    },
+    {
+      "basis": "the before-state or the verify step recorded no test count",
+      "grade": "n/a",
+      "name": "Tests preserved",
+      "target": "no loss",
+      "value": "not measured"
+    },
+    {
+      "basis": "gates.json: a gate that could not read its input is counted here, never as a pass",
+      "grade": "amber",
+      "name": "Gates not evaluated",
+      "target": "0",
+      "value": "2 of 25"
+    },
+    {
+      "basis": "0 category/categories had nothing to measure",
+      "grade": "green",
+      "name": "Categories failing",
+      "target": "0",
+      "value": "0 of 12"
+    }
+  ],
+  "rows": [
+    {
+      "completeness": {
+        "detail": "all 5 planned service(s) are modules in go.work",
+        "grade": "green"
+      },
+      "correctness": {
+        "detail": "all 5 service name(s) describe a domain",
+        "grade": "green"
+      },
+      "id": "boundaries",
+      "name": "Service boundaries",
+      "notes": "A boundary go.work does not build is a directory. A boundary named after a source folder is the monolith's tree with a prefix.",
+      "restraint": {
+        "detail": "8 of 627 changed file(s) were not proposed by the plan (619 were): .dockerignore, .editorconfig, .githooks/pre-commit, contracts/events/envelope.schema.json, contracts/events/order.placed.schema.json",
+        "grade": "amber"
+      },
+      "worst": "amber"
+    },
+    {
+      "completeness": {
+        "detail": "none of 5 service module(s) depend on anything outside the generated tree",
+        "grade": "green"
+      },
+      "correctness": {
+        "detail": "none of 116 service file(s) or 5 go.mod(s) reach into another service",
+        "grade": "green"
+      },
+      "id": "independence",
+      "name": "Service independence",
+      "notes": "The decisive row. A service whose go.mod still requires the monolith cannot be built, versioned or deployed without it.",
+      "restraint": {
+        "detail": "independence is a property of the result, not of the diff",
+        "grade": "n/a"
+      },
+      "worst": "green"
+    },
+    {
+      "completeness": {
+        "detail": "46 file(s) written across 5 service(s); 0 construct(s) were deferred rather than guessed at",
+        "grade": "green"
+      },
+      "correctness": {
+        "detail": "97% of the moved lines were placed verbatim or generated; 12 seam point(s) were left for the develop loop",
+        "grade": "green"
+      },
+      "id": "code_movement",
+      "name": "Code movement",
+      "notes": "",
+      "restraint": {
+        "detail": "the port writes only into the generated tree",
+        "grade": "n/a"
+      },
+      "worst": "green"
+    },
+    {
+      "completeness": {
+        "detail": "all 2 cross-context call edge(s) resolve to a client that performs an HTTP call",
+        "grade": "green"
+      },
+      "correctness": {
+        "detail": "all 4 generated client(s) are constructed at a composition root",
+        "grade": "green"
+      },
+      "id": "cross_service_calls",
+      "name": "Cross-service calls",
+      "notes": "A call that crossed a package boundary in the monolith is an HTTP call now, or it is nothing. A client nothing constructs is a nil pointer at the first request.",
+      "restraint": {
+        "detail": "a client is generated, not edited",
+        "grade": "n/a"
+      },
+      "worst": "green"
+    },
+    {
+      "completeness": {
+        "detail": "all 1 declared saga(s) have an orchestrator that references every participant",
+        "grade": "green"
+      },
+      "correctness": {
+        "detail": "all 2 remote saga step(s) have a compensation naming their service",
+        "grade": "green"
+      },
+      "id": "transactions",
+      "name": "Transactions",
+      "notes": "One db.Transaction across four packages is not one transaction across four services. A saga that cannot undo a step commits halfway.",
+      "restraint": {
+        "detail": "a saga is written, not edited",
+        "grade": "n/a"
+      },
+      "worst": "green"
+    },
+    {
+      "completeness": {
+        "detail": "each of 5 data-owning service(s) opens its own database; 9 table(s), one owner each",
+        "grade": "green"
+      },
+      "correctness": {
+        "detail": "2 piece(s) of carried state, each in its one listed owner",
+        "grade": "green"
+      },
+      "id": "data_ownership",
+      "name": "Data ownership",
+      "notes": "Tables and package-level state both have exactly one owner after the cut, or they diverge silently.",
+      "restraint": {
+        "detail": "ownership is a property of the result, not of the diff",
+        "grade": "n/a"
+      },
+      "worst": "green"
+    },
+    {
+      "completeness": {
+        "detail": "no marker left across 184 generated file(s)",
+        "grade": "green"
+      },
+      "correctness": {
+        "detail": "all 2 cross-context call edge(s) resolve to a client that performs an HTTP call",
+        "grade": "green"
+      },
+      "id": "seams",
+      "name": "Seams finished",
+      "notes": "Completeness is whether the markers are gone. Correctness is whether the code that replaced them does the thing — deleting a marker is the cheaper way to make the first one pass.",
+      "restraint": {
+        "detail": "a seam is filled in place",
+        "grade": "n/a"
+      },
+      "worst": "green"
+    },
+    {
+      "completeness": {
+        "detail": "all 5 service(s) have a route and an upstream",
+        "grade": "green"
+      },
+      "correctness": {
+        "detail": "all 8 generated module file(s) target go 1.26",
+        "grade": "green"
+      },
+      "id": "platform",
+      "name": "Platform wiring",
+      "notes": "",
+      "restraint": {
+        "detail": "the platform modules are generated",
+        "grade": "n/a"
+      },
+      "worst": "green"
+    },
+    {
+      "completeness": {
+        "detail": "all 5 service(s) expose liveness and readiness",
+        "grade": "green"
+      },
+      "correctness": {
+        "detail": "all 5 service image(s) are distroless and non-root",
+        "grade": "green"
+      },
+      "id": "runtime",
+      "name": "Runtime readiness",
+      "notes": "Restraint here is the build itself: a service that only compiles inside go.work, beside its siblings, was never cut.",
+      "restraint": {
+        "detail": "all 5 service(s) build from their own module with no vet finding",
+        "grade": "green"
+      },
+      "worst": "green"
+    },
+    {
+      "completeness": {
+        "detail": "all 1 publishing service(s) have a transactional outbox",
+        "grade": "green"
+      },
+      "correctness": {
+        "detail": "every provider contract still has the shape its consumers were built against",
+        "grade": "green"
+      },
+      "id": "events_contracts",
+      "name": "Events and contracts",
+      "notes": "An in-process bus never lost a message between commit and publish; a broker does, unless an outbox sits in between.",
+      "restraint": {
+        "detail": "a contract is recorded, not edited",
+        "grade": "n/a"
+      },
+      "worst": "green"
+    },
+    {
+      "completeness": {
+        "detail": "all 5 service(s) on disk have a test function",
+        "grade": "green"
+      },
+      "correctness": {
+        "detail": "the tests of all 5 service(s) ran and passed (59 test(s))",
+        "grade": "green"
+      },
+      "id": "tests",
+      "name": "Tests",
+      "notes": "",
+      "restraint": {
+        "detail": "tests are added, not rewritten, by this playbook",
+        "grade": "n/a"
+      },
+      "worst": "green"
+    },
+    {
+      "completeness": {
+        "detail": "not evaluated — the advisory scan did not complete: the advisory database was not queried — this run is offline by default; enable the registry lookup to scan",
+        "grade": "n/a"
+      },
+      "correctness": {
+        "detail": "not evaluated — the advisory scan did not complete: the advisory database was not queried — this run is offline by default; enable the registry lookup to scan",
+        "grade": "n/a"
+      },
+      "id": "dependencies",
+      "name": "Dependencies and diagnostics",
+      "notes": "A //nolint added to make the port pass is a restraint failure, not a correctness one: it changed a setting the migration never required.",
+      "restraint": {
+        "detail": "no wholesale suppression across 184 generated file(s)",
+        "grade": "green"
+      },
+      "worst": "green"
+    }
+  ],
+  "tool": "go-scorecard"
+}

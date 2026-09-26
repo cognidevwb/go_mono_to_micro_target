@@ -1,0 +1,43 @@
+<style>
+:root { --ink:#1b1b1b; --muted:#5b5b5b; --rule:#dcdcdc; --accent:#1a5fb4; --wash:#f6f8fb; }
+* { box-sizing:border-box; }
+body { margin:0; background:#fff; color:var(--ink);
+       font-family:"Charter","Bitstream Charter","Iowan Old Style",Georgia,serif;
+       font-size:16px; line-height:1.55; }
+main { max-width:64rem; margin:0 auto; padding:3rem 1.5rem 5rem; }
+h1 { font-size:1.85rem; line-height:1.25; margin:0 0 1rem; font-weight:600; }
+h2 { font-size:1.2rem; margin:2.5rem 0 .75rem; font-weight:600;
+     padding-bottom:.35rem; border-bottom:2px solid var(--accent); }
+h3 { font-size:1rem; margin:1.75rem 0 .5rem; font-weight:600; color:var(--accent); }
+p { margin:.7rem 0; }
+.scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+table { border-collapse:collapse; width:100%; font-size:.9rem; margin:.6rem 0 1.5rem; }
+th, td { text-align:left; vertical-align:top; padding:.5rem .7rem;
+         border-bottom:1px solid var(--rule); }
+th { font-weight:600; color:var(--muted); font-size:.78rem; text-transform:uppercase;
+     letter-spacing:.05em; border-bottom:1px solid var(--ink); }
+tbody tr:nth-child(even) { background:var(--wash); }
+code { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:.85em; }
+ul { margin:.5rem 0 1rem; padding-left:1.25rem; }
+li { margin:.28rem 0; }
+li ul { margin:.2rem 0; }
+.foot { color:var(--muted); font-size:.85rem; margin-top:3rem; padding-top:1rem;
+        border-top:1px solid var(--rule); }
+</style>
+<main>
+<h1>Task 12 — Deployment: inventory</h1>
+<p><strong>COMPLETED</strong></p>
+<p>Edited services/inventory/deploy/strangler.values.yaml; compiled in the end-of-run pass.</p>
+<h2>Files this task owned</h2>
+<ul>
+<li><code>services/inventory/deploy/strangler.values.yaml</code> — Inventory Service</li>
+</ul>
+<h2>What it was asked to do</h2>
+<p>Set this context's strangler weight (0..100) and legacyPaths from its coupling — leaf higher, saga orchestrator canary low. Delete the marker.</p>
+<h2>What it had to satisfy</h2>
+<ul>
+<li>strangler.values.yaml has a real weight; no CW-SEAM marker remains.</li>
+</ul>
+<p>Planned in <code>../tasks/</code>. Recorded from the engine's own per-task outcome; nothing here was re-derived by reading the tree.</p>
+<p class="foot">Written by the Go decomposition planner. The same content is in <code>12-inventory-deployment.md</code> beside this file.</p>
+</main>

@@ -1,0 +1,18 @@
+{
+  "elapsedMs": 125,
+  "finishedAt": 1790392780,
+  "inputs": [],
+  "kind": "rust-binary",
+  "outputs": [
+    {
+      "exists": true,
+      "kind": null,
+      "name": "cicd-facts",
+      "optional": false,
+      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/.cognidev/feature/cicd-facts.json"
+    }
+  ],
+  "status": "Ok",
+  "step": "cicd-facts",
+  "summary": "Tool `../tools/scan-cicd-go/target/release/scan-cicd-go` completed."
+}

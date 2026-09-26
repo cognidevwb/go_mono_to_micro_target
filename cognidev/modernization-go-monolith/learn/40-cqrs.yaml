@@ -1,0 +1,27 @@
+id: cqrs-event-sourcing
+title: "CQRS + Event Sourcing in One Picture"
+hook: "Separate the write model from the read model, keep every fact."
+concepts: [cqrs, events, microservices, architecture, eventsourcing, read, write, saga, watermill]
+intents: [modernize, greenfield]
+phases: [decompose, plan, develop]
+minutes: 4
+diagram:
+  direction: TB
+  groups:
+    - { id: write, label: "Write Side", tone: brand }
+    - { id: read, label: "Read Side", tone: success }
+  nodes:
+    - { id: cmd, label: "Command", sub: "PlaceOrder", icon: send, group: write, tone: brand }
+    - { id: agg, label: "Aggregate", sub: "validates + emits", icon: workflow, group: write, tone: brand }
+    - { id: store, label: "Event Store", sub: "append-only log", icon: layers, tone: warning }
+    - { id: proj, label: "Projector", sub: "builds views", icon: refresh, group: read, tone: success }
+    - { id: view, label: "Read Model", sub: "denormalized", icon: table, group: read, tone: success }
+  edges:
+    - { from: cmd, to: agg, label: "handle" }
+    - { from: agg, to: store, label: "append events" }
+    - { from: store, to: proj, label: "replay / subscribe" }
+    - { from: proj, to: view, label: "materialize" }
+takeaways:
+  - "Writes append immutable events; the current state is a fold over that log."
+  - "Reads hit a denormalized view built for the query — no joins at request time."
+  - "You get a perfect audit trail + time travel for free, at the cost of eventual consistency."

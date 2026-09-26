@@ -1,0 +1,25 @@
+apiVersion: cognidev.ai/v1
+kind: QuestionnaireSection
+
+section:
+  id: verify
+  title: "Verification"
+  intro: |
+    How thoroughly to prove the cut at the end. Every run builds and vets each
+    generated module and compares the result against a build of your monolith
+    recorded BEFORE a single file was written — so the report can say what the
+    green build is actually worth. Optionally we also run the tests on both
+    sides, which is the only thing that turns "the services compile" into a
+    statement about behaviour.
+  estimated_seconds: 15
+
+questions:
+
+  # The monolith's test count is the one number that catches a decomposition
+  # which moved files and left behaviour behind.
+  - id: run_tests
+    kind: bool
+    label: "Run the test suite on both sides of the cut?"
+    description: "When on, the before-state runs `go test -json ./...` on your monolith and the final proof runs it on every service module, so the report compares behaviour and not just compilation — including the case that matters most, where every service builds but far fewer tests run than the monolith had. Off builds and vets both sides without executing anything, which is much faster. A monolith test that already failed before is reported as arriving broken, never as caused by the decomposition. Recommended: yes."
+    default: true
+    required: false

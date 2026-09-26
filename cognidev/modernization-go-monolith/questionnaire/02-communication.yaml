@@ -1,0 +1,52 @@
+apiVersion: cognidev.ai/v1
+kind: QuestionnaireSection
+
+section:
+  id: communication
+  title: "Inter-service communication"
+  intro: |
+    How the extracted services talk. Synchronous reads use a generated typed
+    net/http client per cross-context call (timeouts, retries with backoff,
+    OpenTelemetry propagation). Cross-service writes go async through a broker
+    with the transactional-outbox pattern. A gateway fronts the fleet.
+  estimated_seconds: 40
+
+questions:
+
+  # NOTE: synchronous transport is NOT a fleet-wide option — every generated
+  # client is JSON over net/http, which is what the scaffolder emits. gRPC /
+  # Connect is documented in architecture/communication/sync-transport.md as a
+  # reference pattern and is carried over where the monolith already exposes a
+  # .proto service, but a "make everything gRPC" switch is not generated.
+
+  - id: event_backbone
+    kind: enum
+    label: "Async event backbone?"
+    description: "What the monolith's in-process publish/subscribe (a Bus type, channels fanned out to goroutines) becomes, and what carries saga commands and replies. Required for the outbox pattern — a cross-context write must never be a synchronous chained call."
+    default: nats
+    required: true
+    options:
+      - { value: nats,  label: "NATS JetStream", hint: "Recommended Go-native default — one small binary, durable streams, consumer acks and dedupe by Nats-Msg-Id; nats.go client." }
+      - { value: kafka, label: "Apache Kafka 4 (KRaft) / Azure Event Hubs", hint: "High-throughput event streaming; franz-go client. Event Hubs speaks the Kafka protocol on Azure." }
+      - { value: none,  label: "In-process only (no broker) — no sagas/outbox", hint: "Smallest setup: the monolith's in-process bus stays inside each service and cross-service topics become marked seams. Only for read-mostly splits." }
+
+  - id: messaging_lib
+    kind: enum
+    label: "Messaging library?"
+    description: "How publishers, subscribers and the outbox relay are written. Watermill wraps NATS/Kafka behind one Publisher/Subscriber API and ships an SQL outbox (forwarder); native uses the broker's own client with a small generated relay."
+    default: watermill
+    required: true
+    options:
+      - { value: watermill, label: "Watermill (MIT)", hint: "Recommended — one API over NATS JetStream or Kafka, router middleware (retry, poison queue), SQL forwarder for the outbox." }
+      - { value: native,    label: "Native broker client", hint: "nats.go / franz-go directly plus a generated outbox relay — fewest dependencies." }
+
+  - id: gateway
+    kind: enum
+    label: "API gateway in front of the services?"
+    description: "The strangler edge: it routes each extracted context to its new service and everything else to the monolith. The Go reverse proxy is a generated module (httputil.ReverseProxy with per-route weights) that builds with the rest of the workspace."
+    default: go-reverse-proxy
+    required: true
+    options:
+      - { value: go-reverse-proxy, label: "Go reverse proxy (generated module)", hint: "Recommended — net/http/httputil, JWT validation, per-route strangler weights, compiled and tested with the fleet." }
+      - { value: envoy,            label: "Envoy", hint: "Config-only edge (envoy.yaml); pick when a platform team already runs Envoy." }
+      - { value: traefik,          label: "Traefik v3", hint: "Label/file-provider routing; natural with docker compose and Kubernetes ingress." }

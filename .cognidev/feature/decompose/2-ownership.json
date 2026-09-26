@@ -1,0 +1,56 @@
+{
+  "jev": [
+    {
+      "deterministic_owner": "catalog",
+      "owner": "catalog",
+      "table": "Category"
+    },
+    {
+      "deterministic_owner": "catalog",
+      "owner": "catalog",
+      "table": "Product"
+    },
+    {
+      "deterministic_owner": "customers",
+      "owner": "customers",
+      "table": "Customer"
+    },
+    {
+      "deterministic_owner": "inventory",
+      "owner": "inventory",
+      "table": "StockItem"
+    },
+    {
+      "deterministic_owner": "payments",
+      "owner": "payments",
+      "table": "Payment"
+    },
+    {
+      "deterministic_owner": "orders",
+      "owner": "orders",
+      "table": "Order"
+    },
+    {
+      "deterministic_owner": "orders",
+      "owner": "orders",
+      "table": "OrderLine"
+    }
+  ],
+  "owners": {
+    "Category": "catalog",
+    "Customer": "customers",
+    "Order": "orders",
+    "OrderLine": "orders",
+    "Payment": "payments",
+    "Product": "catalog",
+    "StockItem": "inventory"
+  },
+  "roots": [
+    "Category",
+    "Customer",
+    "StockItem",
+    "Payment",
+    "Order"
+  ],
+  "source": "jev"
+}

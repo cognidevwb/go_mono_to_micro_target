@@ -1,0 +1,29 @@
+id: docker-under-the-hood
+title: "How Docker Works Under the Hood"
+hook: "What actually happens between `docker run` and a live container."
+concepts: [docker, containers, infra, deploy, kernel, runtime, distroless]
+intents: [modernize, migrate, greenfield]
+phases: [setup-env, scaffold, deploy]
+minutes: 3
+diagram:
+  direction: TB
+  groups:
+    - { id: host, label: "Docker Host", tone: neutral }
+    - { id: engine, label: "containerd", tone: success }
+  nodes:
+    - { id: cli, label: "Docker CLI", sub: "docker run", icon: terminal, tone: brand }
+    - { id: daemon, label: "Docker Daemon", sub: "dockerd", icon: server, group: host, tone: brand }
+    - { id: ctr, label: "containerd", sub: "manages lifecycle", icon: boxes, group: engine, tone: success }
+    - { id: bundle, label: "Runtime Bundle", sub: "OCI config + rootfs", icon: box, group: host, tone: warning }
+    - { id: runc, label: "runc", sub: "namespaces + cgroups", icon: cpu, group: host, tone: brand }
+    - { id: proc, label: "Running Container", sub: "isolated process", icon: container, group: host, tone: success }
+  edges:
+    - { from: cli, to: daemon, label: "API call" }
+    - { from: daemon, to: ctr, label: "delegates" }
+    - { from: ctr, to: bundle, label: "prepares files" }
+    - { from: bundle, to: runc, label: "hands to runtime" }
+    - { from: runc, to: proc, label: "starts isolated process" }
+takeaways:
+  - "The daemon never runs your container — it delegates down to containerd, then runc."
+  - "Isolation is just kernel primitives: namespaces (what it sees) + cgroups (what it can use)."
+  - "The image is layered + read-only; a thin writable layer sits on top per container."

@@ -1,0 +1,7 @@
+{
+  "id": 5,
+  "email": "customer@example.com",
+  "name": "Ada Lovelace",
+  "active": true,
+  "createdAt": "2026-01-01T00:00:00Z"
+}

@@ -1,0 +1,10 @@
+{
+  "elapsedMs": 123,
+  "finishedAt": 1790392802,
+  "inputs": [],
+  "kind": "rust-binary",
+  "outputs": [],
+  "status": "Ok",
+  "step": "verify-build-inheritance",
+  "summary": "Tool `../tools/verify-cicd-go/target/release/verify-cicd-go` completed."
+}

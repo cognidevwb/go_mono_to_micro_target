@@ -1,0 +1,16 @@
+name: ci-gateway
+
+on:
+  push:
+    branches: [main]
+    paths: ["gateway/**", "pkg/**", ".github/workflows/gateway-ci.yml"]
+  pull_request:
+    paths: ["gateway/**", "pkg/**"]
+
+jobs:
+  ci:
+    uses: ./.github/workflows/_service-ci.yml
+    with:
+      module: gateway
+      image: gateway
+    secrets: inherit

@@ -1,0 +1,25 @@
+{
+  "elapsedMs": 123,
+  "finishedAt": 1790392784,
+  "inputs": [],
+  "kind": "rust-binary",
+  "outputs": [
+    {
+      "exists": true,
+      "kind": "report",
+      "name": "DECOMPOSITION-BRIEFING",
+      "optional": true,
+      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/DECOMPOSITION-BRIEFING.html"
+    },
+    {
+      "exists": true,
+      "kind": "docs",
+      "name": "docs",
+      "optional": true,
+      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/cognidev/docs/"
+    }
+  ],
+  "status": "Ok",
+  "step": "publish-briefing",
+  "summary": "Tool `../tools/brief-go-monolith/target/release/brief-go-monolith` completed."
+}

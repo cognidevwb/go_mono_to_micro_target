@@ -1,0 +1,18 @@
+{
+  "elapsedMs": 1929,
+  "finishedAt": 1790395126,
+  "inputs": [],
+  "kind": "structural",
+  "outputs": [
+    {
+      "exists": true,
+      "kind": "understand-shards",
+      "name": "understand",
+      "optional": false,
+      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/.cognidev/understand/"
+    }
+  ],
+  "status": "Ok",
+  "step": "understand-delivered",
+  "summary": "Structural analysis written to /Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/.cognidev/understand"
+}

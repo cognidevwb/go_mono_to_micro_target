@@ -1,0 +1,25 @@
+{
+  "elapsedMs": 124,
+  "finishedAt": 1790392814,
+  "inputs": [],
+  "kind": "rust-binary",
+  "outputs": [
+    {
+      "exists": true,
+      "kind": null,
+      "name": "contracts.lock",
+      "optional": false,
+      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/.cognidev/feature/contracts.lock.json"
+    },
+    {
+      "exists": true,
+      "kind": null,
+      "name": "contracts.lock",
+      "optional": false,
+      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/contracts.lock.json"
+    }
+  ],
+  "status": "Ok",
+  "step": "contracts-manifest",
+  "summary": "Tool `../tools/contracts-go/target/release/contracts-go` completed."
+}

@@ -1,0 +1,697 @@
+{
+  "columns": [
+    "#",
+    "Service",
+    "Owns (tables)",
+    "Calls over the network",
+    "Files",
+    "Why this order"
+  ],
+  "document": "DECOMPOSITION-BRIEFING.html",
+  "edges": [
+    {
+      "from": "orders-service",
+      "to": "catalog-service"
+    },
+    {
+      "from": "orders-service",
+      "to": "customers-service"
+    }
+  ],
+  "measured": {
+    "cross_service_calls": 2,
+    "files_not_owned_by_one_service": 1,
+    "files_planned": 74,
+    "owned_tables": 7,
+    "sagas": 1,
+    "services": 5
+  },
+  "patterns": [
+    {
+      "because": "2 cross-context calls",
+      "currency": "standard",
+      "doc": "architecture/communication/aggregator.md",
+      "family": "communication",
+      "id": "aggregator",
+      "role": "default",
+      "teaches": "When one screen needs three services, compose once at the edge with bounded fan-out — not three round-trips from the client.",
+      "title": "Gateway aggregation"
+    },
+    {
+      "because": "applies to every decomposition",
+      "currency": "standard",
+      "doc": "architecture/communication/api-gateway.md",
+      "family": "communication",
+      "id": "api-gateway",
+      "role": "invariant",
+      "teaches": "One edge for every client — routing, auth, rate limits and the strangler route table live there, not in each service.",
+      "title": "API gateway"
+    },
+    {
+      "because": "5 services",
+      "currency": "standard",
+      "doc": "architecture/communication/contract-testing.md",
+      "family": "communication",
+      "id": "contract-testing",
+      "role": "default",
+      "teaches": "Each consumer pins what it reads from a provider; the provider’s CI fails when it would break a consumer — independent deploys stay safe.",
+      "title": "Contract testing"
+    },
+    {
+      "because": "you chose event_backbone = nats, which is not none",
+      "currency": "standard",
+      "doc": "architecture/communication/event-driven.md",
+      "family": "communication",
+      "id": "event-driven",
+      "role": "default",
+      "teaches": "The in-process bus becomes a broker: every topic a context publishes becomes a durable subject, published through the outbox.",
+      "title": "Event-driven messaging"
+    },
+    {
+      "because": "you chose coordination = orchestration",
+      "currency": "standard",
+      "doc": "architecture/communication/saga-orchestration.md",
+      "family": "communication",
+      "id": "saga-orchestration",
+      "role": "default",
+      "teaches": "One coordinator owns the multi-service write: each step a local transaction, each failure a compensating step, the riskiest step last.",
+      "title": "Saga — orchestration"
+    },
+    {
+      "because": "applies to every decomposition",
+      "currency": "declining",
+      "doc": "architecture/communication/service-discovery.md",
+      "family": "communication",
+      "id": "service-discovery",
+      "role": "default",
+      "teaches": "Let the platform resolve names — compose service names, Kubernetes Services, Container Apps app names — and pass base URLs by environment.",
+      "title": "Service discovery"
+    },
+    {
+      "because": "applies to every decomposition",
+      "currency": "standard",
+      "doc": "architecture/communication/sync-transport.md",
+      "family": "communication",
+      "id": "sync-transport",
+      "role": "invariant",
+      "teaches": "Every cross-service read is a typed net/http client with a context deadline; gRPC is ported where the monolith already speaks it, not imposed.",
+      "title": "Synchronous transport — REST at the edge, gRPC inside"
+    },
+    {
+      "because": "2 cross-context calls",
+      "currency": "standard",
+      "doc": "architecture/data/api-composition.md",
+      "family": "data",
+      "id": "api-composition",
+      "role": "default",
+      "teaches": "Answer a cross-service query by calling the owners and joining in memory — try this before building a read model.",
+      "title": "API composition"
+    },
+    {
+      "because": "you chose orchestrator = azure-containerapps, which is not compose",
+      "currency": "standard",
+      "doc": "architecture/data/connection-pool-budget.md",
+      "family": "data",
+      "id": "connection-pool-budget",
+      "role": "invariant",
+      "teaches": "Pods × pool size must fit under the database’s max_connections — set it, don’t inherit a default.",
+      "title": "Connection-pool budget"
+    },
+    {
+      "because": "applies to every decomposition",
+      "currency": "standard",
+      "doc": "architecture/data/domain-event-aggregate.md",
+      "family": "data",
+      "id": "domain-event-aggregate",
+      "role": "invariant",
+      "teaches": "An aggregate is the consistency boundary; what it records as having happened is the event other services react to.",
+      "title": "Domain events and aggregates"
+    },
+    {
+      "because": "applies to every decomposition",
+      "currency": "standard",
+      "doc": "architecture/data/expand-contract.md",
+      "family": "data",
+      "id": "expand-contract",
+      "role": "invariant",
+      "teaches": "Two versions of the code always share the schema during a rollout — add, migrate, then remove, never rename in place.",
+      "title": "Expand–contract schema change"
+    },
+    {
+      "because": "5 services",
+      "currency": "standard",
+      "doc": "architecture/data/idempotency-key.md",
+      "family": "data",
+      "id": "idempotency-key",
+      "role": "invariant",
+      "teaches": "The same guarantee at the HTTP edge — a caller-supplied key makes a retried write a no-op.",
+      "title": "Idempotency key"
+    },
+    {
+      "because": "you chose event_backbone = nats, which is not none",
+      "currency": "standard",
+      "doc": "architecture/data/idempotent-consumer.md",
+      "family": "data",
+      "id": "idempotent-consumer",
+      "role": "invariant",
+      "teaches": "At-least-once is reality — record each processed message id in the same transaction as its effect.",
+      "title": "Idempotent consumer"
+    },
+    {
+      "because": "applies to every decomposition",
+      "currency": "standard",
+      "doc": "architecture/data/optimistic-concurrency.md",
+      "family": "data",
+      "id": "optimistic-concurrency",
+      "role": "invariant",
+      "teaches": "A version column and a conditional UPDATE — the split widened every write window, and last-writer-wins now loses data.",
+      "title": "Optimistic concurrency"
+    },
+    {
+      "because": "you chose outbox = sql-outbox, which is not none",
+      "currency": "standard",
+      "doc": "architecture/data/outbox-relay-topology.md",
+      "family": "data",
+      "id": "outbox-relay-topology",
+      "role": "invariant",
+      "teaches": "Decide who drains the outbox — one relay per service, leader-elected or SKIP LOCKED — and make sure every replica is allowed to run it.",
+      "title": "Outbox relay topology"
+    },
+    {
+      "because": "1 saga candidate",
+      "currency": "standard",
+      "doc": "architecture/data/saga-isolation.md",
+      "family": "data",
+      "id": "saga-isolation",
+      "role": "invariant",
+      "teaches": "A saga has no isolation — other requests see its intermediate states, so design semantic locks and reversible steps.",
+      "title": "Saga isolation countermeasures"
+    },
+    {
+      "because": "you chose outbox = sql-outbox, which is not none",
+      "currency": "standard",
+      "doc": "architecture/data/transactional-outbox.md",
+      "family": "data",
+      "id": "transactional-outbox",
+      "role": "invariant",
+      "teaches": "Write the row and the message in one local transaction, relay after commit — the only honest way out of the dual write.",
+      "title": "Transactional outbox"
+    },
+    {
+      "because": "2 cross-context calls",
+      "currency": "standard",
+      "doc": "architecture/decomposition/anti-corruption-layer.md",
+      "family": "decomposition",
+      "id": "anti-corruption-layer",
+      "role": "invariant",
+      "teaches": "Translate at every boundary — the consumer maps the provider’s contract into its own types, so one service’s model never leaks into another.",
+      "title": "Anti-corruption layer"
+    },
+    {
+      "because": "you chose migration_approach = strangler",
+      "currency": "standard",
+      "doc": "architecture/decomposition/branch-by-abstraction.md",
+      "family": "decomposition",
+      "id": "branch-by-abstraction",
+      "role": "choice",
+      "teaches": "Put an interface in front of the in-process call, swap the implementation for a client behind it — the in-code half of the strangler.",
+      "title": "Branch by abstraction"
+    },
+    {
+      "because": "applies to every decomposition",
+      "currency": "standard",
+      "doc": "architecture/decomposition/database-per-service.md",
+      "family": "decomposition",
+      "id": "database-per-service",
+      "role": "invariant",
+      "teaches": "Each service owns its tables; nobody else reads them — the one invariant that makes independent deployment real.",
+      "title": "Database per service"
+    },
+    {
+      "because": "you chose boundary_strategy = domain",
+      "currency": "standard",
+      "doc": "architecture/decomposition/decompose-by-business-capability.md",
+      "family": "decomposition",
+      "id": "decompose-by-business-capability",
+      "role": "default",
+      "teaches": "A service is a thing the business does and owns data for — catalog, orders, payments — never a technical layer.",
+      "title": "Decompose by business capability"
+    },
+    {
+      "because": "applies to every decomposition",
+      "currency": "rising",
+      "doc": "architecture/decomposition/right-sizing.md",
+      "family": "decomposition",
+      "id": "right-sizing",
+      "role": "invariant",
+      "teaches": "Extract a service only against a named force — team, scale, isolation or lifecycle; everything else stays in a bounded core.",
+      "title": "Right-sizing"
+    },
+    {
+      "because": "applies to every decomposition",
+      "currency": "standard",
+      "doc": "architecture/decomposition/strangler-fig.md",
+      "family": "decomposition",
+      "id": "strangler-fig",
+      "role": "invariant",
+      "teaches": "Put a gateway in front of the monolith and move one route group at a time; the monolith shrinks while production keeps working.",
+      "title": "Strangler fig"
+    },
+    {
+      "because": "applies to every decomposition",
+      "currency": "standard",
+      "doc": "architecture/_stack/decomposition-method.md",
+      "family": "method",
+      "id": "decomposition-method",
+      "role": "reference",
+      "teaches": "Boundaries come from data ownership and co-writes measured in the shards; the model only refines names and edges it can be checked against.",
+      "title": "How the cut is computed"
+    },
+    {
+      "because": "applies to every decomposition",
+      "currency": "standard",
+      "doc": "architecture/_stack/microservices-conventions.md",
+      "family": "method",
+      "id": "microservices-conventions",
+      "role": "reference",
+      "teaches": "Every service looks the same when you open it — cmd/, internal/, migrations/, one go.mod — so a reader learns the fleet once.",
+      "title": "Go microservice conventions"
+    },
+    {
+      "because": "applies to every decomposition",
+      "currency": "standard",
+      "doc": "architecture/_stack/target-architecture-2026.md",
+      "family": "method",
+      "id": "target-architecture-2026",
+      "role": "reference",
+      "teaches": "One pinned stack, stated once — Go 1.26, a module per service in one go.work, slog + OpenTelemetry, NATS JetStream, distroless nonroot images.",
+      "title": "The 2026 Go target architecture"
+    },
+    {
+      "because": "applies to every decomposition",
+      "currency": "standard",
+      "doc": "architecture/observability/chassis.md",
+      "family": "observability",
+      "id": "chassis",
+      "role": "invariant",
+      "teaches": "One small shared startup path — config, slog, OTel, health, graceful shutdown — so every main.go is the same ten lines.",
+      "title": "Microservice chassis"
+    },
+    {
+      "because": "applies to every decomposition",
+      "currency": "standard",
+      "doc": "architecture/observability/health-checks.md",
+      "family": "observability",
+      "id": "health-checks",
+      "role": "invariant",
+      "teaches": "/healthz says the process lives; /readyz says it can serve — keep them different or the orchestrator restarts healthy pods.",
+      "title": "Health checks"
+    },
+    {
+      "because": "applies to every decomposition",
+      "currency": "standard",
+      "doc": "architecture/observability/observability.md",
+      "family": "observability",
+      "id": "observability",
+      "role": "invariant",
+      "teaches": "Traces, metrics and logs over one OTLP pipe; the trace id in every log line; the backend is a swap.",
+      "title": "Observability — slog + OpenTelemetry"
+    },
+    {
+      "because": "applies to every decomposition",
+      "currency": "standard",
+      "doc": "architecture/observability/secrets-config.md",
+      "family": "observability",
+      "id": "secrets-config",
+      "role": "invariant",
+      "teaches": "Configuration from the environment, secrets from the platform’s store via workload identity — never in git, never in the image.",
+      "title": "Secrets and configuration"
+    },
+    {
+      "because": "applies to every decomposition",
+      "currency": "standard",
+      "doc": "architecture/observability/security.md",
+      "family": "observability",
+      "id": "security",
+      "role": "invariant",
+      "teaches": "Validate the token at the gateway and again in each service; carry identity as a claim, not as an in-process context value.",
+      "title": "Security — JWT at the edge and in every service"
+    },
+    {
+      "because": "applies to every decomposition",
+      "currency": "standard",
+      "doc": "architecture/observability/testing.md",
+      "family": "observability",
+      "id": "testing",
+      "role": "invariant",
+      "teaches": "Test against real Postgres and NATS in containers, not mocks — the split moved the risk into the edges mocks hide.",
+      "title": "Integration testing with real dependencies"
+    },
+    {
+      "because": "you chose orchestrator = azure-containerapps, which is not compose",
+      "currency": "standard",
+      "doc": "architecture/reliability/autoscaling.md",
+      "family": "reliability",
+      "id": "autoscaling",
+      "role": "choice",
+      "teaches": "Scale HTTP services on CPU/RPS and consumers on queue depth — CPU is the wrong signal for a JetStream consumer.",
+      "title": "Autoscaling — HPA and KEDA"
+    },
+    {
+      "because": "5 services",
+      "currency": "standard",
+      "doc": "architecture/reliability/chaos-engineering.md",
+      "family": "reliability",
+      "id": "chaos-engineering",
+      "role": "choice",
+      "teaches": "Prove the timeouts, breakers and compensations work by breaking things on purpose, in a test environment first.",
+      "title": "Chaos engineering"
+    },
+    {
+      "because": "applies to every decomposition",
+      "currency": "standard",
+      "doc": "architecture/reliability/deployment.md",
+      "family": "reliability",
+      "id": "deployment",
+      "role": "default",
+      "teaches": "One static binary per service in a distroless nonroot image, deployed the same way everywhere — compose locally, Kubernetes/Helm or Container Apps in production.",
+      "title": "Deployment — compose, Kubernetes, Azure Container Apps"
+    },
+    {
+      "because": "you chose migration_approach = strangler",
+      "currency": "standard",
+      "doc": "architecture/reliability/progressive-delivery.md",
+      "family": "reliability",
+      "id": "progressive-delivery",
+      "role": "choice",
+      "teaches": "Move traffic to an extracted service gradually — weighted routes and flags, with a fast way back.",
+      "title": "Progressive delivery"
+    },
+    {
+      "because": "applies to every decomposition",
+      "currency": "standard",
+      "doc": "architecture/reliability/rate-limiting.md",
+      "family": "reliability",
+      "id": "rate-limiting",
+      "role": "default",
+      "teaches": "Limit at the edge per client, and inside services on expensive endpoints — shed load before the database does.",
+      "title": "Rate limiting"
+    },
+    {
+      "because": "applies to every decomposition",
+      "currency": "standard",
+      "doc": "architecture/reliability/resilience.md",
+      "family": "reliability",
+      "id": "resilience",
+      "role": "invariant",
+      "teaches": "Every hop has a deadline, bounded retries with jitter for idempotent calls, and a breaker per upstream.",
+      "title": "Resilience — timeouts, retries, breakers"
+    },
+    {
+      "because": "you chose service_internal_structure = flat-package",
+      "currency": "standard",
+      "doc": "architecture/structure/flat-package.md",
+      "family": "structure",
+      "id": "flat-package",
+      "role": "default",
+      "teaches": "Keep the ported package as the unit — one package per context inside the service, wiring in cmd/, adapters beside it; Go rewards fewer layers.",
+      "title": "Flat package per context"
+    },
+    {
+      "because": "applies to every decomposition",
+      "currency": "reference",
+      "doc": "architecture/structure/styles-not-applied.md",
+      "family": "structure",
+      "id": "styles-not-applied",
+      "role": "reference",
+      "teaches": "Omissions are decisions — plugin architectures, space-based grids, serverless-per-function and a shared-library \"platform\" are not targets here.",
+      "title": "Architecture styles this playbook does not apply"
+    }
+  ],
+  "patterns_not_applied": [
+    {
+      "doc": "architecture/communication/backend-for-frontend.md",
+      "id": "backend-for-frontend",
+      "title": "Backend for frontend",
+      "why_not": "A single Go gateway is what this run scaffolds; per-client backends are a later refinement you add by hand."
+    },
+    {
+      "doc": "architecture/communication/dapr.md",
+      "id": "dapr",
+      "title": "Dapr",
+      "why_not": "This run talks to NATS/Kafka and HTTP directly from Go; Dapr is an additional sidecar runtime nothing here installs."
+    },
+    {
+      "doc": "architecture/communication/saga-choreography.md",
+      "id": "saga-choreography",
+      "title": "Saga — choreography",
+      "why_not": "needs coordination = choreography — you chose orchestration"
+    },
+    {
+      "doc": "architecture/communication/sync-compensated-chain.md",
+      "id": "sync-compensated-chain",
+      "title": "Synchronous compensated call chain",
+      "why_not": "needs event_backbone = none — you chose nats"
+    },
+    {
+      "doc": "architecture/data/change-data-capture.md",
+      "id": "change-data-capture",
+      "title": "Change data capture",
+      "why_not": "needs migration_approach = parallel-run — you chose strangler"
+    },
+    {
+      "doc": "architecture/data/cqrs.md",
+      "id": "cqrs",
+      "title": "CQRS",
+      "why_not": "needs read_write_model = cqrs — you chose crud"
+    },
+    {
+      "doc": "architecture/data/durable-execution.md",
+      "id": "durable-execution",
+      "title": "Durable execution",
+      "why_not": "This platform generates a saga whose state lives in the orchestrating service’s own database — no extra runtime to operate. Durable execution (Temporal Go SDK) is the upgrade path when flows outgrow it."
+    },
+    {
+      "doc": "architecture/data/event-sourcing.md",
+      "id": "event-sourcing",
+      "title": "Event sourcing",
+      "why_not": "needs read_write_model = event-sourced — you chose crud"
+    },
+    {
+      "doc": "architecture/data/materialized-view.md",
+      "id": "materialized-view",
+      "title": "Materialized view / read model",
+      "why_not": "needs read_write_model = cqrs — you chose crud"
+    },
+    {
+      "doc": "architecture/data/read-replica.md",
+      "id": "read-replica",
+      "title": "Read replica",
+      "why_not": "needs at least 1 read_heavy_services — this run has 0"
+    },
+    {
+      "doc": "architecture/data/read-through-cache.md",
+      "id": "read-through-cache",
+      "title": "Read-through cache",
+      "why_not": "needs at least 1 read_heavy_services — this run has 0"
+    },
+    {
+      "doc": "architecture/data/try-confirm-cancel.md",
+      "id": "try-confirm-cancel",
+      "title": "Try–Confirm–Cancel",
+      "why_not": "TCC requires every participant to expose Try/Confirm/Cancel; this platform generates compensating sagas because a strangler extraction has participants (and a legacy monolith) that cannot be reshaped that way. Adopt it per participant where isolation is worth it."
+    },
+    {
+      "doc": "architecture/decomposition/decompose-by-subdomain.md",
+      "id": "decompose-by-subdomain",
+      "title": "Decompose by subdomain (DDD)",
+      "why_not": "needs boundary_strategy = subdomain — you chose domain"
+    },
+    {
+      "doc": "architecture/decomposition/modular-monolith-first.md",
+      "id": "modular-monolith-first",
+      "title": "Modular monolith first",
+      "why_not": "needs at most 2 services — this run has 5"
+    },
+    {
+      "doc": "architecture/decomposition/parallel-run.md",
+      "id": "parallel-run",
+      "title": "Parallel run",
+      "why_not": "needs migration_approach = parallel-run — you chose strangler"
+    },
+    {
+      "doc": "architecture/observability/service-identity.md",
+      "id": "service-identity",
+      "title": "Service-to-service identity",
+      "why_not": "needs at least 6 services — this run has 5"
+    },
+    {
+      "doc": "architecture/reliability/service-mesh.md",
+      "id": "service-mesh",
+      "title": "Service mesh",
+      "why_not": "needs at least 6 services — this run has 5"
+    },
+    {
+      "doc": "architecture/reliability/sidecar.md",
+      "id": "sidecar",
+      "title": "Sidecar / ambassador",
+      "why_not": "Sidecarless (ambient / eBPF) meshes are displacing it, and nothing in this run scaffolds a sidecar."
+    },
+    {
+      "doc": "architecture/structure/hexagonal.md",
+      "id": "hexagonal",
+      "title": "Hexagonal (ports and adapters)",
+      "why_not": "needs service_internal_structure = hexagonal — you chose flat-package"
+    }
+  ],
+  "rows": [
+    [
+      "1",
+      "orders-service",
+      "Order, OrderLine",
+      "catalog-service, customers-service",
+      "22",
+      "needs catalog-service, customers-service"
+    ],
+    [
+      "2",
+      "catalog-service",
+      "Category, Product",
+      "—",
+      "12",
+      "leaf — nothing to wait for"
+    ],
+    [
+      "3",
+      "customers-service",
+      "Customer",
+      "—",
+      "12",
+      "leaf — nothing to wait for"
+    ],
+    [
+      "4",
+      "inventory-service",
+      "StockItem",
+      "—",
+      "14",
+      "leaf — nothing to wait for"
+    ],
+    [
+      "5",
+      "payments-service",
+      "Payment",
+      "—",
+      "13",
+      "leaf — nothing to wait for"
+    ]
+  ],
+  "sagas": [
+    {
+      "name": "CreateOrder",
+      "orchestrator": "orders-service",
+      "participants": [
+        "inventory-service",
+        "orders-service",
+        "payments-service"
+      ]
+    }
+  ],
+  "services": [
+    {
+      "aggregates": [
+        "Order"
+      ],
+      "calls": [
+        "catalog-service",
+        "customers-service"
+      ],
+      "files_planned": 22,
+      "moved_from": [
+        "internal/orders/handlers.go",
+        "internal/orders/model.go",
+        "internal/orders/service.go"
+      ],
+      "order": 1,
+      "owns": [
+        "Order",
+        "OrderLine"
+      ],
+      "service": "orders-service",
+      "why_here": "needs catalog-service, customers-service first"
+    },
+    {
+      "aggregates": [
+        "Category"
+      ],
+      "calls": [],
+      "files_planned": 12,
+      "moved_from": [
+        "internal/catalog/handlers.go",
+        "internal/catalog/model.go",
+        "internal/catalog/service.go"
+      ],
+      "order": 2,
+      "owns": [
+        "Category",
+        "Product"
+      ],
+      "service": "catalog-service",
+      "why_here": "a leaf — nothing to wait for"
+    },
+    {
+      "aggregates": [
+        "Customer"
+      ],
+      "calls": [],
+      "files_planned": 12,
+      "moved_from": [
+        "internal/customers/handlers.go",
+        "internal/customers/model.go",
+        "internal/customers/service.go"
+      ],
+      "order": 3,
+      "owns": [
+        "Customer"
+      ],
+      "service": "customers-service",
+      "why_here": "a leaf — nothing to wait for"
+    },
+    {
+      "aggregates": [
+        "StockItem"
+      ],
+      "calls": [],
+      "files_planned": 14,
+      "moved_from": [
+        "internal/inventory/model.go",
+        "internal/inventory/service.go"
+      ],
+      "order": 4,
+      "owns": [
+        "StockItem"
+      ],
+      "service": "inventory-service",
+      "why_here": "a leaf — nothing to wait for"
+    },
+    {
+      "aggregates": [
+        "Payment"
+      ],
+      "calls": [],
+      "files_planned": 13,
+      "moved_from": [
+        "internal/payments/gateway.go",
+        "internal/payments/model.go",
+        "internal/payments/service.go"
+      ],
+      "order": 5,
+      "owns": [
+        "Payment"
+      ],
+      "service": "payments-service",
+      "why_here": "a leaf — nothing to wait for"
+    }
+  ],
+  "title": "Decomposing this monolith"
+}

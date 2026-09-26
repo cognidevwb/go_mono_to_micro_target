@@ -1,0 +1,589 @@
+# ─────────────────────────────────────────────────────────────
+#  Sign-off checklist — Decompose a Go monolith into microservices
+#
+#  Every claim this playbook makes, and the artifact on disk that settles it.
+#  Read by ../tools/signoff-report, which COMPUTES each verdict — nothing here is
+#  asserted. A claim whose evidence is absent reads NOT VERIFIED, with the path
+#  it looked for; it never passes by silence.
+#
+#  The rule for authoring a line: point at the artifact that would be DIFFERENT
+#  if the claim were false. "The services compile" is not evidenced by a report
+#  that says so — it is evidenced by the verify phase reaching terminal Ok,
+#  because go-verify exits non-zero when any module fails to build.
+# ─────────────────────────────────────────────────────────────
+
+title: "Monolith decomposition — sign-off"
+subject: "The monolith was read, cut into bounded-context services deterministically, briefed before approval, moved in verbatim, wired only at the marked seams, and rebuilt and vetted."
+
+groups:
+
+  # ── What we read before proposing anything ────────────────────────────────
+  - name: "Structural intelligence — the monolith was read"
+    checks:
+      - id: si-present
+        claim: "The structural pass read this repository."
+        evidence: { kind: file_exists, path: .cognidev/understand/index.json }
+
+      - id: si-graph-parses
+        claim: "The Go symbol graph (receiver-bound call edges) the decomposition plans against was written and is readable."
+        evidence: { kind: json_parses, path: .cognidev/understand/graph.json }
+
+      - id: understand-ran
+        claim: "The structural phase ran to completion in this run."
+        evidence: { kind: phase_ok, phase: understand }
+
+  # ── The environment, proved before any token was spent ────────────────────
+  - name: "Build environment — proved before planning"
+    checks:
+      - id: env-gate-ran
+        claim: "A Go toolchain that can build the generated services was proved available before anything was planned. The gate exits non-zero when no host toolchain, user-local toolchain or Docker can be made ready, so reaching terminal Ok is the proof."
+        evidence: { kind: phase_ok, phase: setup-environment }
+
+      - id: env-recorded
+        claim: "The build mode the whole run uses was written down, so develop and verify build the same way."
+        evidence: { kind: file_exists, path: .cognidev/env.json }
+
+  # ── What the machine can actually do ──────────────────────────────────────
+  - name: "The machine — what it can build, and what it cannot"
+    checks:
+      - id: runtime-target-chosen
+        claim: "A target Go version was settled on and written down, so the scaffolder, the build and the version gate all mean the same thing by it. `setup-environment` records the version it actually proved a toolchain for — the highest go/toolchain directive in the tree or the `go_version` answer."
+        evidence: { kind: log_contains, path: .cognidev/env.json, needle: "go_version" }
+
+      - id: feasibility-recorded
+        claim: "What the services will need at run time beyond their own code — a container runtime, a database, a broker, a cloud sign-in — was checked and recorded. A requirement this machine cannot answer for reads NOT DETERMINABLE HERE; it is never reported as available."
+        evidence: { kind: file_exists, path: .cognidev/feature/feasibility.json }
+
+      - id: knowledge-indexed
+        claim: "The failure signatures this playbook knows about were indexed against the chosen Go version, so a build error that has been seen before is matched rather than re-diagnosed."
+        evidence: { kind: file_exists, path: .cognidev/feature/knowledge.json }
+
+  # ── The map — deterministic, no model call ────────────────────────────────
+  - name: "The map — computed from the shards, not proposed by a model"
+    checks:
+      - id: map-ran
+        claim: "The deterministic mapper ran to completion."
+        evidence: { kind: phase_ok, phase: map-services }
+
+      - id: map-frozen
+        claim: "The authoritative source-to-service map is on disk and readable."
+        evidence: { kind: json_parses, path: .cognidev/feature/service-map.json }
+
+      - id: map-has-services
+        claim: "The map assigned the monolith to at least one bounded-context service — it did not discover a decomposition and then drop it."
+        evidence:
+          kind: json_count
+          path: .cognidev/feature/service-map.json
+          pointer: /services
+          min: 1
+        detail: "{count} service(s) mapped"
+
+      - id: plan-expanded
+        claim: "The compact map was expanded into the full per-file plan the generators consume."
+        evidence: { kind: json_parses, path: .cognidev/feature/plan.json }
+
+      - id: plan-files
+        claim: "The expanded plan names the files to be written — a plan with no files would generate nothing while reporting success."
+        evidence:
+          kind: json_count
+          path: .cognidev/feature/plan.json
+          pointer: /files
+          min: 1
+        detail: "{count} file(s) planned"
+
+  # ── The learning map ──────────────────────────────────────────────────────
+  - name: "Architecture — which patterns this cut applies, and why"
+    checks:
+      - id: patterns-ran
+        claim: "The pattern selector ran to completion. It exits non-zero when a shipped card is malformed, so terminal Ok also proves the whole catalog loaded."
+        evidence: { kind: phase_ok, phase: patterns }
+
+      - id: patterns-written
+        claim: "The selected patterns were written and are readable."
+        evidence: { kind: json_parses, path: .cognidev/feature/patterns.json }
+
+      - id: patterns-selected-something
+        claim: "At least one architecture pattern was selected for this decomposition. A cut that applies no named pattern is one nobody can review."
+        evidence:
+          kind: json_count
+          path: .cognidev/feature/patterns.json
+          pointer: /selected
+          min: 1
+        detail: "{count} pattern(s) apply"
+
+      # The omissions are decisions. A selection that never rejects anything is
+      # a selection that is not discriminating, and it would read as "every
+      # pattern applies" — which is the failure mode this phase exists to avoid.
+      - id: patterns-rejected-something
+        claim: "Patterns were also considered and left out, each with its reason — the catalog was filtered, not recited."
+        evidence:
+          kind: json_count
+          path: .cognidev/feature/patterns.json
+          pointer: /considered
+          min: 1
+        detail: "{count} pattern(s) considered and not applied"
+
+  # ── The briefing ──────────────────────────────────────────────────────────
+  - name: "The briefing — the cut was explained before it was approved"
+    checks:
+      - id: briefing-ran
+        claim: "The briefing phase ran to completion before the approval gate."
+        evidence: { kind: phase_ok, phase: briefing }
+
+      - id: briefing-table
+        claim: "The service-by-service table the briefing shows was written."
+        evidence: { kind: json_parses, path: .cognidev/feature/briefing.json }
+
+      - id: briefing-steps
+        claim: "The ordered step list — what will happen, and which step is a model rather than a deterministic move — was written."
+        evidence: { kind: json_parses, path: .cognidev/feature/steps.json }
+
+      # The documents are written by a SEPARATE phase, after the gate — a
+      # document describing a decomposition cannot precede its approval. Without
+      # this check, that phase failing silently would show up only as three
+      # missing-file failures below, which read as a permissions problem.
+      - id: briefing-published
+        claim: "The documents were published after the plan was approved, not before it."
+        evidence: { kind: phase_ok, phase: publish-briefing }
+
+      - id: briefing-document
+        claim: "The committable briefing document was written into the repository."
+        evidence: { kind: file_exists, path: DECOMPOSITION-BRIEFING.html }
+
+      - id: briefing-docs-folder
+        claim: "The plan was written as files in the customer's own folder, not only as a screen they had to be looking at."
+        evidence: { kind: file_exists, path: cognidev/docs/README.md }
+
+      - id: briefing-what-changes
+        claim: "The mapping document — what moves where, and every call that becomes a network hop — is on disk."
+        evidence: { kind: file_exists, path: cognidev/docs/what-changes.md }
+
+      - id: briefing-the-plan
+        claim: "The extraction order, and the reason for that order, is on disk."
+        evidence: { kind: file_exists, path: cognidev/docs/the-plan.md }
+
+      - id: briefing-learning
+        claim: "What the team has to understand once this lands — each pattern, why it applies here, and the file to read — is on disk."
+        evidence: { kind: file_exists, path: cognidev/docs/what-you-learn.md }
+
+      - id: briefing-choices
+        claim: "What the run was told and what it decided on the user's behalf were both written down."
+        evidence: { kind: file_exists, path: cognidev/docs/your-choices.yaml }
+
+      - id: plan-reviewed
+        claim: "A human saw the plan before any file was written — the review gate is terminal-Ok only after approval."
+        evidence: { kind: phase_ok, phase: plan-tasks }
+
+  # ── The generated platform ────────────────────────────────────────────────
+  - name: "The platform — generated filled, before any domain code"
+    checks:
+      - id: scaffold-ran
+        claim: "The platform scaffolder ran to completion."
+        evidence: { kind: phase_ok, phase: scaffold-services }
+
+      - id: services-exist
+        claim: "Service projects were written to disk."
+        evidence: { kind: dir_nonempty, path: services }
+
+      - id: kernel-exists
+        claim: "The pkg/ shared kernel — the contract DTOs every service exchanges, and nothing else — was generated."
+        evidence: { kind: dir_nonempty, path: pkg }
+
+      - id: workspace-exists
+        claim: "The go.work workspace that builds every service module together was generated."
+        evidence: { kind: file_exists, path: go.work }
+
+  # ── The before-state ──────────────────────────────────────────────────────
+  # Every "it builds" claim below is worth exactly as much as the answer to
+  # "did it build BEFORE". Without a before-state, a monolith that arrived
+  # broken and left broken reads identically to one this run broke.
+  - name: "The before-state — what the monolith did before the cut"
+    checks:
+      - id: baseline-recorded
+        claim: "The monolith was built, and where a test suite exists it was run, BEFORE anything was cut — so the after-state has something to be compared against."
+        evidence: { kind: json_parses, path: .cognidev/feature/go-baseline.json }
+
+      - id: baseline-command-recorded
+        claim: "The exact command the before-state used was written down. A before and an after measured by different commands are not a comparison."
+        evidence: { kind: log_contains, path: .cognidev/feature/go-baseline.json, needle: "command" }
+
+  # ── The moved code ────────────────────────────────────────────────────────
+  - name: "The port — your code was moved, not rewritten"
+    checks:
+      - id: port-ran
+        claim: "The porter ran to completion."
+        evidence: { kind: phase_ok, phase: port-monolith }
+
+      - id: port-report
+        claim: "What was moved verbatim, what was generated, and what was left marked for the model are all recorded."
+        evidence: { kind: json_parses, path: .cognidev/feature/port-report.json }
+
+      # A porter that moves nothing exits 0 and reports success exactly as
+      # loudly as one that works. This is the line that tells them apart.
+      - id: port-moved-something
+        claim: "Lines of the monolith's own code were actually relocated into the services."
+        evidence:
+          kind: json_count
+          path: .cognidev/feature/port-report.json
+          pointer: /summary/lines_ported_verbatim
+          min: 1
+        detail: "{count} line(s) moved verbatim"
+
+      - id: contracts-baseline
+        claim: "The cross-service contract shapes were snapshotted BEFORE develop could change them, so the drift check has a real baseline."
+        evidence: { kind: json_parses, path: .cognidev/feature/contracts.lock.json }
+
+  # ── The record ────────────────────────────────────────────────────────────
+  - name: "The record — what each task actually did"
+    checks:
+      - id: status-ran
+        claim: "The status pass ran after develop."
+        evidence: { kind: phase_ok, phase: record-status }
+
+      - id: status-index
+        claim: "The per-task record was written, including how many of the planned tasks never ran."
+        evidence: { kind: file_exists, path: cognidev/docs/status/README.md }
+
+      - id: migration-log
+        claim: "What moved out of the monolith was written down in the order it moved, as a committable log. Built from the same per-task outcomes as the records above, so the two cannot disagree; a task the loop never reached has no entry, and the gap between the plan's count and the log's is the report that it did not run."
+        evidence: { kind: file_exists, path: MIGRATION-LOG.md }
+
+  # ── The delivered code ────────────────────────────────────────────────────
+  - name: "The result — it compiles"
+    checks:
+      - id: verify-ran
+        claim: "`go build ./...` and `go vet ./...` succeeded across every generated module. go-verify exits non-zero when any module fails to compile, so reaching terminal Ok is the proof — not the report's own wording."
+        evidence: { kind: phase_ok, phase: verify }
+
+      - id: drift-checked
+        claim: "The contract shapes were recomputed after develop and diffed against the baseline, so a consumer left depending on a changed provider was marked rather than shipped silently."
+        evidence: { kind: json_parses, path: .cognidev/feature/contracts-drift.json }
+
+  # ── The build, as DATA ────────────────────────────────────────────────────
+  - name: "The build outcome — written down, not just printed"
+    checks:
+      - id: verify-shard
+        claim: "The build and test outcome was recorded as data, not only as a report. A markdown file is for a person; the scorecard and the closing review both need the numbers."
+        evidence: { kind: json_parses, path: .cognidev/feature/verify.json }
+
+      - id: verify-build-green
+        claim: "Every module in the generated workspace compiled."
+        evidence:
+          kind: json_equals
+          path: .cognidev/feature/verify.json
+          pointer: /build_ok
+          value: true
+        detail: "at least one module in the generated workspace failed to compile"
+
+  # ── THE MEASURED TREE ─────────────────────────────────────────────────────
+  # Everything above this line reports what a phase DID. These report what the
+  # finished tree IS, and the two come apart badly: measured on nopCommerce, the
+  # port ran, the develop loop ran, the build was green — and
+  # `cross_context_client_calls` was zero, not one generated client was
+  # registered with the container, and all six "services" still
+  # imported the monolith module they had been cut out of. Every claim
+  # above passed on that run.
+  #
+  # Each claim below keys on a SCALAR that `go-gates` publishes only for a
+  # gate that actually ran. A gate that could not run publishes nothing, and a
+  # claim reading an absent pointer renders NOT VERIFIED — never a pass. That is
+  # deliberate: `max: 0` is satisfied by the zero of "never looked" exactly as it
+  # is by the zero of "looked and found none".
+  - name: "The measured tree — what a green build does not prove"
+    checks:
+      - id: gates-ran
+        claim: "The finished tree was measured against the checks a reviewer would run by hand."
+        evidence: { kind: phase_ok, phase: gates }
+
+      - id: gates-written
+        claim: "Every measurement, its count and its offenders were written down, including the ones that could not run and why."
+        evidence: { kind: json_parses, path: .cognidev/feature/gates.json }
+
+      # ── The hollowness a green build hides completely ──
+      - id: cross-calls-converted
+        claim: "Every call that crossed a context boundary in the monolith is a real HTTP call in the services. A client whose body is still a marker compiles perfectly and does nothing."
+        evidence:
+          kind: json_count
+          path: .cognidev/feature/gates.json
+          pointer: /scalars/cross_context_calls_converted
+          max: 0
+        detail: "{count} declared cross-context call edge(s) are not real HTTP calls"
+
+      - id: clients-registered
+        claim: "Every generated client is constructed and wired into its service in main.go. A client nothing constructs compiles and leaves a nil interface that panics on the first request."
+        evidence:
+          kind: json_count
+          path: .cognidev/feature/gates.json
+          pointer: /scalars/clients_wired_in_main
+          max: 0
+        detail: "{count} generated client(s) are never constructed in main.go"
+
+      - id: sagas-present
+        claim: "Every cross-context transaction the plan declared has an orchestrator that names each of its participants. Two databases are not one db.Transaction, and the compiler has no opinion about it."
+        evidence:
+          kind: json_count
+          path: .cognidev/feature/gates.json
+          pointer: /scalars/sagas_at_commit_points
+          max: 0
+        detail: "{count} problem(s) across the declared sagas"
+
+      - id: no-seams-left
+        claim: "No seam is still a marker."
+        evidence:
+          kind: json_count
+          path: .cognidev/feature/gates.json
+          pointer: /scalars/no_residual_seam_markers
+          max: 0
+        detail: "{count} marker(s) left unimplemented in the generated tree"
+
+      # ── The boundaries ──
+      - id: services-independent-of-monolith
+        claim: "No generated service imports the monolith module. A service that imports it cannot be deployed without it, cannot be versioned apart from it, and every boundary above is a directory name."
+        evidence:
+          kind: json_count
+          path: .cognidev/feature/gates.json
+          pointer: /scalars/no_service_references_the_monolith
+          max: 0
+        detail: "{count} import(s) from a generated module into the monolith"
+
+      - id: no-cross-service-reference
+        claim: "No service module imports another service module — these would be one deployable, not two."
+        evidence:
+          kind: json_count
+          path: .cognidev/feature/gates.json
+          pointer: /scalars/no_cross_service_module_import
+          max: 0
+        detail: "{count} cross-service module import(s)"
+
+      - id: service-names-are-domains
+        claim: "Every service name names a domain rather than a source folder. A service called `libraries` is the monolith's directory tree with a prefix."
+        evidence:
+          kind: json_count
+          path: .cognidev/feature/gates.json
+          pointer: /scalars/service_names_are_domains_not_folders
+          max: 0
+        detail: "{count} service name(s) describe a folder"
+
+      - id: data-owned-per-service
+        claim: "Every service that owns entities opens its own database connection and reads no other service's tables."
+        evidence:
+          kind: json_count
+          path: .cognidev/feature/gates.json
+          pointer: /scalars/every_service_owns_its_database
+          max: 0
+        detail: "{count} data-ownership breach(es)"
+
+      - id: services-in-the-workspace
+        claim: "Every planned service is a module listed in go.work. A module go.work never mentions is a directory, and `go build` succeeding says nothing about it."
+        evidence:
+          kind: json_count
+          path: .cognidev/feature/gates.json
+          pointer: /scalars/every_planned_service_is_in_the_workspace
+          max: 0
+        detail: "{count} planned service(s) go.work does not list"
+
+      - id: go-version-is-the-chosen-one
+        claim: "Every generated module declares the Go version the run chose."
+        evidence:
+          kind: json_count
+          path: .cognidev/feature/gates.json
+          pointer: /scalars/go_version_is_the_chosen_one
+          max: 0
+        detail: "{count} generated module(s) on the wrong Go version"
+
+      - id: gateway-reaches-everything
+        claim: "The gateway has a route and a cluster for every service. One without a route is unreachable from outside the cluster, and the gateway starts happily without it."
+        evidence:
+          kind: json_count
+          path: .cognidev/feature/gates.json
+          pointer: /scalars/gateway_routes_cover_every_service
+          max: 0
+        detail: "{count} service(s) unreachable through the gateway"
+
+      # ── What the cut left behind ──
+      - id: no-monolith-import
+        claim: "No service still imports a monolith package path."
+        evidence:
+          kind: json_count
+          path: .cognidev/feature/gates.json
+          pointer: /scalars/no_monolith_import_left_in_services
+          max: 0
+        detail: "{count} surviving monolith import(s)"
+
+      - id: nothing-silenced
+        claim: "Nothing was switched off to make the tree compile — no blanket //nolint, no vet analyzer disabled, no linter switched off in .golangci.yml."
+        evidence:
+          kind: json_count
+          path: .cognidev/feature/gates.json
+          pointer: /scalars/no_wholesale_warning_suppression
+          max: 0
+        detail: "{count} wholesale suppression(s)"
+
+      - id: tests-came-over
+        claim: "Every service has a _test.go file with a test in it. A cut that moved the production code and left the tests behind cannot show a service still does what it did."
+        evidence:
+          kind: json_count
+          path: .cognidev/feature/gates.json
+          pointer: /scalars/tests_came_over
+          max: 0
+        detail: "{count} service(s) that cannot show they still work"
+
+      - id: no-test-switched-off
+        claim: "No test that came over from the monolith was switched off during the run — none gained an unconditional t.Skip, a new skip call or a build constraint, and none was deleted — compared, file by file, with the monolith's version on the frozen `source` branch."
+        evidence:
+          kind: json_count
+          path: .cognidev/feature/gates.json
+          pointer: /scalars/no_test_newly_disabled
+          max: 0
+        detail: "{count} ported test(s) switched off during the run"
+
+      # ── Go-specific measurements (go-gates). A gate that could not evaluate
+      # publishes no scalar, so its claim reads NOT VERIFIED — skipped is never a pass. ──
+      - id: sagas-compensate
+        claim: "Every saga step that writes has a compensation that undoes it, run in reverse. A saga with no compensation is a distributed transaction that cannot roll back."
+        evidence:
+          kind: json_count
+          path: .cognidev/feature/gates.json
+          pointer: /scalars/sagas_have_compensations
+          max: 0
+        detail: "{count} saga step(s) with no compensation"
+
+      - id: services-build-and-vet
+        claim: "Every service module builds and passes `go vet` on its own, not only as part of the workspace."
+        evidence:
+          kind: json_count
+          path: .cognidev/feature/gates.json
+          pointer: /scalars/services_build_and_vet
+          max: 0
+        detail: "{count} service module(s) that do not build or vet"
+
+      - id: services-tests-pass
+        claim: "The services' test suites pass. Measured only when the tests ran; a run that did not execute them reads NOT VERIFIED."
+        evidence:
+          kind: json_count
+          path: .cognidev/feature/gates.json
+          pointer: /scalars/services_tests_pass
+          max: 0
+        detail: "{count} failing test(s) across the services"
+
+      - id: health-endpoints
+        claim: "Every service exposes a liveness and a readiness endpoint, so the platform can tell a starting service from a dead one."
+        evidence:
+          kind: json_count
+          path: .cognidev/feature/gates.json
+          pointer: /scalars/health_endpoints_present
+          max: 0
+        detail: "{count} service(s) missing /healthz or /readyz"
+
+      - id: containers-hardened
+        claim: "Every service image is distroless (or minimal) and runs as a non-root user."
+        evidence:
+          kind: json_count
+          path: .cognidev/feature/gates.json
+          pointer: /scalars/containers_distroless_nonroot
+          max: 0
+        detail: "{count} Dockerfile(s) not distroless/non-root"
+
+      - id: shared-state-owned
+        claim: "Every package-level mutable value the monolith shared (a map behind a mutex, a cache) has exactly one owning service; nobody else holds a drifting copy."
+        evidence:
+          kind: json_count
+          path: .cognidev/feature/gates.json
+          pointer: /scalars/shared_state_has_an_owner
+          max: 0
+        detail: "{count} shared mutable value(s) held by more than one service"
+
+      - id: events-use-outbox
+        claim: "Every event that crosses a service boundary is published through the transactional outbox, never as a dual write after the commit."
+        evidence:
+          kind: json_count
+          path: .cognidev/feature/gates.json
+          pointer: /scalars/events_use_outbox
+          max: 0
+        detail: "{count} crossing event(s) published without the outbox"
+
+      - id: contracts-no-drift
+        claim: "No consumer depends on a provider contract shape that changed after the baseline was taken."
+        evidence:
+          kind: json_count
+          path: .cognidev/feature/gates.json
+          pointer: /scalars/contracts_no_drift
+          max: 0
+        detail: "{count} contract drift(s) a consumer still depends on"
+
+      # ── The delivery facts, declared in YAML rather than compiled ──
+      - id: readiness-gates-pass
+        claim: "The 22 readiness gates this playbook declares in `gates/validate.yaml` all pass — go.work exists, the gateway proxies something, every service is containerised, the decisions are recorded, and no secret was committed. A missing or unusable gates file fails this too: a gates file nothing executes reads as a guarantee and enforces nothing."
+        evidence:
+          kind: json_count
+          path: .cognidev/feature/gates.json
+          pointer: /scalars/declarative_readiness_gates
+          max: 0
+        detail: "{count} declared readiness gate(s) failed at severity `fail`"
+
+  # ── Advisories ────────────────────────────────────────────────────────────
+  # The cut does not choose the package versions; it inherits them and then
+  # ships them once per service. Offline is the default, and an offline run
+  # records that it did not scan — so this claim reads NOT VERIFIED rather than
+  # passing on a scan nobody ran.
+  - name: "Advisories — what the cut inherited, and then multiplied"
+    checks:
+      - id: cve-recorded
+        claim: "Whether the modules were checked against the advisory database — and if not, why not — was written down."
+        evidence: { kind: json_parses, path: .cognidev/feature/cve.json }
+
+      - id: security-bumps-recorded
+        claim: "What the security step bumped, pinned, reverted or could not fix — or that it changed nothing because the scan did not run — was written down."
+        evidence: { kind: json_parses, path: .cognidev/feature/security-bumps.json }
+
+      # Two claims, not one: "no known advisory" was printed beside a cve.json
+      # listing six medium advisories, because the gate it read counts only the
+      # CALLED or critical ones. What the gate measures is claimed as exactly
+      # that, and the scan's full count is stated from cve.json itself.
+      - id: no-called-or-critical-advisory
+        claim: "No advisory the services' code calls, and no critical advisory whose reachability is unproven, is in the resolved module graph. This is claimed only when the scan actually ran; an offline run publishes no count and this reads NOT VERIFIED."
+        evidence:
+          kind: json_count
+          path: .cognidev/feature/gates.json
+          pointer: /scalars/known_vulnerable_dependencies
+          max: 0
+        detail: "{count} called or critical advisory/advisories"
+
+      - id: advisories-in-graph-stated
+        claim: "Every advisory the scan found in the resolved module graph — called or not — is counted here from cve.json and listed there by module, severity and reachability; none is hidden by the filter above."
+        evidence:
+          kind: json_count
+          path: .cognidev/feature/cve.json
+          pointer: /findings
+        detail: "{count} advisory/advisories in the resolved module graph (cve.json)"
+
+  # ── The grade ─────────────────────────────────────────────────────────────
+  - name: "The grade — where the cut was strong, and where it was thin"
+    checks:
+      - id: scorecard-written
+        claim: "Each stage of the cut was graded on completeness, correctness and restraint. An axis nothing measured reads as unmeasured; it never counts as clean."
+        evidence: { kind: file_exists, path: MIGRATION-SCORECARD.md }
+
+      - id: scorecard-shard
+        claim: "The grid was written as data as well as prose."
+        evidence: { kind: json_parses, path: .cognidev/feature/scorecard.json }
+
+      - id: no-failing-stage
+        claim: "No stage of the cut came out failing."
+        evidence:
+          kind: json_count
+          path: .cognidev/feature/scorecard.json
+          pointer: /counts/red
+          max: 0
+        detail: "{count} stage(s) of the cut graded FAIL"
+
+      - id: closing-review-written
+        claim: "Everything the checks found and could not fix was turned into next steps for this repository. Advice only — nothing was edited, nothing was claimed fixed, and this verdict was decided before it ran."
+        evidence: { kind: file_exists, path: .cognidev/feature/closing-review.json }
+
+  # ── The playbook itself ───────────────────────────────────────────────────
+  - name: "The run did not modify the playbook that ran it"
+    checks:
+      - id: integrity-ran
+        claim: "This playbook's own files were re-fingerprinted and compared against the baseline taken before the run started. A playbook that edits itself mid-run invalidates every claim above."
+        evidence: { kind: phase_ok, phase: playbook-integrity }

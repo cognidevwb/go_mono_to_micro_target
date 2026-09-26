@@ -1,0 +1,16 @@
+name: ci-orders-service
+
+on:
+  push:
+    branches: [main]
+    paths: ["services/orders/**", "pkg/**", ".github/workflows/orders-service-ci.yml"]
+  pull_request:
+    paths: ["services/orders/**", "pkg/**"]
+
+jobs:
+  ci:
+    uses: ./.github/workflows/_service-ci.yml
+    with:
+      module: services/orders
+      image: orders-service
+    secrets: inherit

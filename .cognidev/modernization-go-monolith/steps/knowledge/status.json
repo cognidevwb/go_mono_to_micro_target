@@ -1,0 +1,18 @@
+{
+  "elapsedMs": 126,
+  "finishedAt": 1790392776,
+  "inputs": [],
+  "kind": "rust-binary",
+  "outputs": [
+    {
+      "exists": true,
+      "kind": null,
+      "name": "knowledge",
+      "optional": false,
+      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/.cognidev/feature/knowledge.json"
+    }
+  ],
+  "status": "Ok",
+  "step": "knowledge",
+  "summary": "Tool `../tools/index-go-knowledge/target/release/index-go-knowledge` completed."
+}

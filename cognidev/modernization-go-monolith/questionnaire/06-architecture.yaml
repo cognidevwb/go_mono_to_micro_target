@@ -1,0 +1,47 @@
+apiVersion: cognidev.ai/v1
+kind: QuestionnaireSection
+
+section:
+  id: architecture
+  title: "Architecture patterns"
+  intro: |
+    The applied microservices patterns — selected here, routed DETERMINISTICALLY
+    (no LLM) into the generated structure. Each choice changes the files the
+    scaffolder creates; the model only fills the marked seams. The full pattern
+    library, with fit signals and trade-offs, is in the playbook's
+    `architecture/` catalog.
+  estimated_seconds: 40
+
+questions:
+
+  - id: service_internal_structure
+    kind: enum
+    label: "Internal structure of each service?"
+    description: "How each extracted service is organized inside its module. Routed deterministically into the generated layout; the model only fills the code."
+    default: flat-package
+    required: true
+    options:
+      - { value: flat-package, label: "Ported package (flat)", hint: "Recommended default for a port. The monolith package moves whole into services/<name>/internal/<pkg>/ with its package name, beside cmd/, clients/, saga/ and events/. Least churn — the code reads as it did." }
+      - { value: hexagonal,    label: "Clean / Hexagonal", hint: "internal/domain (no DB/HTTP imports) → internal/app (use cases + ports as interfaces) → internal/adapters (gorm/pgx, HTTP); the dependency rule is checked by the gates. For a large, long-lived service; the port then splits each package, so expect more develop tasks." }
+
+  - id: read_write_model
+    kind: enum
+    label: "Read/write model per service?"
+    description: "CRUD is the default; CQRS splits commands and queries with a read model kept current by events — apply it where reads are heavy or their shape fights the write model. See architecture/data/cqrs.md."
+    default: crud
+    required: true
+    options:
+      - { value: crud, label: "CRUD per service", hint: "Recommended default. One model, one store; try API composition for cross-service reads before CQRS." }
+      - { value: cqrs, label: "CQRS (command/query split)", hint: "command/ + query/ packages and a read model per aggregate, fed by domain events. Pick it per service, not fleet-wide." }
+
+  - id: coordination
+    kind: enum
+    label: "Cross-service write coordination?"
+    description: "How a business transaction that spans services is coordinated. Orchestration is the 2026 default (a coordinator owns the flow); choreography has services react to events with no central coordinator."
+    default: orchestration
+    required: true
+    options:
+      - { value: orchestration, label: "Orchestrated saga", hint: "Recommended default. A coordinator (the orders service for PlaceOrder) drives each step via command + reply with explicit compensation; the hardest-to-reverse step (charging payment) runs last." }
+      - { value: choreography,  label: "Choreographed / event-driven", hint: "No coordinator — each service reacts to domain events. For simple, independent fan-out; control flow is harder to trace." }
+    # NOTE: a purely synchronous split is not offered — the saga is still
+    # scaffolded when map-services-go finds a cross-context db.Transaction.

@@ -1,0 +1,18 @@
+{
+  "elapsedMs": 123,
+  "finishedAt": 1790392774,
+  "inputs": [],
+  "kind": "rust-binary",
+  "outputs": [
+    {
+      "exists": true,
+      "kind": null,
+      "name": "cognidev",
+      "optional": true,
+      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/cognidev/"
+    }
+  ],
+  "status": "Ok",
+  "step": "seed-context",
+  "summary": "Tool `../tools/seed-context/target/release/seed-context` completed."
+}

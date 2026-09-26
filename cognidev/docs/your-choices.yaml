@@ -1,0 +1,54 @@
+# What this decomposition was told, and what it decided.
+#
+# Answers you gave are listed first. Everything the plan measured for
+# itself is under `measured:` — those were not choices, they were counts.
+
+answers:
+  api_versioning: url-segment
+  auth: jwt-keycloak
+  authz_boundary: edge-and-service
+  boundary_strategy: domain
+  ci: github
+  cloud: azure
+  container: distroless
+  coordination: orchestration
+  data_access: keep-gorm
+  data_ownership: database-per-service
+  database: postgres
+  db_max_connections: 100
+  decomposition_granularity: balanced
+  deploy_packaging: raw-k8s
+  driver: independent-deploy
+  event_backbone: nats
+  gateway: go-reverse-proxy
+  git_strategy: archive-and-adopt
+  go_version: 1.26
+  goproxy: public
+  jev_source_consent: yes
+  load_profile: bursty
+  messaging_lib: watermill
+  migration_approach: strangler
+  observability: otel-lgtm
+  orchestrator: azure-containerapps
+  outbox: sql-outbox
+  read_write_model: crud
+  run_tests: true
+  search_registry: false
+  service_internal_structure: flat-package
+  service_size: small
+  web_framework: keep
+
+measured:
+  services: 5
+  owned_tables: 7
+  cross_service_calls: 2
+  sagas: 1
+  files_planned: 74
+  files_not_owned_by_one_service: 1
+
+extraction_order:
+  - orders-service
+  - catalog-service
+  - customers-service
+  - inventory-service
+  - payments-service

@@ -1,0 +1,18 @@
+{
+  "elapsedMs": 124,
+  "finishedAt": 1790395035,
+  "inputs": [],
+  "kind": "rust-binary",
+  "outputs": [
+    {
+      "exists": true,
+      "kind": null,
+      "name": "security-bumps",
+      "optional": true,
+      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/.cognidev/feature/security-bumps.json"
+    }
+  ],
+  "status": "Ok",
+  "step": "security-bumps",
+  "summary": "Tool `../tools/bump-security-go/target/release/bump-security-go` completed."
+}

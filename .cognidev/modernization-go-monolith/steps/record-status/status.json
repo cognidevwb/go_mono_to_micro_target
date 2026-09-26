@@ -1,0 +1,25 @@
+{
+  "elapsedMs": 124,
+  "finishedAt": 1790395036,
+  "inputs": [],
+  "kind": "rust-binary",
+  "outputs": [
+    {
+      "exists": true,
+      "kind": "docs",
+      "name": "status",
+      "optional": true,
+      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/cognidev/docs/status/"
+    },
+    {
+      "exists": true,
+      "kind": "report",
+      "name": "MIGRATION-LOG",
+      "optional": true,
+      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/MIGRATION-LOG.md"
+    }
+  ],
+  "status": "Ok",
+  "step": "record-status",
+  "summary": "Tool `../tools/brief-go-monolith/target/release/brief-go-monolith` completed."
+}

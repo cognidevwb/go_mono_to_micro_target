@@ -1,0 +1,5 @@
+# Strangler-fig traffic for customers-service. The gateway sends `weight` percent of
+# the listed legacy paths here; the rest still reach the monolith.
+weight: 100
+legacyPaths:
+  - /api/customers

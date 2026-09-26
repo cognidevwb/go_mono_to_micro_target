@@ -1,0 +1,40 @@
+playbook_id: modernization-go-monolith
+captured_at: 2026-09-26T03:16:39Z
+workdir: /Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-jev
+answers:
+  api_versioning: url-segment
+  auth: jwt-custom
+  authz_boundary: edge-and-service
+  base_module: github.com/techschool/simplebank
+  boundary_strategy: domain
+  ci: github
+  cloud: aws
+  container: distroless
+  coordination: orchestration
+  data_access: pgx-sqlc
+  data_ownership: database-per-service
+  database: postgres
+  db_max_connections: 100
+  decomposition_granularity: coarse
+  deploy_packaging: raw-k8s
+  driver: independent-deploy
+  event_backbone: nats
+  gateway: go-reverse-proxy
+  git_strategy: work-branch
+  go_version: '1.26'
+  goproxy: public
+  goproxy_url: ''
+  jev_source_consent: yes
+  load_profile: steady
+  messaging_lib: watermill
+  migration_approach: strangler
+  observability: otel-lgtm
+  orchestrator: kubernetes
+  outbox: sql-outbox
+  read_write_model: crud
+  run_tests: true
+  scope: ''
+  search_registry: true
+  service_internal_structure: flat-package
+  service_size: small
+  web_framework: keep

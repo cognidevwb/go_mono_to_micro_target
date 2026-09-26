@@ -1,0 +1,25 @@
+{
+  "elapsedMs": 9084,
+  "finishedAt": 1790392814,
+  "inputs": [],
+  "kind": "rust-binary",
+  "outputs": [
+    {
+      "exists": true,
+      "kind": null,
+      "name": "services",
+      "optional": false,
+      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/services/"
+    },
+    {
+      "exists": true,
+      "kind": null,
+      "name": "port-report",
+      "optional": false,
+      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/.cognidev/feature/port-report.json"
+    }
+  ],
+  "status": "Ok",
+  "step": "port-monolith",
+  "summary": "Tool `../tools/port-monolith-go/target/release/port-monolith-go` completed."
+}

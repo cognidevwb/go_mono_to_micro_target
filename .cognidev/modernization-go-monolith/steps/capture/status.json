@@ -1,0 +1,25 @@
+{
+  "elapsedMs": 3,
+  "finishedAt": 1790392774,
+  "inputs": [],
+  "kind": "questionnaire",
+  "outputs": [
+    {
+      "exists": true,
+      "kind": null,
+      "name": "intent",
+      "optional": false,
+      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/.cognidev/intent.yml"
+    },
+    {
+      "exists": true,
+      "kind": null,
+      "name": "intent",
+      "optional": false,
+      "path": "/Users/rajasekharkarawalla/dev/2026/cognidev/.cw-worktrees/pb-go-jev-mono/playbooks-v2/modernization-go-monolith/config/intent.yml"
+    }
+  ],
+  "status": "Ok",
+  "step": "capture",
+  "summary": "Captured 36 answers across 9 steps."
+}

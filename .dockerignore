@@ -1,0 +1,5 @@
+.git
+.cognidev
+**/bin
+**/*.test
+.env

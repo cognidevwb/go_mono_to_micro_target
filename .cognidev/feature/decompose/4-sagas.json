@@ -1,0 +1,26 @@
+{
+  "jev": [
+    {
+      "answer": "saga",
+      "confidence": {
+        "confidence": 0.99,
+        "p": 1.0
+      },
+      "name": "CreateOrder",
+      "unit": "PlaceOrder"
+    }
+  ],
+  "sagas": [
+    {
+      "name": "CreateOrder",
+      "orchestrator": "orders",
+      "participants": [
+        "inventory",
+        "orders",
+        "payments"
+      ],
+      "pivot": "orders"
+    }
+  ],
+  "source": "jev"
+}

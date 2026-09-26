@@ -1,0 +1,18 @@
+{
+  "elapsedMs": 87706,
+  "finishedAt": 1790395124,
+  "inputs": [],
+  "kind": "rust-binary",
+  "outputs": [
+    {
+      "exists": true,
+      "kind": null,
+      "name": "verify",
+      "optional": false,
+      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/.cognidev/feature/verify.json"
+    }
+  ],
+  "status": "Ok",
+  "step": "verify",
+  "summary": "Tool `../tools/go-verify/target/release/go-verify` completed."
+}

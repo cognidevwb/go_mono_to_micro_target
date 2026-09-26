@@ -1,0 +1,179 @@
+{
+  "edges": [
+    {
+      "becomes": "sync-http",
+      "from": "orders",
+      "to": "catalog",
+      "why": "deterministic default — a resolved read call becomes a typed HttpClient"
+    },
+    {
+      "becomes": "sync-http",
+      "from": "orders",
+      "to": "customers",
+      "why": "deterministic default — a resolved read call becomes a typed HttpClient"
+    },
+    {
+      "becomes": "saga-step",
+      "from": "orders",
+      "to": "inventory",
+      "why": "the analysis saw this call write the other context"
+    },
+    {
+      "becomes": "saga-step",
+      "from": "orders",
+      "to": "payments",
+      "why": "the analysis saw this call write the other context"
+    }
+  ],
+  "feature": "monolith-to-microservices",
+  "folders": [
+    "services/orders",
+    "services/catalog",
+    "services/customers",
+    "services/inventory",
+    "services/payments"
+  ],
+  "kept_monolithic": [],
+  "modify": [
+    {
+      "path": "internal/orders/service.go",
+      "purpose": "replace the cross-service unit of work in PlaceOrder with the CreateOrder saga (outbox + compensations) — writes in inventory, orders, payments"
+    }
+  ],
+  "order": [
+    "orders-service",
+    "catalog-service",
+    "customers-service",
+    "inventory-service",
+    "payments-service"
+  ],
+  "sagas": [
+    {
+      "name": "CreateOrder",
+      "orchestrator": "orders-service",
+      "participants": [
+        "inventory",
+        "orders",
+        "payments"
+      ],
+      "pivot": "orders",
+      "steps": [
+        {
+          "action": "s.inventory.Reserve",
+          "compensation": "compensable (Jev p=0.88): undo `s.inventory.Reserve` in inventory",
+          "context": "inventory"
+        },
+        {
+          "action": "s.payments.Charge",
+          "compensation": "needs decision — Jev could not tell whether this step can be undone",
+          "context": "payments"
+        }
+      ]
+    }
+  ],
+  "services": [
+    {
+      "aggregates": [
+        "Category"
+      ],
+      "calls": [],
+      "context": "catalog",
+      "entities": [
+        "Category",
+        "Product"
+      ],
+      "name": "catalog-service",
+      "reads": 1,
+      "sources": [
+        "internal/catalog/handlers.go",
+        "internal/catalog/model.go",
+        "internal/catalog/service.go"
+      ],
+      "why": "Jev: stays its own service",
+      "writes": 1
+    },
+    {
+      "aggregates": [
+        "Customer"
+      ],
+      "calls": [],
+      "context": "customers",
+      "entities": [
+        "Customer"
+      ],
+      "name": "customers-service",
+      "reads": 1,
+      "sources": [
+        "internal/customers/handlers.go",
+        "internal/customers/model.go",
+        "internal/customers/service.go"
+      ],
+      "why": "Jev: stays its own service",
+      "writes": 1
+    },
+    {
+      "aggregates": [
+        "StockItem"
+      ],
+      "calls": [],
+      "context": "inventory",
+      "entities": [
+        "StockItem"
+      ],
+      "name": "inventory-service",
+      "reads": 0,
+      "sources": [
+        "internal/inventory/model.go",
+        "internal/inventory/service.go"
+      ],
+      "why": "Jev: stays its own service",
+      "writes": 0
+    },
+    {
+      "aggregates": [
+        "Payment"
+      ],
+      "calls": [],
+      "context": "payments",
+      "entities": [
+        "Payment"
+      ],
+      "name": "payments-service",
+      "reads": 0,
+      "sources": [
+        "internal/payments/gateway.go",
+        "internal/payments/model.go",
+        "internal/payments/service.go"
+      ],
+      "why": "Jev: stays its own service",
+      "writes": 0
+    },
+    {
+      "aggregates": [
+        "Order"
+      ],
+      "calls": [
+        "catalog",
+        "customers"
+      ],
+      "context": "orders",
+      "entities": [
+        "Order",
+        "OrderLine"
+      ],
+      "name": "orders-service",
+      "reads": 1,
+      "sources": [
+        "internal/orders/handlers.go",
+        "internal/orders/model.go",
+        "internal/orders/service.go"
+      ],
+      "why": "Jev: stays its own service",
+      "writes": 1
+    }
+  ],
+  "state_owners": {
+    "catalog.priceCache": "catalog",
+    "platform.Models": "*"
+  }
+}

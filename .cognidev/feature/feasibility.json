@@ -1,0 +1,107 @@
+{
+  "arch": "darwin/arm64",
+  "counts": {
+    "blockers": 0,
+    "external": 1,
+    "go_files": 18,
+    "requirements": 2,
+    "risks": 5,
+    "test_projects": 0,
+    "unavailable": 1
+  },
+  "decomposition": {
+    "blockers": [],
+    "risks": [
+      {
+        "count": 2,
+        "evidence": [
+          "internal/catalog/service.go:13 — catalog.priceCache (map[uint]float64), guarded by catalog.priceMu",
+          "internal/platform/db.go:9 — platform.Models ([]any)"
+        ],
+        "id": "shared-mutable-state",
+        "what": "package-level mutable state — each becomes one service's in-process state or a shared store; a copy in two services silently diverges"
+      },
+      {
+        "count": 4,
+        "evidence": [
+          "internal/orders/handlers.go:34 — platform.UserIDKey via platform.UserID",
+          "internal/platform/auth.go:33 — platform.UserIDKey via ctx.Value",
+          "internal/platform/auth.go:24 — platform.UserIDKey via context.WithValue",
+          "internal/platform/auth.go:26 — userID via c.Set"
+        ],
+        "id": "ambient-context",
+        "what": "2 request-scoped context key(s) — a value set by middleware in one service is gone in the next; each must become a propagated header or token claim"
+      },
+      {
+        "count": 1,
+        "evidence": [
+          "internal/orders/service.go#orders.Service.PlaceOrder (Transaction) writes Order, Payment, stock_items across inventory, orders, payments"
+        ],
+        "id": "cross-context-co-writes",
+        "what": "units of work whose writes span contexts — one database transaction today, a saga with compensations after the cut"
+      },
+      {
+        "count": 1,
+        "evidence": [
+          "order.placed → inventory.Service.OnOrderPlaced (orders → inventory)"
+        ],
+        "id": "in-process-events",
+        "what": "in-process events cross a context — after the split each needs a broker and an outbox, or a publish is lost whenever the process dies between commit and send"
+      },
+      {
+        "count": 1,
+        "evidence": [
+          "internal/inventory/service.go:42 — inventory.Service.Restock (time.NewTicker)"
+        ],
+        "id": "background-jobs",
+        "what": "in-process background jobs — with N replicas of a service each runs N times unless one owner and a lease are chosen"
+      }
+    ],
+    "signals": {
+      "ambient_context_keys": 2,
+      "background_jobs": 1,
+      "cgo": 0,
+      "cross_context_co_writes": 1,
+      "go": "1.26",
+      "in_process_events": 1,
+      "init_side_effects": 0,
+      "module": "github.com/acme/shop",
+      "outbound_calls": 1,
+      "reflect_imports": 0,
+      "replace_directives": 0,
+      "shared_mutable": 2,
+      "toolchain": null,
+      "unmaintained_modules": 0,
+      "unsafe_imports": 0,
+      "vendored": false
+    },
+    "unread_shards": [],
+    "verdict": "feasible-with-risks"
+  },
+  "not_determinable_here": [
+    "postgres (DSN supplied at runtime)"
+  ],
+  "requirements": [
+    {
+      "available": null,
+      "detail": "the DSN is not in any config file this could read. NOT DETERMINABLE HERE (something IS listening on localhost:5432, which may or may not be it)",
+      "evidence": "internal/platform/db.go:16 opens a connection — .cognidev/understand/db.json",
+      "kind": "database",
+      "name": "postgres (DSN supplied at runtime)"
+    },
+    {
+      "available": false,
+      "detail": "not signed in. Generated code is unaffected; provisioning and deploy are not runnable here",
+      "evidence": ".cognidev/intent.yml selected an Azure-backed target",
+      "kind": "cloud-credentials",
+      "name": "Azure sign-in"
+    }
+  ],
+  "target_go": "1.26",
+  "test_projects": [],
+  "tool": "go-feasibility",
+  "unavailable": [
+    "Azure sign-in"
+  ],
+  "verdict": "some requirements are not available here"
+}

@@ -1,0 +1,83 @@
+{
+  "contexts": [
+    {
+      "context": "catalog",
+      "from": [
+        "catalog"
+      ],
+      "why": "Jev: stays its own service"
+    },
+    {
+      "context": "customers",
+      "from": [
+        "customers"
+      ],
+      "why": "Jev: stays its own service"
+    },
+    {
+      "context": "inventory",
+      "from": [
+        "inventory"
+      ],
+      "why": "Jev: stays its own service"
+    },
+    {
+      "context": "payments",
+      "from": [
+        "payments"
+      ],
+      "why": "Jev: stays its own service"
+    },
+    {
+      "context": "orders",
+      "from": [
+        "orders"
+      ],
+      "why": "Jev: stays its own service"
+    }
+  ],
+  "jev": [
+    {
+      "answer": "own",
+      "candidate": "catalog",
+      "confidence": {
+        "confidence": 0.98,
+        "p": 0.99
+      }
+    },
+    {
+      "answer": "own",
+      "candidate": "customers",
+      "confidence": {
+        "confidence": 0.97,
+        "p": 0.98
+      }
+    },
+    {
+      "answer": "own",
+      "candidate": "inventory",
+      "confidence": {
+        "confidence": 0.95,
+        "p": 0.97
+      }
+    },
+    {
+      "answer": "own",
+      "candidate": "orders",
+      "confidence": {
+        "confidence": 1.0,
+        "p": 1.0
+      }
+    },
+    {
+      "answer": "own",
+      "candidate": "payments",
+      "confidence": {
+        "confidence": 0.96,
+        "p": 0.97
+      }
+    }
+  ],
+  "overridden_by_rule": [],
+  "source": "jev"
+}

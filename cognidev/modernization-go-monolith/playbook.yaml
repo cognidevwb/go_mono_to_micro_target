@@ -1,0 +1,1043 @@
+# ─────────────────────────────────────────────────────────────
+#  CogniDev Playbook Manifest — Decompose a Go monolith into microservices
+#
+#  The Go twin of modernization-dotnet-monolith, phase for phase. Runs on the
+#  SHARED plan→tasks→develop→verify spine so the LLM does real work, not a
+#  summary card:
+#    understand (Go shards) → classify (each declaration's categories: facts,
+#    then Jev) → setup-environment (Go toolchain GATE) →
+#    map-services-go (deterministic bounded-context map, reading the
+#    classification's routes) →
+#    plan-decomposition (Jev decides; the model only with no Jev key) → reconcile-map (the file map
+#    follows the plan the refine produced — without it the porter moves code by
+#    the OLD cut while the scaffolder generates the NEW one, and every module
+#    still compiles) → expand-plan-go (full file plan) → index-go-patterns
+#    (WHICH architecture this cut applies, selected against the measured map) →
+#    brief-go-monolith (the BRIEFING tables) → plan-tasks (REVIEW GATE) →
+#    publish-briefing (cognidev/docs/) → baseline (go-verify --baseline) →
+#    scaffold-services-go (go.work platform) → plan-apply (stubs) →
+#    port-monolith-go (MOVE the monolith's packages in verbatim, mark the seams)
+#    → develop (fill only the marked seams + `go build`/`go vet` + git commit) →
+#    record-status → verify (build + test proof) → gates → scorecard →
+#    playbook-integrity → signoff → finalize (cutover-go).
+#
+#  One .NET phase has no Go analogue and is DROPPED: `scan-runtimes`. The .NET
+#  scan exists because a classic net48 monolith and its net10 services need two
+#  different SDKs — one machine can build the after-state and not the
+#  before-state. Go does not split that way: the toolchain is backward
+#  compatible (the Go 1 promise), `go-setup-env` already resolves the highest
+#  `go`/`toolchain` directive across every go.mod in the tree, and GOTOOLCHAIN
+#  fetches a newer toolchain on demand. The inventory it would write is exactly
+#  what `setup-environment` records in `.cognidev/env.json`. 39 phases (the three
+#  security phases — advisory-scan, security-bumps, setup-toolchain — repair the
+#  inherited module graph before the proof).
+#
+#  The port step is "move code, don't rewrite it": Go's unit of code is the
+#  PACKAGE, so a monolith package (internal/orders) moves whole into its service
+#  module (services/orders/internal/orders) with its package name kept, and only
+#  the imports of the OTHER contexts are rewritten to typed clients. The ported
+#  modules COMPILE with only the seam placeholders, so develop's LLM edits shrink
+#  to the handful of cross-context calls + the saga. The engine freezes the input
+#  on `source` and commits every task on `target-master`.
+# ─────────────────────────────────────────────────────────────
+
+apiVersion: cognidev.ai/v1
+kind: Playbook
+
+metadata:
+  id: modernization-go-monolith
+  name: "Decompose a Go monolith into microservices"
+  # Closed enum {greenfield|migrate|rescue|understand}; modernize semantics live
+  # in `intent` + the maps. `understand` keeps target_dir == workdir so work is
+  # in-place on target-master.
+  category: understand
+  intent: modernize
+  # TRANSFORMER: walks its OWN static question deck deterministically (zero
+  # tokens in capture), never the greenfield ARCHITECTURE STUDIO interview.
+  archetype: transformer
+  # Decompose a monolith into a NEW microservices codebase that supersedes it
+  # (PLAYBOOK-AUTHORING-RUNBOOK.md §2). Drives the git-strategy options + the
+  # terminal `finalize` (the cutover) end-state.
+  transform_shape: replace
+  # The folders THIS run produces. `finalize` uses them to leave a CLEAN branch:
+  # everything else at the root is what the run replaced, removed only after the
+  # pre-run tree is snapshotted to `archive/pre-<playbook>-<sha>`. `go.work` sits
+  # at the root beside them.
+  product_dirs: [services, gateway, pkg, deploy]
+  source: go
+  target: go
+  runtime: go
+  version: 1.0.0
+  updated: 2026-09-22
+  tags: [go, golang, gin, echo, chi, gorm, pgx, modernization, microservices, decomposition, bounded-context, strangler-fig, saga, nats]
+  summary: "Understand a Go (gin/echo/chi + gorm/pgx) monolith, plan a precise monolith → microservices decomposition (bounded contexts from packages + entity ownership, database-per-service, the cross-context saga, strangler order, the pinned 2026 Go stack), then generate + compile each service task by task on target-master."
+  description: |
+    Decomposes an existing Go monolith into microservices on the shared
+    plan→tasks→develop→verify spine. The IDE's Go structural pass supplies the
+    shards (entities, entity access + co-writes, consistency boundaries,
+    shared mutable state, events, ambient context, externals, routes, the
+    receiver-bound call graph); a deterministic pass maps every package and file
+    to a bounded-context service (owned tables, cross-context calls, sagas,
+    hazards, strangler order — NO model call); the LLM makes ONE grounded,
+    step-checked refine pass; the plan becomes numbered ordered tasks shown for
+    approval; and each task is generated, compiled with `go build` + `go vet`,
+    and committed on `target-master` — ending with build and test proof.
+    The target is the pinned 2026 Go stack: **Go 1.26**, one module per service
+    in a `go.work` workspace, the monolith's web framework kept (or chi v5),
+    gorm kept (or pgx v5 + sqlc), NATS JetStream (or Kafka) with a transactional
+    outbox, slog + OpenTelemetry (OTLP), distroless non-root images, Azure
+    Container Apps / Kubernetes / compose. Source is frozen and never touched.
+
+compatibility:
+  surfaces: [ide, cli]
+  workspace:
+    file_count: { min: 1 }
+
+# ─── Contract ───────────────────────────────────────────────
+# No scaffold BLOCKS — the platform is generated by `scaffold-services-go`, a
+# binary. What this playbook has instead is privilege: it may download the
+# official Go toolchain archive, execs `go`, `docker` and `git`, and rewrites the
+# user's repository onto a new branch. The per-phase `effects:` below declare
+# that. They are RECORDED into the composition receipt and NOT ENFORCED.
+contract:
+  mode: advisory
+
+intake:
+  runHint: "Working service by service — let it run. Each task carves out a service, edits its whole package set, compiles, then refines, so this takes a while. You can safely close the app and resume from the welcome screen."
+
+# ─── Step timeouts ──────────────────────────────────────────
+# Every phase carries `CW_PHASE_IDLE_TIMEOUT_SECS` (or, for the develop loop,
+# `CW_TOOL_IDLE_TIMEOUT_SECS`). The watchdog bounds SILENCE, not runtime: a step
+# that prints is never interrupted. The right number is a property of the STEP —
+# a toolchain download legitimately says nothing for minutes; a deterministic
+# mapper that goes quiet for two has wedged.
+lifecycle:
+
+  # ── Record the playbook as it stands, before it runs ──
+  - id: playbook-baseline
+    name: "Record the playbook as it stands"
+    description: "Fingerprint this playbook's own files before the run touches anything, so the closing integrity check has something to compare against."
+    background: true
+    kind: rust-binary
+    tool: ../tools/playbook-integrity/target/release/playbook-integrity
+    args: ["record"]
+    optional: true
+    env: { CW_PHASE_IDLE_TIMEOUT_SECS: "120" }
+    effects:
+      fs_read: ["**"]
+      fs_write: [".cognidev/run/**"]
+
+  # ── Seed the customer's brief folder FIRST (deterministic, no-clobber) ──
+  # Materializes `cognidev/` from this playbook's `onboarding/` templates so the
+  # customer can tell the tool what the parser can't — the why, the team, the
+  # domain language, the constraints, the scars. NEVER overwrites anything filled.
+  - id: seed-context
+    name: "Prepare your project brief"
+    description: "Create the cognidev/ brief folder in your project so you can (optionally) tell the tool your goals, constraints, domain language, desired service boundaries, and coding standards. Deterministic; never overwrites anything you've written."
+    kind: rust-binary
+    resumable: true
+    tool: ../tools/seed-context/target/release/seed-context
+    optional: true
+    env: { CW_PHASE_IDLE_TIMEOUT_SECS: "120" }
+    effects:
+      fs_write: ["cognidev/**"]
+    outputs:
+      - { path: cognidev/, scope: workspace, optional: true }
+
+  # ── (.NET `scan-runtimes` is not here — see the header: go-setup-env already
+  #    resolves the required toolchain from every go.mod, and Go has no
+  #    before/after SDK split to report.) ──
+
+  # ── Capture the TARGET decisions (parser derives the monolith's structure) ──
+  - id: capture
+    name: "Decomposition goals & target stack"
+    description: "What to extract, how services own data + talk, where they run. The monolith structure is read from source — we only ask the choices a parser can't make."
+    kind: questionnaire
+    effects:
+      fs_write: [".cognidev/intent.yml"]
+    outputs:
+      - { path: .cognidev/intent.yml, scope: workspace }
+      - { path: config/intent.yml, scope: playbook }
+
+  # ── Validate the requirement ──
+  - id: validate-requirement
+    name: "Validate the setup"
+    description: "Prove every decision is a valid answer or a valid default; log the full resolved requirement. Invalid → a Retry/Skip/Stop block; no tokens spent."
+    kind: rust-binary
+    resumable: true
+    tool: ../tools/validate-requirement/target/release/validate-requirement
+    requires: [capture]
+    env: { CW_PHASE_IDLE_TIMEOUT_SECS: "120" }
+    effects:
+      fs_read: [".cognidev/intent.yml"]
+      fs_write: [".cognidev/run/**"]
+
+  # ── KNOWLEDGE: how a Go cut fails, and what it prints when it does ──
+  # Keyed on WHAT THE BUILD PRINTS: `import cycle not allowed`, `use of internal
+  # package … not allowed`, `missing go.sum entry`, `go: updates to go.mod
+  # needed`, `undefined: catalog.Service` after a package moved. Facts about the
+  # decomposition itself carry `since: 0`; facts about a Go release carry its
+  # minor and are emitted only when the target crosses it. `knowledge/*.md`
+  # travels INSIDE this playbook.
+  - id: knowledge
+    name: "Read how a decomposition fails"
+    description: "Load the failure signatures a Go monolith cut produces — the internal package another module can no longer import, the import cycle a moved package creates, the go.sum entry the new module never recorded, the one db.Transaction that is now four services, and the green build with no cross-service call in it — from this playbook's own reference set, each entry citing what it came from."
+    background: true
+    kind: rust-binary
+    resumable: true
+    tool: ../tools/index-go-knowledge/target/release/index-go-knowledge
+    args: ["--emit"]
+    requires: [validate-requirement]
+    optional: true
+    env: { CW_PHASE_IDLE_TIMEOUT_SECS: "120" }
+    effects:
+      fs_read: ["knowledge/**", ".cognidev/intent.yml"]
+      fs_write: [".cognidev/feature/knowledge.json"]
+    outputs:
+      - { path: .cognidev/feature/knowledge.json, scope: workspace }
+
+  # ── Understand the monolith — IN-CORE structural pass (SI-assumed) ──
+  # Understanding lives in the IDE. The engine's `structural` kind runs the Go
+  # analyzers (tree-sitter-go + the gorm/sqlx/pgx entity scan + the gin/echo/chi
+  # route scan), emitting entities.json, entity-access.json (write sets +
+  # co-writes), dataflow.json (db.Transaction consistency boundaries),
+  # datastructures.json (package-level mutable state), events.json,
+  # ambient-context.json (context.Value keys), externals.json (outbound HTTP,
+  # caches, tickers), http.json, graph.json (receiver-bound call edges) and
+  # packages-api.json. Cache-aware (Merkle).
+  - id: understand
+    name: "Understand the monolith"
+    description: "Ensure the structural shards exist (packages, gorm/sqlx entities + relations, gin/echo/chi routes, db.Transaction boundaries, shared mutable state, events, context keys, outbound calls, the call graph). Cache-aware — re-runs only when the source changed; a no-op read when the IDE already produced them."
+    background: true
+    kind: structural
+    # `subject: source`: the workbench's own understand job over the monolith,
+    # which owns the freshness cache — shards the IDE already wrote for this
+    # tree are reused, not rebuilt. Without it the phase ran the target-side
+    # extractor, which always re-parses and threw the IDE's shards away.
+    subject: source
+    parser_run: go-structural
+    output_artifact: .cognidev/understand/graph.json
+    requires: [validate-requirement]
+    effects:
+      fs_read: ["**/*.go", "**/go.mod", "**/go.sum", "go.work"]
+      fs_write: [".cognidev/understand/**"]
+    outputs:
+      - { path: .cognidev/understand/, scope: workspace, kind: understand-shards }
+
+  # ── CLASSIFY: what each Go declaration touches — code first, Jev for the rest ──
+  # Every top-level declaration gets its categories of change (authentication,
+  # persistence, transactions, messaging, …): the Understand shards and the
+  # syntax settle what they can (`source: fact`), Jev answers the rest from the
+  # question bank (tools/classify-go/questions/classify-go.md), code hardens the
+  # answers per question and routes them (tools/classify-go/routes.yaml).
+  # map-services reads the routes for this playbook: cross-cutting units never
+  # pull a file into a domain service, messaging units mark the event contracts,
+  # transactions units are checked against the saga detection. Cached by request
+  # hash. No Jev key → facts only, exit 0 with the warning on top of the report.
+  - id: classify
+    name: "Classify what each declaration touches"
+    description: "Mark every Go declaration with the categories of change it belongs to — authentication, authorization, persistence, transactions, messaging, configuration, observability and the rest. What the analysis already knows is recorded as fact; Jev answers the rest, one request per declaration, and each answer is kept only above its confidence threshold. Declaration source is sent to Jev (api.typesafe.ai) only when you answered yes to it; no source file is changed. Without a Jev key only the facts are recorded."
+    background: true
+    kind: rust-binary
+    resumable: true
+    tool: ../tools/classify-go/target/release/classify-go
+    requires: [understand]
+    env: { CW_PHASE_IDLE_TIMEOUT_SECS: "600" }
+    effects:
+      fs_read: [".cognidev/understand/**", ".cognidev/intent.yml", "**/*.go"]
+      fs_write: [".cognidev/go-classify/**"]
+      net_egress: ["api.typesafe.ai"]
+    outputs:
+      - { path: .cognidev/go-classify/classification.json, scope: workspace }
+      - { path: .cognidev/go-classify/CLASSIFICATION.md, scope: workspace, kind: report }
+
+  # ── HARD ENVIRONMENT GATE — prove the Go toolchain BEFORE any LLM spend ──
+  # Host toolchain ≥ the required version (preferred) → a user-local toolchain
+  # from the official go.dev archive, SHA-256 verified, into ~/.cognidev/go (no
+  # admin) → Docker (`golang:<line>`) → hard fail with exact instructions. The
+  # required version is the highest go/toolchain directive in the tree or the
+  # `go_version` answer. Writes .cognidev/env.json so develop/verify build the
+  # same way.
+  - id: setup-environment
+    name: "Prepare the Go build environment"
+    description: "Prove a Go toolchain that compiles the new services (Go 1.26 unless your go.mod needs newer) is available — a host toolchain (preferred), a user-local one installed into ~/.cognidev/go, or Docker. Hard-stops the run before any planning if none can be made ready."
+    kind: rust-binary
+    tool: ../tools/go-setup-env/target/release/go-setup-env
+    gate: true
+    requires: [understand]
+    env: { CW_PHASE_IDLE_TIMEOUT_SECS: "1800" }
+    effects:
+      net_egress: ["go.dev", "dl.google.com"]
+      proc_exec: [go, docker]
+      fs_write: ["~/.cognidev/go/**", ".cognidev/env.json"]
+
+  # ── FEASIBILITY: can this machine TEST what it is about to build? ──
+  # A testcontainers-go suite with no Docker daemon, an integration test pointed
+  # at a Postgres nobody started, a NATS server the compose file expects — those
+  # failures look exactly like a broken cut and are present on BOTH sides. Never
+  # fails the run; an external host the repository merely names is REPORTED,
+  # never probed.
+  - id: feasibility
+    name: "Check this machine can build and test it"
+    description: "Before anything is measured, find what the tests need beyond the code itself — a container daemon for testcontainers-go and for the compose file's Postgres and NATS, the databases and brokers the DSNs point at, cloud sign-in where the platform you chose needs it, and cgo/native dependencies for this CPU. Anything missing is named now, with the file that says it is needed, so a red test later is attributed to the machine rather than to the decomposition. Never stops the run."
+    background: true
+    kind: rust-binary
+    tool: ../tools/go-feasibility/target/release/go-feasibility
+    requires: [setup-environment]
+    optional: true
+    env: { CW_PHASE_IDLE_TIMEOUT_SECS: "300" }
+    effects:
+      fs_read: ["**"]
+      fs_write: [".cognidev/feature/feasibility.json"]
+      proc_exec: [docker, podman, az]
+    outputs:
+      - { path: .cognidev/feature/feasibility.json, scope: workspace }
+
+  # ── HOW THIS REPOSITORY IS BUILT, TESTED AND SHIPPED TODAY ──
+  # Everything generated has a default for the runner, the trigger branch, the
+  # go directive, the base image, the test libraries (testify? gomock?
+  # testcontainers?), the linter config and the database it was written against.
+  # A default is a decision nobody made. This phase decides nothing — it writes
+  # the facts down so the emitters downstream can be asked why they departed.
+  - id: cicd-facts
+    name: "Read the existing build"
+    description: "Comb the monolith's own CI workflows, Dockerfile, compose files, go.mod, Makefile, .golangci.yml and test files, and record what they say: which runner and branch it builds on, which Go it targets, which base image it ships on, which database it was written against, and which test libraries its tests use."
+    kind: rust-binary
+    resumable: true
+    tool: ../tools/scan-cicd-go/target/release/scan-cicd-go
+    requires: [understand]
+    effects:
+      fs_read: [".github/**", "**/go.mod", "Dockerfile*", "docker-compose*.yml", "compose*.yml", "Makefile", ".golangci.yml", ".golangci.yaml", "azure-pipelines*.yml", ".gitlab-ci.yml", "**/*_test.go"]
+      fs_write: [".cognidev/feature/cicd-facts.json"]
+    outputs:
+      - { path: .cognidev/feature/cicd-facts.json, scope: workspace }
+
+  # ── MAP: the monolith→microservice decomposition, computed from the shards. NO LLM ──
+  # Bounded contexts from packages + entity ownership + co-writes; every file to a
+  # service; cross-context calls from the receiver-bound call graph; sagas from
+  # the db.Transaction consistency boundaries whose write set spans contexts; and
+  # the hazards per service (package-level mutable state, context.Value keys,
+  # in-process bus topics, outbound calls, tickers/goroutine jobs). Emits
+  # service-map.json + plan.json + context.md + decomposition-facts.json.
+  - id: map-services
+    name: "Map the monolith to services"
+    description: "Deterministically decompose the monolith from its shards — assign every package and file to a bounded-context service, owned tables, cross-context calls, saga candidates, the hidden coupling each cut breaks, and the strangler order. The classification decides what is cross-cutting: authentication, authorization, observability and configuration code never pulls a file into a domain service. Every unit a category moved, and every one a package held, is recorded with its evidence. Identical output for the same classification."
+    background: true
+    kind: rust-binary
+    resumable: true
+    tool: ../tools/map-services-go/target/release/map-services-go
+    requires: [setup-environment, classify]
+    env: { CW_PHASE_IDLE_TIMEOUT_SECS: "300" }
+    effects:
+      fs_read: [".cognidev/understand/**", ".cognidev/intent.yml", ".cognidev/go-classify/**", "**/*.go"]
+      proc_exec: ["../tools/classify-go/target/release/classify-go"]
+      fs_write: [".cognidev/feature/**"]
+    outputs:
+      - { path: .cognidev/feature/service-map.json, scope: workspace }
+      - { path: .cognidev/feature/plan.json, scope: workspace }
+      - { path: .cognidev/feature/context.md, scope: workspace }
+
+  # ── REFINE: the decomposition questions, asked of Jev ──
+  # Code builds the closed sets from decomposition-facts.json; Jev answers, one
+  # request per candidate (questions in ../tools/decompose-go/questions/
+  # decompose-go.md, measured facts only, never source):
+  #   1 boundaries — a Choice: stays its own service / merges into <each other candidate>
+  #   2 ownership  — yes/no per table: does this candidate own it
+  #   4 sagas      — a Choice per multi-service unit of work: saga / keep in one
+  #                  service, and yes/no per step: can it be compensated
+  # Each answer is hardened against its own threshold, re-asked once when it is
+  # too close to call (both answers kept), and an unresolved one decides
+  # nothing: it is listed "needs decision" and the deterministic map stands.
+  # Exact rules still override Jev (a Go package is never split).
+  #   3 edges      — DETERMINISTIC: every measured call resolved by code
+  #   5 order      — DETERMINISTIC, never asked: arithmetic over the resolved edges
+  # With NO Jev key the same four decisions go to the configured model through
+  # the engine's ONE LLM path (the tool-loop bridge) — the fallback only, and
+  # the ledger names which path ran (decomposition-steps.json `path`).
+  - id: plan-decomposition
+    name: "Refine the map"
+    description: "Jev decides, per candidate, whether it stays its own service or merges into another, which tables it owns, whether each multi-service unit of work becomes a saga and which of its steps can be undone — from the measured facts only, never your source. Answers too close to call are asked once more; any still unsettled is listed as needing your decision and the deterministic map stands for it. What each call becomes and the extraction order are computed. Without a Jev key the same decisions go to your configured model."
+    kind: tool-loop
+    resumable: true
+    tool: ../tools/decompose-go/target/release/decompose-go
+    optional: true
+    requires: [map-services]
+    # NOT a review gate — the informed decision is the `briefing` gate below.
+    env: { CW_PHASE_IDLE_TIMEOUT_SECS: "900" }
+    effects:
+      fs_read: [".cognidev/feature/**", ".cognidev/intent.yml", "questionnaire/**", "context/decompose/**", "../tools/decompose-go/questions/**"]
+      net_egress: ["api.typesafe.ai"]
+      fs_write:
+        - ".cognidev/feature/plan.json"
+        - ".cognidev/feature/decomposition-steps.json"
+        - ".cognidev/feature/decomposition.yaml"
+        - ".cognidev/feature/decompose/**"
+        - ".cognidev/run/**"
+    outputs:
+      - { path: .cognidev/feature/plan.json, scope: workspace }
+      - { path: .cognidev/feature/decomposition-steps.json, scope: workspace }
+      - { path: .cognidev/feature/decomposition.yaml, scope: workspace }
+      - { path: .cognidev/feature/decompose, scope: workspace }
+
+  # ── RECONCILE: the file map follows the plan the refine actually produced ──
+  # The refine rewrites plan.json ALONE; the porter moves code by service-map.json.
+  # Reassignment is by entity ownership, then by the types a file names, then by
+  # path segment, then by package siblings. Runs unconditionally: when the refine
+  # was skipped this rewrites the map to the same thing it already said.
+  - id: reconcile-map
+    name: "Point the file map at the plan that was actually approved"
+    description: "Rebuild the file→service map from the refined plan by entity ownership, so the porter moves code into the services the scaffolder is generating. Deterministic; identical output when nothing was refined."
+    background: true
+    kind: rust-binary
+    resumable: true
+    tool: ../tools/map-services-go/target/release/map-services-go
+    args: ["--reconcile"]
+    requires: [map-services]
+    env: { CW_PHASE_IDLE_TIMEOUT_SECS: "300" }
+    effects:
+      fs_read: [".cognidev/feature/plan.json", ".cognidev/understand/**", "**/*.go"]
+      fs_write: [".cognidev/feature/service-map.json"]
+    outputs:
+      - { path: .cognidev/feature/service-map.json, scope: workspace }
+
+  # ── EXPAND the compact plan into the full file plan ──
+  # Ported package files → services/<ctx>/internal/<pkg>/; entity → migration;
+  # call → typed net/http client under internal/clients/; orchestrator → saga +
+  # outbox; event → internal/events contract; one test per service. The LLM
+  # decides the split (cheap); the tool writes the big list (free).
+  - id: expand-plan
+    name: "Expand the plan"
+    description: "Turn the compact service map into the full per-file plan by Go convention — one module per service, ported packages under internal/, entities → owned-table migrations, calls → typed HTTP clients, orchestrator → saga + outbox, events → broker contracts, one test per service."
+    background: true
+    kind: rust-binary
+    resumable: true
+    tool: ../tools/expand-plan-go/target/release/expand-plan-go
+    requires: [reconcile-map]
+    env: { CW_PHASE_IDLE_TIMEOUT_SECS: "300" }
+    effects:
+      fs_read: [".cognidev/feature/**", ".cognidev/intent.yml"]
+      fs_write: [".cognidev/feature/**"]
+    outputs:
+      - { path: .cognidev/feature/plan.json, scope: workspace }
+      - { path: .cognidev/feature/decomposition.json, scope: workspace }
+
+  # ── WHICH ARCHITECTURE THIS CUT LANDS ON — selected, not recited. NO LLM ──
+  # Every selection carries the sentence that selected it, with the measured
+  # number in it, and every pattern left OUT carries its reason.
+  - id: patterns
+    name: "Select the architecture this cut applies"
+    description: "Match the measured decomposition against the shipped pattern catalog: which patterns this cut actually applies, why each one applies to THIS repository, and which were considered and left out. Deterministic — identical output for identical input."
+    background: true
+    kind: rust-binary
+    resumable: true
+    tool: ../tools/index-go-patterns/target/release/index-go-patterns
+    requires: [expand-plan]
+    env: { CW_PHASE_IDLE_TIMEOUT_SECS: "120" }
+    effects:
+      fs_read: ["architecture/**", ".cognidev/feature/plan.json", ".cognidev/intent.yml"]
+      fs_write: [".cognidev/feature/patterns.json"]
+    outputs:
+      - { path: .cognidev/feature/patterns.json, scope: workspace }
+
+  # ── THE BRIEFING — what this costs you, and what you will have to know ──
+  # A GATE, not a passing screen (`review: true`): the runner holds one view slot,
+  # so without it the approval table replaces the briefing a moment later.
+  # Tables only here; the documents are a deliverable ABOUT a decision and are
+  # written after the decision (`publish-briefing`).
+  - id: briefing
+    name: "Everything this decomposition will do to your project"
+    description: "The document you read before approving: every service and what it owns, every call that becomes a network hop, every package-level map, context key and in-process topic the cut breaks, the extraction order and why, and the architecture each choice commits you to — with the file to read for each. Written from what earlier phases measured; nothing is re-derived."
+    kind: rust-binary
+    tool: ../tools/brief-go-monolith/target/release/brief-go-monolith
+    requires: [patterns]
+    review: true
+    view:
+      shape: table
+      artifact: .cognidev/feature/briefing.json
+      title: "The cut — every service, what it owns, and what it will cost"
+      prompt: "This is what your monolith becomes, in the order it will be extracted, with every call that stops being a function call and starts being a network one. Read it, then continue to the step-by-step plan."
+    args: ["--tables-only"]
+    env: { CW_PHASE_IDLE_TIMEOUT_SECS: "120" }
+    effects:
+      fs_read: [".cognidev/feature/**", ".cognidev/intent.yml"]
+      fs_write: [".cognidev/feature/**"]
+    outputs:
+      - { path: .cognidev/feature/briefing.json, scope: workspace }
+      - { path: .cognidev/feature/steps.json, scope: workspace }
+
+  # ── Numbered, ordered tasks + REVIEW GATE (before any SOURCE is written) ──
+  - id: plan-tasks
+    name: "Break into precise, ordered tasks"
+    description: "Turn the plan into an ordered per-file task list (data → handler → api, leaf services before the orders hub), each scoped to one file with the signatures it builds on. Shown for review before anything runs."
+    kind: plan-tasks
+    requires: [briefing]
+    effects:
+      fs_read: [".cognidev/feature/**"]
+      fs_write: [".cognidev/modernization-go-monolith/plan/**", ".cognidev/feature/mapping.json"]
+    review: true
+    # `editable`: a typed change ("pull payments into its own service") re-runs
+    # `refine_phases` through the ONE LLM path, re-derives the table, re-presents.
+    view:
+      shape: table
+      artifact: .cognidev/feature/mapping.json
+      title: "Target architecture — Go monolith → microservices"
+      editable: true
+      # Tick the services to carve on THIS run (pilot-then-continue); ticking
+      # nothing runs every service.
+      selectable: true
+      refine_phases: [plan-decomposition, reconcile-map, expand-plan, patterns, briefing]
+      select_refine_phases: [expand-plan, patterns, briefing]
+    outputs:
+      - { path: .cognidev/modernization-go-monolith/plan/, scope: workspace, kind: plan }
+
+  # ── The documents, now that there is an approved decision to document ──
+  # Everything it writes is optional on purpose: a read-only checkout must not
+  # abort a decomposition over a document; the sign-off then reads NOT VERIFIED.
+  - id: publish-briefing
+    name: "Write the plan into your repository"
+    description: "The approved decomposition as files you can commit and share: what changes, the plan, what your team learns, one document per service, and the briefing page."
+    background: true
+    kind: rust-binary
+    resumable: true
+    tool: ../tools/brief-go-monolith/target/release/brief-go-monolith
+    requires: [plan-tasks]
+    env: { CW_PHASE_IDLE_TIMEOUT_SECS: "120" }
+    effects:
+      fs_read: [".cognidev/feature/**", ".cognidev/intent.yml"]
+      fs_write: ["cognidev/docs/**", "DECOMPOSITION-BRIEFING.html"]
+    outputs:
+      - { path: DECOMPOSITION-BRIEFING.html, scope: workspace, kind: report, optional: true }
+      - { path: cognidev/docs/, scope: workspace, kind: docs, optional: true }
+
+  # ── BASELINE: did the MONOLITH build, and how many of its tests passed? ──
+  # The denominator. Runs HERE because `scaffold-services` is the next phase that
+  # writes SOURCE. `go-verify --baseline` records `go build ./...`, `go vet` and
+  # `go test -json ./...` per module and never fails the run: a red monolith is a
+  # fact to carry forward. `args`, not `env`, selects the mode (older engines
+  # ignore a rust-binary's env).
+  - id: baseline
+    name: "Record the monolith's before-state"
+    description: "Build, vet and test the monolith exactly as it is now, before a single file is written, and record which packages were green and how many tests passed. This is the number every later claim is measured against. Never fails the run."
+    kind: rust-binary
+    tool: ../tools/go-verify/target/release/go-verify
+    args: ["--baseline"]
+    requires: [plan-tasks]
+    optional: true
+    env: { CW_PHASE_IDLE_TIMEOUT_SECS: "1800" }
+    effects:
+      fs_read: ["**"]
+      fs_write: [".cognidev/feature/**"]
+      proc_exec: [go, docker, golangci-lint]
+      net_egress: ["proxy.golang.org", "sum.golang.org"]
+    outputs:
+      - { path: .cognidev/feature/go-baseline.json, scope: workspace }
+
+  # ── DETERMINISTIC platform scaffold FIRST: the whole system minus business code ──
+  # A complete, guaranteed-compiling Go 1.26 platform FILLED from the captured
+  # intent: `go.work`, one module per service (cmd/<ctx>/main.go with slog, OTel
+  # OTLP, health/readiness, graceful shutdown, the chosen router), the `pkg/`
+  # shared kernel (contracts only — kept minimal), a gateway module, the outbox
+  # relay + NATS JetStream (or Kafka) wiring, per-service migrations, distroless
+  # non-root Dockerfiles, docker compose, Kubernetes/Helm + Azure Container Apps
+  # manifests, GitHub Actions / Azure DevOps CI (govulncheck + Syft + Grype),
+  # and the documentation + ADR set. The LLM writes only business code.
+  - id: scaffold-services
+    name: "Scaffold the platform"
+    description: "Generate + fill the entire Go platform — a go.work workspace, one module per service (entrypoint, router, config, health, graceful shutdown, OpenTelemetry), the pkg/ contracts kernel, a reverse-proxy gateway, the outbox relay and broker wiring, per-service migrations, distroless non-root Dockerfiles, docker compose, the Kubernetes/Helm and Azure Container Apps deploy set, per-service and workspace CI (go vet, golangci-lint, go test, govulncheck, Syft SBOM + Grype), a test file per service, and the documentation set a reader needs to operate it: README.md (the services, their gateway prefixes, what each owns and calls, the sagas, how to build and run — the monolith's own README moves to docs/monolith/README.md), ARCHITECTURE.md with a mermaid component diagram (gateway, services, databases, broker), STATE-FLOW.md naming which service owns which table and which writes stopped being one db.Transaction, SEQUENCE-DIAGRAMS.md with one mermaid sequenceDiagram per saga and cross-context call, CALL-GRAPH.md (a mermaid graph of the cross-service calls and topics), RUNBOOK.md, TESTING.md, SECURITY.md, PERFORMANCE.md, ACCESSIBILITY.md (the API-level concerns a backend owns: problem-JSON error clarity, localisable messages, the WCAG obligations of any client consuming it), CONTRIBUTING.md, CLAUDE.md with the house conventions for future agents, the language config set (.golangci.yml linter config, .go-version pinning the toolchain, .editorconfig, .gitignore, .dockerignore), a .env.example naming every DSN and secret, an opt-in pre-commit hook, and five architecture decision records under docs/adr/ — 0001-database-per-service, 0002-saga-vs-2pc, 0003-typed-resilient-clients, 0004 (transactional-outbox with a broker, no-broker-consistency without one) and 0005-strangler-cutover-order. The skeleton compiles before any domain code exists."
+    background: true
+    kind: rust-binary
+    tool: ../tools/scaffold-services-go/target/release/scaffold-services-go
+    requires: [plan-tasks]
+    env: { CW_PHASE_IDLE_TIMEOUT_SECS: "600" }
+    effects:
+      fs_read: [".cognidev/feature/**", ".cognidev/intent.yml", "scaffolds/**"]
+      fs_write:
+        - "services/**"
+        - "gateway/**"
+        - "pkg/**"
+        - "deploy/**"
+        - "go.work"
+        - "go.work.sum"
+        - "docker-compose.yml"
+        - "Makefile"
+        - ".golangci.yml"
+        - ".go-version"
+        - ".editorconfig"
+        - ".gitignore"
+        - ".dockerignore"
+        - ".github/workflows/**"
+        - ".azuredevops/**"
+        - "azure-pipelines-*.yml"
+        - ".gitlab-ci.yml"
+        - "azure.yaml"
+        - "README.md"
+        - "ARCHITECTURE.md"
+        - "STATE-FLOW.md"
+        - "SEQUENCE-DIAGRAMS.md"
+        - "CALL-GRAPH.md"
+        - "RUNBOOK.md"
+        - "TESTING.md"
+        - "SECURITY.md"
+        - "PERFORMANCE.md"
+        - "ACCESSIBILITY.md"
+        - "CONTRIBUTING.md"
+        - "CLAUDE.md"
+        - "docs/adr/**"
+        - "docs/monolith/**"
+        - ".env.example"
+        - ".githooks/**"
+        - ".cognidev/feature/scaffold-report.json"
+    outputs:
+      - { path: services/, scope: workspace }
+      - { path: gateway/, scope: workspace }
+      - { path: pkg/, scope: workspace }
+      - { path: go.work, scope: workspace }
+      - { path: ARCHITECTURE.md, scope: workspace, kind: report, optional: true }
+      - { path: STATE-FLOW.md, scope: workspace, kind: report, optional: true }
+      - { path: SEQUENCE-DIAGRAMS.md, scope: workspace, kind: report, optional: true }
+      - { path: .env.example, scope: workspace, optional: true }
+      - { path: RUNBOOK.md, scope: workspace, kind: report, optional: true }
+      - { path: CALL-GRAPH.md, scope: workspace, kind: report, optional: true }
+      - { path: ACCESSIBILITY.md, scope: workspace, kind: report, optional: true }
+      - { path: docs/adr/, scope: workspace, kind: docs, optional: true }
+      - { path: .cognidev/feature/scaffold-report.json, scope: workspace, optional: true }
+
+  # ── DID THE GENERATED PLATFORM KEEP THE BUILD THE REPOSITORY HAS? ──
+  # Separate from the generator on purpose: a generator reporting on itself can
+  # only report the departures it knows it made. Reads cicd-facts.json and the
+  # generated files independently. A departure a captured answer explains is a
+  # decision; one nothing explains fails the step.
+  - id: verify-build-inheritance
+    name: "Check the build survived"
+    description: "Compare the generated pipelines, Dockerfiles, go directives and test dependencies against what the monolith's own build says. A fact that changed because the questionnaire said so is recorded as a decision; a fact that changed for no stated reason fails."
+    kind: rust-binary
+    tool: ../tools/verify-cicd-go/target/release/verify-cicd-go
+    requires: [scaffold-services]
+    effects:
+      fs_read: [".cognidev/feature/cicd-facts.json", ".cognidev/feature/scaffold-report.json", ".cognidev/feature/service-map.json", ".cognidev/intent.yml", ".github/workflows/**", "go.work", "deploy/**", "services/**/go.mod", "services/**/Dockerfile", "services/**/Makefile"]
+      fs_write: []
+
+  # ── Materialize the rest of the plan (empty business-file stubs only) ──
+  - id: plan-apply
+    name: "Create the service skeletons"
+    description: "Materialize the plan — new service dirs + empty business-file stubs on target-master. No-clobber, so it never overwrites the filled boilerplate from scaffold-services. Outside the LLM."
+    background: true
+    kind: rust-binary
+    tool: ../tools/feature-plan/target/release/feature-plan
+    requires: [scaffold-services]
+    env: { CW_PHASE_IDLE_TIMEOUT_SECS: "300" }
+    effects:
+      fs_read: [".cognidev/feature/**"]
+      fs_write: ["services/**"]
+
+  # ── PORT: MOVE the monolith's packages into the services ──
+  # For every file the map assigned, copy the source verbatim into
+  # services/<ctx>/internal/<pkg>/ keeping the package clause; rewrite the import
+  # paths of packages that moved WITH it; replace each import of ANOTHER context's
+  # package by a generated typed client (services/<ctx>/internal/clients/<provider>/)
+  # + the consumer's OWN copy of the provider's DTOs
+  # (services/<ctx>/internal/contracts/<provider>/ — consumer-owned, never a
+  # shared pkg/contracts module); narrow the shared
+  # *gorm.DB to the service's own tables; and MARK every seam
+  # (`// CW-SEAM[kind=...]`). Emits port-report.json.
+  - id: port-monolith
+    name: "Port the monolith code into the services"
+    description: "Move each owned package from the monolith into its scaffolded service verbatim — keep the package name, fix the import paths, replace every import of another context by a generated typed client (internal/clients/<provider>/) + the consumer's own copy of the provider's contract types (internal/contracts/<provider>/), and mark every seam. The ported workspace compiles with only the seam placeholders; the LLM then fills only those, never writing files from scratch."
+    background: true
+    kind: rust-binary
+    tool: ../tools/port-monolith-go/target/release/port-monolith-go
+    requires: [plan-apply]
+    # Additive: if porting can't run, the run falls back to the from-scratch
+    # develop path on the plan-apply stubs — never a hard stop.
+    optional: true
+    env: { CW_PHASE_IDLE_TIMEOUT_SECS: "900" }
+    effects:
+      fs_read: ["**/*.go", "**/go.mod", ".cognidev/understand/**", ".cognidev/feature/**"]
+      fs_write: ["services/**", "pkg/**", "go.work", ".cognidev/feature/**"]
+    outputs:
+      - { path: services/, scope: workspace }
+      - { path: .cognidev/feature/port-report.json, scope: workspace }
+
+  # ── CONTRACT MANIFEST: snapshot the ported provider→consumer contract shapes as
+  # the drift baseline (BEFORE develop can change them). Deterministic. ──
+  - id: contracts-manifest
+    name: "Snapshot the cross-service contract manifest"
+    description: "Record each provider's read-model shape (the exported struct fields and json tags each consumer copied into services/<consumer>/internal/contracts/<provider>/) + the consumer edges into contracts.lock.json, and write the interface documents under contracts/ (OpenAPI per service, event schemas) — the baseline the drift check compares against."
+    background: true
+    kind: rust-binary
+    tool: ../tools/contracts-go/target/release/contracts-go
+    args: ["gen"]
+    requires: [port-monolith]
+    optional: true
+    env: { CW_PHASE_IDLE_TIMEOUT_SECS: "300" }
+    effects:
+      fs_read: ["services/**/*.go", "pkg/**/*.go", ".cognidev/feature/service-map.json", ".cognidev/understand/http.json"]
+      fs_write: [".cognidev/feature/contracts.lock.json", "contracts.lock.json", "contracts/**"]
+    outputs:
+      - { path: .cognidev/feature/contracts.lock.json, scope: workspace }
+      - { path: contracts.lock.json, scope: workspace }
+
+  # ── DEVELOP: per-task fill the marked SEAMS → COMPILE (go build + go vet) → commit ──
+  # The files are PRE-FILLED by port-monolith; the develop loop makes ONLY the
+  # `// CW-SEAM[...]` edits (implement each typed client's HTTP call; turn the
+  # marked cross-context db.Transaction into a saga + outbox), never rewriting
+  # ported code.
+  - id: develop
+    name: "Wire the marked seams, task by task"
+    description: "The service files are PRE-FILLED with the ported monolith code. Implement only the `// CW-SEAM[...]` markers — each typed client's HTTP call and the saga that replaces the cross-context db.Transaction — with a `go build` + `go vet` check and a git checkpoint per green task on target-master."
+    kind: tool-loop
+    progress_label: "services built"
+    tool: ../tools/execute-plan/target/release/execute-plan
+    requires: [port-monolith]
+    checkpoint: true
+    optional: true
+    # `go build` downloads modules through GOPROXY; the module set is a property of
+    # the go.mod files, not a list this manifest can enumerate.
+    effects:
+      fs_read: ["**/*.go", "**/go.mod", ".cognidev/feature/**", "cognidev/**"]
+      fs_write: ["services/**", "gateway/**", "pkg/**", ".git/**", ".cognidev/run/**"]
+      proc_exec: [go, docker, git]
+      net_egress: ["proxy.golang.org", "sum.golang.org"]
+    env:
+      CW_TYPECHECK_CMD: "../tools/go-typecheck/target/release/go-typecheck"
+      CW_TOOL_IDLE_TIMEOUT_SECS: "1800"
+
+  # ── CONTRACT DRIFT: after develop, diff the current contract shapes against the
+  # baseline; a provider whose shape changed and that a consumer depends on marks
+  # the stale consumer copy with a contract-impact seam. ──
+  - id: contracts-check
+    name: "Check cross-service contract drift"
+    description: "Recompute the contract shapes after develop and diff against contracts.lock.json. When a provider's shape changed and a consumer depends on it, mark the stale consumer copy with a `// CW-SEAM[kind=contract-impact]` and report the drift (default policy: warn)."
+    kind: rust-binary
+    tool: ../tools/contracts-go/target/release/contracts-go
+    args: ["check"]
+    optional: true
+    env: { CW_PHASE_IDLE_TIMEOUT_SECS: "300" }
+    effects:
+      fs_read: ["services/**/*.go", "pkg/**/*.go", ".cognidev/feature/contracts.lock.json"]
+      fs_write: ["services/**/*.go", "pkg/**/*.go", ".cognidev/feature/contracts-drift.json", "contracts-drift.md"]
+    outputs:
+      - { path: .cognidev/feature/contracts-drift.json, scope: workspace }
+      - { path: contracts-drift.md, scope: workspace, optional: true }
+
+  # ── SECURITY: repair the advisories the cut inherited, BEFORE the proof ──
+  # A decomposition inherits the monolith's module graph and ships it once per
+  # service. Scan the delivered workspace (same `search_registry` switch as the
+  # final `cve` phase — offline by default, and then nothing is claimed), fold
+  # every same-major fix into `go get mod@fixed` per module (reverted if the
+  # module stops building), pin the newest verified patch toolchain for stdlib
+  # advisories, and provision that toolchain — so verify, cve and gates measure
+  # the repaired graph, not the inherited one.
+  - id: advisory-scan
+    name: "Scan the services' modules for known vulnerabilities"
+    description: "Check every module the new services resolve — indirect ones included — and the toolchain's standard library against the Go vulnerability database, so the next step can repair what it finds instead of shipping it five times over. Offline unless the run opted into registry lookups."
+    background: true
+    kind: rust-binary
+    tool: ../tools/go-cve/target/release/go-cve
+    args: ["--out", ".cognidev/feature/cve-pre.json"]
+    optional: true
+    env: { CW_PHASE_IDLE_TIMEOUT_SECS: "600" }
+    effects:
+      fs_read: ["**/go.mod", "**/go.sum", "go.work", ".cognidev/intent.yml", ".cognidev/env.json"]
+      fs_write: [".cognidev/feature/cve-pre.json"]
+      proc_exec: [go, govulncheck]
+      net_egress: ["api.osv.dev", "vuln.go.dev", "proxy.golang.org"]
+    outputs:
+      - { path: .cognidev/feature/cve-pre.json, scope: workspace, optional: true }
+
+  - id: security-bumps
+    name: "Bump every vulnerable module to its fixed release"
+    description: "For each service module, raise every dependency with a known advisory to its fixed release in the same major (`go get mod@fixed`, then `go mod tidy` and a build — reverted for that module if it stops building), and pin the newest patch of the Go release that fixes the standard-library advisories. A fix that needs a new major, or has no release yet, is recorded and left alone. Deterministic; changes nothing when the scan did not run."
+    kind: rust-binary
+    tool: ../tools/bump-security-go/target/release/bump-security-go
+    optional: true
+    env: { CW_PHASE_IDLE_TIMEOUT_SECS: "900" }
+    effects:
+      fs_read: [".cognidev/feature/cve-pre.json", ".cognidev/env.json", "go.work", "services/**", "pkg/**", "gateway/**"]
+      fs_write: ["services/**/go.mod", "services/**/go.sum", "pkg/go.mod", "pkg/go.sum", "gateway/go.mod", "gateway/go.sum", "go.work", ".cognidev/feature/security-bumps.json"]
+      proc_exec: [go]
+      net_egress: ["proxy.golang.org", "sum.golang.org"]
+    outputs:
+      - { path: .cognidev/feature/security-bumps.json, scope: workspace, optional: true }
+
+  - id: setup-toolchain
+    name: "Provision the pinned Go toolchain"
+    description: "When the security step pinned a newer patch of the Go release, install it (host toolchain if it matches, else a user-local one from go.dev, SHA-256 verified) so the build proof and the final advisory scan run on the fixed standard library. A no-op when nothing was pinned."
+    kind: rust-binary
+    tool: ../tools/go-setup-env/target/release/go-setup-env
+    optional: true
+    env: { CW_PHASE_IDLE_TIMEOUT_SECS: "1800" }
+    effects:
+      net_egress: ["go.dev", "dl.google.com"]
+      proc_exec: [go, docker]
+      fs_write: ["~/.cognidev/go/**", ".cognidev/env.json"]
+
+  # ── THE RECORD: what each task ACTUALLY did, beside what it was asked to do ──
+  # A task the loop never reached gets NO file — the gap is the report.
+  - id: record-status
+    name: "Write down what each task actually did"
+    description: "Fill cognidev/docs/status/ from the run's own per-task outcomes — one record per task that executed — and roll them up into MIGRATION-LOG.md, what moved out of the monolith in the order it moved. Tasks that never ran get no record and no log entry."
+    background: true
+    kind: rust-binary
+    tool: ../tools/brief-go-monolith/target/release/brief-go-monolith
+    args: ["--status"]
+    optional: true
+    env: { CW_PHASE_IDLE_TIMEOUT_SECS: "120" }
+    effects:
+      fs_read: [".cognidev/**"]
+      fs_write: ["cognidev/docs/status/**", "cognidev/docs/share/status/**", "MIGRATION-LOG.md"]
+    outputs:
+      - { path: cognidev/docs/status/, scope: workspace, kind: docs, optional: true }
+      - { path: MIGRATION-LOG.md, scope: workspace, kind: report, optional: true }
+
+  # ── PROOF: build (and, when asked, test) the result ──
+  - id: verify
+    name: "Prove the services compile"
+    description: "Run `go build ./...`, `go vet ./...` and (when run_tests is on) `go test -json ./...` for every module in the workspace on target-master, compared against the monolith's before-state — the proof that ends the cycle."
+    kind: rust-binary
+    tool: ../tools/go-verify/target/release/go-verify
+    optional: true
+    env: { CW_PHASE_IDLE_TIMEOUT_SECS: "1800" }
+    effects:
+      fs_read: ["services/**", "gateway/**", "pkg/**", "go.work", ".cognidev/feature/go-baseline.json"]
+      fs_write: [".cognidev/run/**", ".cognidev/feature/verify.json"]
+      proc_exec: [go, docker, golangci-lint]
+      net_egress: ["proxy.golang.org", "sum.golang.org"]
+    outputs:
+      - { path: .cognidev/feature/verify.json, scope: workspace }
+
+  # ── RE-READ THE TREE THAT WAS ACTUALLY DELIVERED ──
+  # NO `requires: [verify]` — a red build is exactly when the shards are most
+  # worth refreshing. Cache-aware: a no-op when nothing moved.
+  - id: understand-delivered
+    name: "Re-read the delivered services"
+    description: "Refresh the structural shards against the tree the run actually delivered, so the project opens on the services rather than on the monolith it was cut from. Cache-aware — a no-op when nothing moved since the last pass."
+    background: true
+    kind: structural
+    parser_run: go-structural
+    output_artifact: .cognidev/understand/graph.json
+    optional: true
+    effects:
+      fs_read: ["**/*.go", "**/go.mod", "go.work"]
+      fs_write: [".cognidev/understand/**"]
+    outputs:
+      - { path: .cognidev/understand/, scope: workspace, kind: understand-shards }
+
+  # ── ADVISORIES: what the cut inherited, and then multiplied ──
+  # The cut inherits the monolith's module versions and ships them once per
+  # service. Offline by default; the opt-in is the SAME `search_registry` answer.
+  # Offline it writes `scanned: false` with the reason, and the gate renders
+  # SKIPPED rather than PASS.
+  - id: cve
+    name: "Check the modules against the advisory database"
+    description: "Read the module graph every service actually resolves — go.sum and `go list -m all`, indirect modules included — and check it against the Go vulnerability database (govulncheck where installed, OSV otherwise). Offline unless the run opted into registry lookups; when it does not run it records that it did not."
+    background: true
+    kind: rust-binary
+    tool: ../tools/go-cve/target/release/go-cve
+    optional: true
+    env: { CW_PHASE_IDLE_TIMEOUT_SECS: "300" }
+    effects:
+      fs_read: ["**/go.mod", "**/go.sum", "go.work", ".cognidev/intent.yml", ".cognidev/env.json"]
+      fs_write: [".cognidev/feature/cve.json", ".cognidev/feature/cve-findings.json"]
+      proc_exec: [go, govulncheck]
+      net_egress: ["api.osv.dev", "vuln.go.dev"]
+    outputs:
+      - { path: .cognidev/feature/cve.json, scope: workspace }
+      - { path: .cognidev/feature/cve-findings.json, scope: workspace }
+
+  # ── MEASURE THE TREE: the signals a green build hides ──
+  # `verify` proves the workspace COMPILES. That is not "a decomposition
+  # happened": a cut can build green with zero real cross-service calls, every
+  # client unwired in main.go, and every service still importing the monolith.
+  # Also EXECUTES this playbook's own `gates/validate.yaml` (the flat delivery
+  # facts). REPAIR HAND-BACK: a finding whose fix is SOURCE in a file a task owns
+  # is handed back to develop (deny-by-default allowlist in the tool); go.mod,
+  # go.work and the gateway config are never handed to a model.
+  # NO `requires:` — a red build is exactly when these measurements matter.
+  - id: gates
+    name: "Measure the decomposition"
+    description: "Run the checks a reviewer would run by hand against the finished tree — every call that crossed a context boundary is a real HTTP call rather than a marker, every generated client is constructed and wired in main.go, cross-context transactions became sagas that name their participants, no seam is still a marker; no service module imports another service's module or the monolith, every data-owning service opens its own database and reads no other, every planned service is in go.work, every module is on the chosen Go version, the gateway routes to each service; no nolint blanket or disabled vet check, a test file in each service, and any module carrying a known advisory. Deterministic, no model. A check that cannot run says so; it never reports a pass."
+    kind: rust-binary
+    tool: ../tools/go-gates/target/release/go-gates
+    repair_with: develop
+    repair_handback: .cognidev/modernization-go-monolith/plan/_breaches.json
+    max_repair_rounds: 2
+    optional: true
+    env: { CW_PHASE_IDLE_TIMEOUT_SECS: "600" }
+    effects:
+      fs_read: ["services/**", "gateway/**", "pkg/**", "deploy/**", "go.work", "docs/adr/**", ".env.example", ".github/workflows/**", ".cognidev/understand/**", ".cognidev/feature/**", ".cognidev/env.json", "gates/validate.yaml"]
+      fs_write: [".cognidev/feature/gates.json", ".cognidev/modernization-go-monolith/plan/_breaches.json"]
+    outputs:
+      - { path: .cognidev/feature/gates.json, scope: workspace }
+
+  # ── SCORECARD: not "did it pass" but "where was the cut strong and where thin" ──
+  # Grades the stages of the cut on completeness, correctness and restraint, from
+  # artifacts the run already wrote; Restraint asks what the run changed in the
+  # MONOLITH that nobody proposed.
+  - id: scorecard
+    name: "Grade the decomposition"
+    description: "Grade each stage of the cut on three axes — did it find every instance, is each result a real extraction rather than a folder move, and did it change only what the decomposition required — plus the roll-up numbers: build outcome, services compiled, services still importing the monolith, seams left to fill, and whether the test suite survived. Writes MIGRATION-SCORECARD.md. An axis nothing measured reads as unmeasured."
+    kind: rust-binary
+    tool: ../tools/go-scorecard/target/release/go-scorecard
+    requires: [gates]
+    optional: true
+    env: { CW_PHASE_IDLE_TIMEOUT_SECS: "300" }
+    effects:
+      fs_read: [".cognidev/feature/**", ".cognidev/feature/go-baseline.json", ".git/**"]
+      fs_write: [".cognidev/feature/scorecard.json", "MIGRATION-SCORECARD.md"]
+      proc_exec: [git]
+    outputs:
+      - { path: .cognidev/feature/scorecard.json, scope: workspace }
+      - { path: MIGRATION-SCORECARD.md, scope: workspace, kind: report }
+
+  # ── CLOSING REVIEW: the findings, turned into next steps ──
+  # ONE model call, through the engine's LLM path, at the point every fact is on
+  # disk. Never edits a file, never claims a fix, cannot move the verdict. Free
+  # on a clean run.
+  - id: closing-review
+    name: "Turn the findings into next steps"
+    description: "Take everything the checks found and could not fix, and say what to do about each one in THIS repository — which are pre-existing conditions the monolith already had, which the cut introduced, and what to check where the answer depends on something a rule cannot see. Advice only."
+    kind: rust-binary
+    tool: ../tools/closing-review/target/release/closing-review
+    llm: true
+    requires: [scorecard]
+    optional: true
+    env: { CW_PHASE_IDLE_TIMEOUT_SECS: "600" }
+    effects:
+      fs_read: [".cognidev/feature/**"]
+      fs_write: ["NEXT-STEPS.md", ".cognidev/feature/closing-review.json"]
+    outputs:
+      - { path: NEXT-STEPS.md, scope: workspace, kind: report }
+      - { path: .cognidev/feature/closing-review.json, scope: workspace }
+
+  # ── Did the run modify the playbook that ran it? ──
+  # NOT `requires: [verify]` — a failed dependency would skip this measurement.
+  - id: playbook-integrity
+    name: "Confirm the playbook was not modified by its own run"
+    description: "Re-fingerprint this playbook's files and compare against the baseline taken before the run started."
+    background: true
+    kind: rust-binary
+    tool: ../tools/playbook-integrity/target/release/playbook-integrity
+    args: ["verify"]
+    optional: true
+    env: { CW_PHASE_IDLE_TIMEOUT_SECS: "120" }
+    effects:
+      fs_read: ["**"]
+      fs_write: [".cognidev/run/**"]
+
+  # ── SIGN-OFF: every claim, and the artifact on disk that settles it ──
+  # REQUIRED and depends on nothing: signoff-report computes from artifacts on
+  # disk and renders every pointer it cannot read as NOT VERIFIED, so a red build
+  # still gets its checklist. `accept_exit: [1]` — a FAIL verdict is a verdict,
+  # not a crash, accepted only when both outputs are on disk.
+  - id: signoff
+    name: "Sign off the run"
+    description: "Check every claim this playbook makes against the artifact that would be different if the claim were false, and write the verdict as a committable report. Deterministic, no model call. A claim whose evidence is missing is reported as NOT VERIFIED; it never passes by silence."
+    kind: rust-binary
+    tool: ../tools/signoff-report/target/release/signoff-report
+    accept_exit: [1]
+    env: { CW_PHASE_IDLE_TIMEOUT_SECS: "300" }
+    effects:
+      fs_read: ["**"]
+      fs_write: ["VALIDATION-REPORT.html", ".cognidev/run/**"]
+    outputs:
+      - { path: VALIDATION-REPORT.html,     scope: workspace, kind: report }
+      - { path: .cognidev/run/signoff.json, scope: workspace, kind: report }
+
+  # ── FINALIZE: execute the chosen git strategy ──
+  # Reads `git_strategy` (00-git-strategy.yaml): keep the monolith branch with the
+  # microservices on a new branch, archive the monolith and adopt the services,
+  # export to a new repo, or split each service into its own repo under
+  # dist/repos/ with the pkg/ kernel vendored and its go.mod made standalone
+  # (go.work dropped, replace directives resolved). Local git only — never pushes.
+  - id: finalize
+    name: "Apply your git strategy (cut over to the microservices)"
+    description: "Perform the git end-state you chose up front — keep the monolith branch as-is with the microservices on a new branch, archive the monolith and adopt the services (default), export to a new repo, or split each service into its own standalone, buildable module repo under dist/repos/. Deterministic, non-destructive."
+    kind: rust-binary
+    tool: ../tools/cutover-go/target/release/cutover-go
+    requires: [signoff]
+    optional: true
+    env: { CW_PHASE_IDLE_TIMEOUT_SECS: "600" }
+    effects:
+      fs_read: ["**"]
+      fs_write: ["**", ".git/**", "dist/repos/**"]
+      proc_exec: [git]
+    outputs:
+      - { path: dist/repos/, scope: workspace, optional: true }
+      # What the cutover actually did — whether the monolith was removed, and
+      # which service still imports it when it was not.
+      - { path: .cognidev/feature/cutover.json, scope: workspace, optional: true }
+
+questionnaire:
+  mode: full
+  sections:
+    # Git strategy FIRST — the end-state decision, before anything is planned.
+    - { file: 00-git-strategy.yaml,            required: true,  estimated_q: 1 }
+    - { file: 00-intent.yaml,                  required: true,  estimated_q: 5 }
+    - { file: 01-framework.yaml,               required: true,  estimated_q: 2 }
+    - { file: 02-communication.yaml,           required: true,  estimated_q: 3 }
+    - { file: 03-data.yaml,                    required: true,  estimated_q: 5 }
+    - { file: 04-observability-security.yaml,  required: true,  estimated_q: 4 }
+    - { file: 05-platform.yaml,                required: false, estimated_q: 8 }
+    - { file: 06-architecture.yaml,            required: true,  estimated_q: 3 }
+    - { file: 07-verify.yaml,                  required: false, estimated_q: 1 }
+
+# Brownfield develop contract (rules + system fallback + completion markers).
+rules:
+  - id: go-decomposition
+    include: rules/go/
+    when: always
+
+# Failure messages containing any of these substrings are treated as UNFIXABLE:
+# the engine skips the LLM repair agent and hands the decision to the user.
+repair_stop_signatures:
+  # classify: the Jev key or the service, not code the repair agent can fix.
+  - "JEV NOT REACHABLE"
+  - "CLASSIFY INCOMPLETE"
+  - "ENVIRONMENT NOT READY"
+  - "REQUIREMENT VALIDATION FAILED"
+  - "matched no service in the plan"
+
+# ─── Tools (validator-level declarations; the engine reads lifecycle only) ───
+tools:
+  parsers:
+    - id: go-structural
+      handles:
+        - "gin / echo / chi / net/http route registration (router groups, handler funcs, methods on handler structs)"
+        - "gorm model structs (tags, has-many / belongs-to), sqlx/pgx table access → entities + relations"
+        - "db.Transaction / tx.Begin unit-of-work spans (consistency boundaries with their effective writes)"
+        - "package-level mutable state (maps/slices + sync guards), context.Value keys, in-process pub/sub topics, outbound HTTP, tickers"
+        - "receiver-bound call graph across packages (the coupling the cut turns into network hops)"
+      description: "The IDE's in-core Go structural pass (tree-sitter-go) writing the .cognidev/understand/ shards the decomposition consumes — entities.json, entity-access.json, dataflow.json, datastructures.json, events.json, ambient-context.json, externals.json, http.json, graph.json, packages-api.json."
+      output_artifact: .cognidev/understand/graph.json
+  generators:
+    - id: unit-classifier
+      kind: deterministic
+      tool: ../tools/classify-go/target/release/classify-go
+      description: "The classify phase — code settles each declaration's categories from the shards and the syntax; Jev (api.typesafe.ai, pinned model) answers the rest from the question bank tools/classify-go/questions/classify-go.md, hardened per question; routes.yaml maps the categories to this playbook's actions."
+    - id: decomposition-planner
+      kind: ai-with-frozen-prompt
+      tool: ../tools/decompose-go/target/release/decompose-go
+      prompt: context/decompose/boundaries.md
+      description: "The plan-decomposition phase — Jev answers the typed decomposition questions (tools/decompose-go/questions/decompose-go.md: stays/merges per candidate, owns per table, saga/keep per unit of work, compensable per step), one request per candidate over the measured facts; code hardens each answer per question, applies the exact rules and computes the edges and the order. With no Jev key: four scoped LLM calls through the engine's tool-loop bridge instead, prompts FROZEN in context/decompose/."
+    - id: service-scaffolder
+      kind: deterministic
+      tool: ../tools/scaffold-services-go/target/release/scaffold-services-go
+      description: "Generates the entire Go platform (go.work, one module per service, the minimal pkg/ kernel, gateway, outbox + broker wiring, deploy + CI) FILLED from the captured intent. Pure data → files; the LLM never writes scaffolding."
+    - id: monolith-porter
+      kind: deterministic
+      tool: ../tools/port-monolith-go/target/release/port-monolith-go
+      description: "MOVES the monolith's own packages into the scaffolded service modules verbatim — package names kept, import paths rewritten mechanically, each cross-context import replaced by a generated typed client + contract DTO, and every seam MARKED (`// CW-SEAM`). The ported workspace compiles with only the seam placeholders."
+    - id: develop-executor
+      kind: ai-with-frozen-prompt
+      tool: ../tools/execute-plan/target/release/execute-plan
+      prompt: context/develop-feature.md
+      description: "The shared execute-plan tool-loop: implements each planned task in dependency order with a go-typecheck (go build + go vet) gate and a git checkpoint per green task."
+    - id: pattern-selector
+      kind: deterministic
+      tool: ../tools/index-go-patterns/target/release/index-go-patterns
+      description: "Selects, from the pattern documents this playbook ships in architecture/, the ones this decomposition actually applies — matched against the MEASURED map and the captured answers. Every selection carries the sentence that selected it; every pattern left out carries its reason."
+    - id: decomposition-briefer
+      kind: deterministic
+      tool: ../tools/brief-go-monolith/target/release/brief-go-monolith
+      description: "Writes the briefing a person reads before approving the cut, and cognidev/docs/ — the plan as files in the customer's own repository. Re-derives nothing. `--status` fills cognidev/docs/status/ + MIGRATION-LOG.md from the engine's own per-task outcomes."

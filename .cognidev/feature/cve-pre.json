@@ -1,0 +1,20 @@
+{
+  "tool": "go-cve",
+  "scanned": false,
+  "why": "the advisory database was not queried — this run is offline by default; enable the registry lookup to scan",
+  "reason": "the advisory database was not queried — this run is offline by default; enable the registry lookup to scan",
+  "package_source": "resolved",
+  "coverage": "every module in the build list as the go command selected it (go list -m all), replacements applied",
+  "scanned_packages": 109,
+  "counts": {
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "total": 0
+  },
+  "findings": [],
+  "outside_workspace": [
+    "go.mod"
+  ]
+}

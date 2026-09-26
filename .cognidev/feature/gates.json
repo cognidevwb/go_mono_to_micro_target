@@ -1,0 +1,288 @@
+{
+  "counts": {
+    "fail": 0,
+    "pass": 23,
+    "skipped": 2,
+    "total": 25
+  },
+  "failing_gates": [],
+  "gates": [
+    {
+      "count": 0,
+      "detail": "all 2 cross-context call edge(s) resolve to a client that performs an HTTP call",
+      "evaluated": true,
+      "id": "cross_context_calls_converted",
+      "offenders": [],
+      "status": "pass",
+      "title": "Cross-context calls became real HTTP calls"
+    },
+    {
+      "count": 0,
+      "detail": "all 4 generated client(s) are constructed at a composition root",
+      "evaluated": true,
+      "id": "clients_wired_in_main",
+      "offenders": [],
+      "status": "pass",
+      "title": "Every generated client is constructed at the composition root"
+    },
+    {
+      "count": 0,
+      "detail": "all 1 declared saga(s) have an orchestrator that references every participant",
+      "evaluated": true,
+      "id": "sagas_at_commit_points",
+      "offenders": [],
+      "status": "pass",
+      "title": "Cross-context transactions became sagas"
+    },
+    {
+      "count": 0,
+      "detail": "all 2 remote saga step(s) have a compensation naming their service",
+      "evaluated": true,
+      "id": "sagas_have_compensations",
+      "offenders": [],
+      "status": "pass",
+      "title": "Every saga step in another service has a compensation"
+    },
+    {
+      "count": 0,
+      "detail": "no marker left across 184 generated file(s)",
+      "evaluated": true,
+      "id": "no_residual_seam_markers",
+      "offenders": [],
+      "status": "pass",
+      "title": "No seam is still a marker"
+    },
+    {
+      "count": 0,
+      "detail": "all 5 service name(s) describe a domain",
+      "evaluated": true,
+      "id": "service_names_are_domains_not_folders",
+      "offenders": [],
+      "status": "pass",
+      "title": "Service names name a domain, not a folder"
+    },
+    {
+      "count": 0,
+      "detail": "none of 116 service file(s) or 5 go.mod(s) reach into another service",
+      "evaluated": true,
+      "id": "no_cross_service_module_import",
+      "offenders": [],
+      "status": "pass",
+      "title": "No service imports another service"
+    },
+    {
+      "count": 0,
+      "detail": "none of 5 service module(s) depend on anything outside the generated tree",
+      "evaluated": true,
+      "id": "no_service_references_the_monolith",
+      "offenders": [],
+      "status": "pass",
+      "title": "No service builds against the monolith"
+    },
+    {
+      "count": 0,
+      "detail": "each of 5 data-owning service(s) opens its own database; 9 table(s), one owner each",
+      "evaluated": true,
+      "id": "every_service_owns_its_database",
+      "offenders": [],
+      "status": "pass",
+      "title": "Every data-owning service owns its own database, and no table has two owners"
+    },
+    {
+      "count": 0,
+      "detail": "all 5 planned service(s) are modules in go.work",
+      "evaluated": true,
+      "id": "every_planned_service_is_in_the_workspace",
+      "offenders": [],
+      "status": "pass",
+      "title": "Every planned service is in go.work"
+    },
+    {
+      "count": 0,
+      "detail": "all 8 generated module file(s) target go 1.26",
+      "evaluated": true,
+      "id": "go_version_is_the_chosen_one",
+      "offenders": [],
+      "status": "pass",
+      "title": "Generated modules target the chosen Go"
+    },
+    {
+      "count": 0,
+      "detail": "all 5 service(s) have a route and an upstream",
+      "evaluated": true,
+      "id": "gateway_routes_cover_every_service",
+      "offenders": [],
+      "status": "pass",
+      "title": "The gateway routes to every service"
+    },
+    {
+      "count": 0,
+      "detail": "no monolith import across 116 service file(s)",
+      "evaluated": true,
+      "id": "no_monolith_import_left_in_services",
+      "offenders": [],
+      "status": "pass",
+      "title": "No service still imports the monolith"
+    },
+    {
+      "count": 0,
+      "detail": "no wholesale suppression across 184 generated file(s)",
+      "evaluated": true,
+      "id": "no_wholesale_warning_suppression",
+      "offenders": [],
+      "status": "pass",
+      "title": "Nothing was silenced to make the tree pass"
+    },
+    {
+      "count": 0,
+      "detail": "all 5 service(s) on disk have a test function",
+      "evaluated": true,
+      "id": "tests_came_over",
+      "offenders": [],
+      "status": "pass",
+      "title": "Every service has a test that runs"
+    },
+    {
+      "count": 0,
+      "detail": "the port moved no test file, so there is nothing to compare",
+      "evaluated": false,
+      "id": "no_test_newly_disabled",
+      "offenders": [],
+      "status": "skipped",
+      "title": "No ported test was switched off"
+    },
+    {
+      "count": 0,
+      "detail": "all 5 service(s) build from their own module with no vet finding",
+      "evaluated": true,
+      "id": "services_build_and_vet",
+      "offenders": [],
+      "status": "pass",
+      "title": "Every service builds and vets from its own module"
+    },
+    {
+      "count": 0,
+      "detail": "the tests of all 5 service(s) ran and passed (59 test(s))",
+      "evaluated": true,
+      "id": "services_tests_pass",
+      "offenders": [],
+      "status": "pass",
+      "title": "Every service's tests pass"
+    },
+    {
+      "count": 0,
+      "detail": "all 5 service(s) expose liveness and readiness",
+      "evaluated": true,
+      "id": "health_endpoints_present",
+      "offenders": [],
+      "status": "pass",
+      "title": "Every service exposes liveness and readiness probes"
+    },
+    {
+      "count": 0,
+      "detail": "all 5 service image(s) are distroless and non-root",
+      "evaluated": true,
+      "id": "containers_distroless_nonroot",
+      "offenders": [],
+      "status": "pass",
+      "title": "Every service image is distroless and runs as non-root"
+    },
+    {
+      "count": 0,
+      "detail": "2 piece(s) of carried state, each in its one listed owner",
+      "evaluated": true,
+      "id": "shared_state_has_an_owner",
+      "offenders": [],
+      "status": "pass",
+      "title": "Shared mutable state carried into a service has one listed owner"
+    },
+    {
+      "count": 0,
+      "detail": "all 1 publishing service(s) have a transactional outbox",
+      "evaluated": true,
+      "id": "events_use_outbox",
+      "offenders": [],
+      "status": "pass",
+      "title": "Every published event goes through an outbox"
+    },
+    {
+      "count": 0,
+      "detail": "every provider contract still has the shape its consumers were built against",
+      "evaluated": true,
+      "id": "contracts_no_drift",
+      "offenders": [],
+      "status": "pass",
+      "title": "No cross-service contract drifted under a consumer"
+    },
+    {
+      "count": 0,
+      "detail": "the advisory scan did not complete: the advisory database was not queried — this run is offline by default; enable the registry lookup to scan",
+      "evaluated": false,
+      "id": "known_vulnerable_dependencies",
+      "offenders": [],
+      "status": "skipped",
+      "title": "No reachable or critical known advisory"
+    },
+    {
+      "count": 0,
+      "detail": "all 22 declared readiness gate(s) pass at severity `fail`",
+      "evaluated": true,
+      "id": "declarative_readiness_gates",
+      "offenders": [],
+      "status": "pass",
+      "title": "The platform readiness gates the playbook declares"
+    }
+  ],
+  "not_evaluated": [
+    {
+      "id": "no_test_newly_disabled",
+      "why": "the port moved no test file, so there is nothing to compare"
+    },
+    {
+      "id": "known_vulnerable_dependencies",
+      "why": "the advisory scan did not complete: the advisory database was not queried — this run is offline by default; enable the registry lookup to scan"
+    }
+  ],
+  "planned_services": 5,
+  "scalars": {
+    "clients_wired_in_main": 0,
+    "containers_distroless_nonroot": 0,
+    "contracts_no_drift": 0,
+    "cross_context_calls_converted": 0,
+    "declarative_readiness_gates": 0,
+    "events_use_outbox": 0,
+    "every_planned_service_is_in_the_workspace": 0,
+    "every_service_owns_its_database": 0,
+    "gateway_routes_cover_every_service": 0,
+    "go_version_is_the_chosen_one": 0,
+    "health_endpoints_present": 0,
+    "no_cross_service_module_import": 0,
+    "no_monolith_import_left_in_services": 0,
+    "no_residual_seam_markers": 0,
+    "no_service_references_the_monolith": 0,
+    "no_wholesale_warning_suppression": 0,
+    "sagas_at_commit_points": 0,
+    "sagas_have_compensations": 0,
+    "service_names_are_domains_not_folders": 0,
+    "services_build_and_vet": 0,
+    "services_tests_pass": 0,
+    "shared_state_has_an_owner": 0,
+    "tests_came_over": 0
+  },
+  "services_on_disk": 5,
+  "skipped_gates": [
+    {
+      "id": "no_test_newly_disabled",
+      "why": "the port moved no test file, so there is nothing to compare"
+    },
+    {
+      "id": "known_vulnerable_dependencies",
+      "why": "the advisory scan did not complete: the advisory database was not queried — this run is offline by default; enable the registry lookup to scan"
+    }
+  ],
+  "subject": "Go 1.26",
+  "subject_kind": "decomposition",
+  "target_framework": "go1.26",
+  "target_go": "1.26",
+  "tool": "go-gates"
+}

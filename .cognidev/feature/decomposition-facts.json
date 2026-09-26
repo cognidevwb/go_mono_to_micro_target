@@ -1,0 +1,362 @@
+{
+  "ambient": {
+    "orders": {
+      "user": 1
+    }
+  },
+  "cache_straddles": [],
+  "candidates": [
+    {
+      "context": "catalog",
+      "entities": [
+        "Category",
+        "Product"
+      ],
+      "files": 3,
+      "label": "catalog",
+      "reads": 1,
+      "root": "Category",
+      "routes": 2,
+      "writes": 1
+    },
+    {
+      "context": "customers",
+      "entities": [
+        "Customer"
+      ],
+      "files": 3,
+      "label": "customers",
+      "reads": 1,
+      "root": "Customer",
+      "routes": 2,
+      "writes": 1
+    },
+    {
+      "context": "inventory",
+      "entities": [
+        "StockItem"
+      ],
+      "files": 2,
+      "label": "inventory",
+      "reads": 0,
+      "root": "StockItem",
+      "routes": 0,
+      "writes": 0
+    },
+    {
+      "context": "payments",
+      "entities": [
+        "Payment"
+      ],
+      "files": 3,
+      "label": "payments",
+      "reads": 0,
+      "root": "Payment",
+      "routes": 0,
+      "writes": 0
+    },
+    {
+      "context": "orders",
+      "entities": [
+        "Order",
+        "OrderLine"
+      ],
+      "files": 3,
+      "label": "orders",
+      "reads": 1,
+      "root": "Order",
+      "routes": 2,
+      "writes": 1
+    }
+  ],
+  "classification": {
+    "already_outside_services": [
+      {
+        "file": "cmd/shop/main.go",
+        "units": [
+          {
+            "categories": [
+              {
+                "category": "configuration",
+                "evidence": "references os.Getenv",
+                "source": "fact"
+              }
+            ],
+            "line": 18,
+            "unit": "cmd/shop/main.go#main"
+          }
+        ]
+      },
+      {
+        "file": "internal/platform/auth.go",
+        "units": [
+          {
+            "categories": [
+              {
+                "category": "authentication",
+                "evidence": "stores the caller's identity on the request context: writes user key platform.UserIDKey via context.WithValue (ambient-context, line 24)",
+                "source": "fact"
+              }
+            ],
+            "line": 17,
+            "unit": "internal/platform/auth.go#AuthMiddleware"
+          }
+        ]
+      }
+    ],
+    "applied": true,
+    "bank_revision": "2026-09-24.1",
+    "event_contracts": [
+      {
+        "evidence": [
+          {
+            "category": "messaging",
+            "evidence": "subscribes inventory.Service.OnOrderPlaced to order.placed",
+            "source": "fact"
+          }
+        ],
+        "file": "cmd/shop/main.go",
+        "line": 18,
+        "service": null,
+        "unit": "cmd/shop/main.go#main"
+      },
+      {
+        "evidence": [
+          {
+            "category": "messaging",
+            "evidence": "handles event order.placed (subscribed at cmd/shop/main.go:32)",
+            "source": "fact"
+          }
+        ],
+        "file": "internal/inventory/service.go",
+        "line": 31,
+        "service": "inventory",
+        "unit": "internal/inventory/service.go#Service.OnOrderPlaced"
+      },
+      {
+        "evidence": [
+          {
+            "category": "messaging",
+            "evidence": "publishes order.placed via s.bus.Publish, line 73",
+            "source": "fact"
+          }
+        ],
+        "file": "internal/orders/service.go",
+        "line": 36,
+        "service": "orders",
+        "unit": "internal/orders/service.go#Service.PlaceOrder"
+      },
+      {
+        "evidence": [
+          {
+            "category": "messaging",
+            "p": 0.96,
+            "source": "jev"
+          }
+        ],
+        "file": "internal/platform/bus.go",
+        "line": 26,
+        "service": null,
+        "unit": "internal/platform/bus.go#Bus.Publish"
+      },
+      {
+        "evidence": [
+          {
+            "category": "messaging",
+            "p": 0.95,
+            "source": "jev"
+          }
+        ],
+        "file": "internal/platform/bus.go",
+        "line": 19,
+        "service": null,
+        "unit": "internal/platform/bus.go#Bus.Subscribe"
+      }
+    ],
+    "held_by_rule": [],
+    "jev": "answered",
+    "moved_as_knock_on": [],
+    "moved_by_category": [],
+    "needs_review": [
+      "internal/orders/service.go#Service.PlaceOrder",
+      "internal/platform/bus.go#Bus",
+      "internal/platform/bus.go#Bus.Subscribe",
+      "internal/platform/db.go#Open"
+    ],
+    "platform_files": [
+      "cmd/shop/main.go",
+      "internal/platform/auth.go"
+    ],
+    "platform_module": "pkg",
+    "saga_check": {
+      "agree": [
+        {
+          "classification_writes_in": [
+            "inventory",
+            "orders",
+            "payments"
+          ],
+          "detection_writes_in": [
+            "inventory",
+            "orders",
+            "payments"
+          ],
+          "saga": "CreateOrder",
+          "unit": "internal/orders/service.go#Service.PlaceOrder"
+        }
+      ],
+      "classification_only": [],
+      "detection_only": [],
+      "local_transactions": []
+    },
+    "source": ".cognidev/go-classify/classification.json"
+  },
+  "edges": [
+    {
+      "calls": 1,
+      "from": "orders",
+      "to": "catalog"
+    },
+    {
+      "calls": 1,
+      "from": "orders",
+      "to": "customers"
+    },
+    {
+      "calls": 1,
+      "from": "orders",
+      "portable": false,
+      "to": "inventory",
+      "writes": true
+    },
+    {
+      "calls": 1,
+      "from": "orders",
+      "portable": false,
+      "to": "payments",
+      "writes": true
+    }
+  ],
+  "entities": [
+    {
+      "context": "catalog",
+      "name": "Category",
+      "relations": [
+        "Product"
+      ]
+    },
+    {
+      "context": "catalog",
+      "name": "Product",
+      "relations": [
+        "Category"
+      ]
+    },
+    {
+      "context": "customers",
+      "name": "Customer",
+      "relations": []
+    },
+    {
+      "context": "inventory",
+      "name": "StockItem",
+      "relations": [
+        "Product"
+      ]
+    },
+    {
+      "context": "payments",
+      "name": "Payment",
+      "relations": [
+        "Order"
+      ]
+    },
+    {
+      "context": "orders",
+      "name": "Order",
+      "relations": [
+        "Customer",
+        "OrderLine"
+      ]
+    },
+    {
+      "context": "orders",
+      "name": "OrderLine",
+      "relations": [
+        "Order",
+        "Product"
+      ]
+    }
+  ],
+  "events_crossing": [
+    {
+      "event": "order.placed",
+      "handler": "inventory",
+      "owner": "orders"
+    }
+  ],
+  "infra": [],
+  "jobs": {
+    "inventory": [
+      "StartRestockJob"
+    ]
+  },
+  "outbound": {
+    "payments": [
+      "POST /v1/charges via g.client"
+    ]
+  },
+  "routes_spanning": [],
+  "routes_unreached": 0,
+  "saga_candidates": [
+    {
+      "contexts": [
+        "orders",
+        "customers",
+        "inventory",
+        "catalog",
+        "payments"
+      ],
+      "name": "CreateOrder",
+      "steps": [
+        {
+          "call": "s.customers.IsActive",
+          "from": "orders",
+          "to": "customers",
+          "writes": false
+        },
+        {
+          "call": "s.inventory.Reserve",
+          "from": "orders",
+          "to": "inventory",
+          "writes": true
+        },
+        {
+          "call": "s.catalog.PriceOf",
+          "from": "orders",
+          "to": "catalog",
+          "writes": false
+        },
+        {
+          "call": "s.payments.Charge",
+          "from": "orders",
+          "to": "payments",
+          "writes": true
+        }
+      ],
+      "unit": "PlaceOrder",
+      "writes_in": [
+        "inventory",
+        "orders",
+        "payments"
+      ]
+    }
+  ],
+  "shared_packages": [],
+  "shared_state": {
+    "catalog": [
+      "catalog.priceCache: map[uint]float64"
+    ]
+  },
+  "shared_tables": []
+}

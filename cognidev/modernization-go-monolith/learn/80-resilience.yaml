@@ -1,0 +1,31 @@
+# Learning card — surfaced on the learning rail while this playbook runs.
+# Owned by the playbook; the IDE loads learn/*.yaml and renders generically.
+id: resilience
+title: "The Call That Used to Be Free"
+hook: "Every seam you cut turns a method call that cannot fail into one that can."
+concepts: [resilience, retry, circuit-breaker, timeout, backoff, net-http, boundaries]
+intents: [modernize, migrate]
+phases: [briefing, scaffold, port-monolith, develop, decompose]
+minutes: 3
+diagram:
+  direction: LR
+  groups:
+    - { id: caller, label: "Orders", tone: brand }
+    - { id: guard, label: "The typed client", tone: warning }
+    - { id: callee, label: "Payments", tone: success }
+  nodes:
+    - { id: handler, label: "Handler", sub: "was a method call", icon: server, group: caller, tone: brand }
+    - { id: timeout, label: "Timeout", sub: "bounds the wait", icon: split, group: guard, tone: warning }
+    - { id: retry, label: "Retry", sub: "only if it is safe to repeat", icon: split, group: guard, tone: warning }
+    - { id: breaker, label: "Circuit breaker", sub: "stops asking a dead peer", icon: split, group: guard, tone: warning }
+    - { id: svc, label: "Payments API", sub: "may be slow, or gone", icon: server, group: callee, tone: success }
+  edges:
+    - { from: handler, to: timeout, label: "one typed client" }
+    - { from: timeout, to: retry, label: "bounded" }
+    - { from: retry, to: breaker, label: "bounded attempts" }
+    - { from: breaker, to: svc, label: "or fail fast" }
+takeaways:
+  - "A slow dependency is worse than a dead one — without a timeout it holds your threads until you are down too."
+  - "Retry only what is safe to repeat. Retrying a charge without an idempotency key charges twice."
+  - "The breaker exists so that when a peer is down you stop asking, instead of turning their outage into yours."
+  - "This is a mitigation, not a removal: the call really can fail now, and the code has to have somewhere to go when it does."

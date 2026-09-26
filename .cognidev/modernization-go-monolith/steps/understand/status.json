@@ -1,0 +1,18 @@
+{
+  "elapsedMs": 17,
+  "finishedAt": 1790392776,
+  "inputs": [],
+  "kind": "structural",
+  "outputs": [
+    {
+      "exists": true,
+      "kind": "understand-shards",
+      "name": "understand",
+      "optional": false,
+      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/.cognidev/understand/"
+    }
+  ],
+  "status": "Ok",
+  "step": "understand",
+  "summary": "Structural intelligence reused (source unchanged): 21 files analyzed, shards in /Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/.cognidev/understand"
+}

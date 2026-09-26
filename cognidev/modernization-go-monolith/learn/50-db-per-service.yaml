@@ -1,0 +1,25 @@
+id: database-per-service
+title: "Why Each Service Owns Its Database"
+hook: "Shared tables are the coupling microservices exist to remove."
+concepts: [database, microservices, data, boundaries, decompose, sql, ef]
+intents: [modernize, migrate]
+phases: [decompose, plan, scaffold]
+minutes: 3
+diagram:
+  direction: LR
+  groups:
+    - { id: ordersvc, label: "Order Service", tone: brand }
+    - { id: paysvc, label: "Payment Service", tone: success }
+  nodes:
+    - { id: oapi, label: "Order API", sub: "owns schema", icon: server, group: ordersvc, tone: brand }
+    - { id: odb, label: "Orders DB", sub: "private", icon: database, group: ordersvc, tone: brand }
+    - { id: papi, label: "Payment API", sub: "owns schema", icon: server, group: paysvc, tone: success }
+    - { id: pdb, label: "Payments DB", sub: "private", icon: database, group: paysvc, tone: success }
+  edges:
+    - { from: oapi, to: odb, label: "reads + writes" }
+    - { from: papi, to: pdb, label: "reads + writes" }
+    - { from: oapi, to: papi, label: "API call, never cross-DB" }
+takeaways:
+  - "A service reaches another service's data through its API, never its tables."
+  - "Private databases let each service pick its schema, engine, and scaling independently."
+  - "The cost is distributed consistency — reconcile with events + the outbox pattern, not joins."

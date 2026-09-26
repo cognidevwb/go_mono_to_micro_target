@@ -1,0 +1,16 @@
+name: ci-payments-service
+
+on:
+  push:
+    branches: [main]
+    paths: ["services/payments/**", "pkg/**", ".github/workflows/payments-service-ci.yml"]
+  pull_request:
+    paths: ["services/payments/**", "pkg/**"]
+
+jobs:
+  ci:
+    uses: ./.github/workflows/_service-ci.yml
+    with:
+      module: services/payments
+      image: payments-service
+    secrets: inherit

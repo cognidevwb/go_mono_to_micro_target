@@ -1,0 +1,30 @@
+# Learning card — surfaced on the learning rail while this playbook runs.
+# Owned by the playbook; the IDE loads learn/*.yaml and renders generically.
+id: strangler-fig
+title: "Why the Order You Cut In Matters"
+hook: "Extract the leaves first. The service everything calls goes last."
+concepts: [strangler, migration, decompose, monolith, gateway, reverse-proxy, sequencing]
+intents: [modernize, migrate]
+phases: [map-services, patterns, briefing, plan, plan-tasks, decompose]
+minutes: 3
+diagram:
+  direction: LR
+  groups:
+    - { id: edge, label: "The facade (Go reverse proxy)", tone: brand }
+    - { id: new, label: "Extracted", tone: success }
+    - { id: old, label: "Still the monolith", tone: warning }
+  nodes:
+    - { id: client, label: "Clients", sub: "one address, throughout", icon: server, group: edge, tone: brand }
+    - { id: gw, label: "Gateway", sub: "routes per slice", icon: split, group: edge, tone: brand }
+    - { id: notif, label: "Notifications", sub: "a leaf — cut 1st", icon: server, group: new, tone: success }
+    - { id: catalog, label: "Catalog", sub: "a leaf — cut 2nd", icon: server, group: new, tone: success }
+    - { id: mono, label: "Orders (in the monolith)", sub: "calls both — cut last", icon: table, group: old, tone: warning }
+  edges:
+    - { from: client, to: gw, label: "unchanged" }
+    - { from: gw, to: notif, label: "/notifications/** → new" }
+    - { from: gw, to: catalog, label: "/catalog/** → new" }
+    - { from: gw, to: mono, label: "everything else → old" }
+takeaways:
+  - "A service with no outbound calls can be extracted and routed on its own — that is why leaves go first."
+  - "The hub is cut last, once every service it depends on already exists. Cutting it first is a big-bang wearing a strangler's name."
+  - "At every step the system is whole and shippable, and each slice is small enough to reverse."

@@ -1,0 +1,18 @@
+{
+  "elapsedMs": 2217,
+  "finishedAt": 1790392786,
+  "inputs": [],
+  "kind": "rust-binary",
+  "outputs": [
+    {
+      "exists": true,
+      "kind": null,
+      "name": "go-baseline",
+      "optional": false,
+      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/.cognidev/feature/go-baseline.json"
+    }
+  ],
+  "status": "Ok",
+  "step": "baseline",
+  "summary": "Tool `../tools/go-verify/target/release/go-verify` completed."
+}

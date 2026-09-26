@@ -1,0 +1,62 @@
+{
+  "build_props": {
+    "file": "go.mod",
+    "go": "1.26",
+    "module": "github.com/acme/shop",
+    "replaces": [],
+    "target_framework": "go1.26",
+    "toolchain": null,
+    "vendored": false
+  },
+  "ci": {
+    "actions": [],
+    "branches": [],
+    "commands": [],
+    "env": [],
+    "lint": [],
+    "runners": [],
+    "sdks": [],
+    "workflows": []
+  },
+  "commands": {
+    "build_flags": [],
+    "cgo_enabled": null,
+    "followed": [],
+    "go_commands": [],
+    "test_flags": [],
+    "tools": [],
+    "vet_flags": []
+  },
+  "compose": {
+    "brokers": [],
+    "databases": [],
+    "files": [],
+    "services": []
+  },
+  "container": {},
+  "frameworks": {
+    "declared": [
+      {
+        "files": [
+          "go.mod"
+        ],
+        "framework": "1.26",
+        "projects": 1
+      }
+    ],
+    "projects": 1,
+    "sole": "1.26",
+    "states_none": []
+  },
+  "lint": {},
+  "make": {},
+  "release": {},
+  "tests": {
+    "assertion_library": null,
+    "framework": null,
+    "harness": null,
+    "mocking_library": null,
+    "packages": [],
+    "projects": []
+  }
+}

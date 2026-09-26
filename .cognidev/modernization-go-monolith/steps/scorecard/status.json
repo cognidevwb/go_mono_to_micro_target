@@ -1,0 +1,25 @@
+{
+  "elapsedMs": 244,
+  "finishedAt": 1790395127,
+  "inputs": [],
+  "kind": "rust-binary",
+  "outputs": [
+    {
+      "exists": true,
+      "kind": null,
+      "name": "scorecard",
+      "optional": false,
+      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/.cognidev/feature/scorecard.json"
+    },
+    {
+      "exists": true,
+      "kind": "report",
+      "name": "MIGRATION-SCORECARD",
+      "optional": false,
+      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/MIGRATION-SCORECARD.md"
+    }
+  ],
+  "status": "Ok",
+  "step": "scorecard",
+  "summary": "Tool `../tools/go-scorecard/target/release/go-scorecard` completed."
+}

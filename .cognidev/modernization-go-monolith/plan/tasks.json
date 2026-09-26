@@ -1,0 +1,460 @@
+{
+  "feature": "monolith-to-microservices",
+  "tasks": [
+    {
+      "acceptance": [
+        "No CW-SEAM or TODO(cognidev) marker remains in these files.",
+        "go build ./... and go vet ./... stay green."
+      ],
+      "allow_expand": true,
+      "brief": "Resolve every remaining marker in this service's ported code: event seams publish through internal/events.Publish (the outbox) and consume from the broker; shared-state seams move to a shared store or are accepted explicitly; wiring seams port what the service needs from the monolith's main. Fill any `TODO(cognidev)` stub. Keep the ported code otherwise as it is — the monolith's own servers and routes that wire.go mounts stay mounted; never replace them with new handlers. Build and vet stay green.",
+      "files": [
+        "services/catalog/internal/acl/legacy.go",
+        "services/catalog/internal/catalog/catalog_test.go",
+        "services/catalog/internal/catalog/service.go",
+        "services/catalog/internal/store/db.go",
+        "services/catalog/migrations/0001_init.sql",
+        "services/catalog/test/equivalence/catalog_equivalence_test.go"
+      ],
+      "grounding": [
+        ".cognidev/feature/service-map.json",
+        ".cognidev/feature/port-report.json"
+      ],
+      "id": "01-catalog-core",
+      "kind": "edit",
+      "order": 1,
+      "title": "Implement catalog-service — domain + wiring"
+    },
+    {
+      "acceptance": [
+        "README.md has a real business-capability paragraph; no CW-SEAM marker remains."
+      ],
+      "allow_expand": true,
+      "brief": "Fill the business-capability paragraph (2-3 sentences) from the ported code. Delete the marker.",
+      "files": [
+        "services/catalog/README.md"
+      ],
+      "grounding": [
+        ".cognidev/feature/service-map.json",
+        ".cognidev/feature/port-report.json"
+      ],
+      "id": "02-catalog-docs",
+      "kind": "edit",
+      "order": 2,
+      "title": "Docs: catalog"
+    },
+    {
+      "acceptance": [
+        "deploy.targets.yml names real environments and a smoke_check_path; no TODO(cognidev) remains."
+      ],
+      "allow_expand": true,
+      "brief": "Fill this service's deploy environments (staging, then production behind an approval gate) and the post-deploy smoke_check_path (its readiness route, /readyz). Build, test, image, SBOM and scan are already wired — never edit workflow YAML. Replace the header and TODO(cognidev) comment lines.",
+      "files": [
+        "services/catalog/deploy/deploy.targets.yml"
+      ],
+      "grounding": [
+        ".cognidev/feature/service-map.json",
+        ".cognidev/feature/port-report.json"
+      ],
+      "id": "03-catalog-cicd",
+      "kind": "edit",
+      "order": 3,
+      "title": "CI/CD: catalog"
+    },
+    {
+      "acceptance": [
+        "strangler.values.yaml has a real weight; no CW-SEAM marker remains."
+      ],
+      "allow_expand": true,
+      "brief": "Set this context's strangler weight (0..100) and legacyPaths from its coupling — leaf higher, saga orchestrator canary low. Delete the marker.",
+      "files": [
+        "services/catalog/deploy/strangler.values.yaml"
+      ],
+      "grounding": [
+        ".cognidev/feature/service-map.json",
+        ".cognidev/feature/port-report.json"
+      ],
+      "id": "04-catalog-deployment",
+      "kind": "edit",
+      "order": 4,
+      "title": "Deployment: catalog"
+    },
+    {
+      "acceptance": [
+        "No CW-SEAM or TODO(cognidev) marker remains in these files.",
+        "go build ./... and go vet ./... stay green."
+      ],
+      "allow_expand": true,
+      "brief": "Resolve every remaining marker in this service's ported code: event seams publish through internal/events.Publish (the outbox) and consume from the broker; shared-state seams move to a shared store or are accepted explicitly; wiring seams port what the service needs from the monolith's main. Fill any `TODO(cognidev)` stub. Keep the ported code otherwise as it is — the monolith's own servers and routes that wire.go mounts stay mounted; never replace them with new handlers. Build and vet stay green.",
+      "files": [
+        "services/customers/internal/acl/legacy.go",
+        "services/customers/internal/customers/customers_test.go",
+        "services/customers/internal/store/db.go",
+        "services/customers/migrations/0001_init.sql",
+        "services/customers/test/equivalence/customers_equivalence_test.go"
+      ],
+      "grounding": [
+        ".cognidev/feature/service-map.json",
+        ".cognidev/feature/port-report.json"
+      ],
+      "id": "05-customers-core",
+      "kind": "edit",
+      "order": 5,
+      "title": "Implement customers-service — domain + wiring"
+    },
+    {
+      "acceptance": [
+        "README.md has a real business-capability paragraph; no CW-SEAM marker remains."
+      ],
+      "allow_expand": true,
+      "brief": "Fill the business-capability paragraph (2-3 sentences) from the ported code. Delete the marker.",
+      "files": [
+        "services/customers/README.md"
+      ],
+      "grounding": [
+        ".cognidev/feature/service-map.json",
+        ".cognidev/feature/port-report.json"
+      ],
+      "id": "06-customers-docs",
+      "kind": "edit",
+      "order": 6,
+      "title": "Docs: customers"
+    },
+    {
+      "acceptance": [
+        "deploy.targets.yml names real environments and a smoke_check_path; no TODO(cognidev) remains."
+      ],
+      "allow_expand": true,
+      "brief": "Fill this service's deploy environments (staging, then production behind an approval gate) and the post-deploy smoke_check_path (its readiness route, /readyz). Build, test, image, SBOM and scan are already wired — never edit workflow YAML. Replace the header and TODO(cognidev) comment lines.",
+      "files": [
+        "services/customers/deploy/deploy.targets.yml"
+      ],
+      "grounding": [
+        ".cognidev/feature/service-map.json",
+        ".cognidev/feature/port-report.json"
+      ],
+      "id": "07-customers-cicd",
+      "kind": "edit",
+      "order": 7,
+      "title": "CI/CD: customers"
+    },
+    {
+      "acceptance": [
+        "strangler.values.yaml has a real weight; no CW-SEAM marker remains."
+      ],
+      "allow_expand": true,
+      "brief": "Set this context's strangler weight (0..100) and legacyPaths from its coupling — leaf higher, saga orchestrator canary low. Delete the marker.",
+      "files": [
+        "services/customers/deploy/strangler.values.yaml"
+      ],
+      "grounding": [
+        ".cognidev/feature/service-map.json",
+        ".cognidev/feature/port-report.json"
+      ],
+      "id": "08-customers-deployment",
+      "kind": "edit",
+      "order": 8,
+      "title": "Deployment: customers"
+    },
+    {
+      "acceptance": [
+        "No CW-SEAM or TODO(cognidev) marker remains in these files.",
+        "go build ./... and go vet ./... stay green."
+      ],
+      "allow_expand": true,
+      "brief": "Resolve every remaining marker in this service's ported code: event seams publish through internal/events.Publish (the outbox) and consume from the broker; shared-state seams move to a shared store or are accepted explicitly; wiring seams port what the service needs from the monolith's main. Fill any `TODO(cognidev)` stub. Keep the ported code otherwise as it is — the monolith's own servers and routes that wire.go mounts stay mounted; never replace them with new handlers. Build and vet stay green.",
+      "files": [
+        "services/inventory/internal/acl/legacy.go",
+        "services/inventory/internal/app/wire.go",
+        "services/inventory/internal/events/order_placed_consumer.go",
+        "services/inventory/internal/httpapi/stock_item_handlers.go",
+        "services/inventory/internal/inventory/inventory_test.go",
+        "services/inventory/internal/jobs/scheduler.go",
+        "services/inventory/internal/store/db.go",
+        "services/inventory/migrations/0001_init.sql",
+        "services/inventory/test/equivalence/inventory_equivalence_test.go"
+      ],
+      "grounding": [
+        ".cognidev/feature/service-map.json",
+        ".cognidev/feature/port-report.json"
+      ],
+      "id": "09-inventory-core",
+      "kind": "edit",
+      "order": 9,
+      "title": "Implement inventory-service — domain + wiring"
+    },
+    {
+      "acceptance": [
+        "README.md has a real business-capability paragraph; no CW-SEAM marker remains."
+      ],
+      "allow_expand": true,
+      "brief": "Fill the business-capability paragraph (2-3 sentences) from the ported code. Delete the marker.",
+      "files": [
+        "services/inventory/README.md"
+      ],
+      "grounding": [
+        ".cognidev/feature/service-map.json",
+        ".cognidev/feature/port-report.json"
+      ],
+      "id": "10-inventory-docs",
+      "kind": "edit",
+      "order": 10,
+      "title": "Docs: inventory"
+    },
+    {
+      "acceptance": [
+        "deploy.targets.yml names real environments and a smoke_check_path; no TODO(cognidev) remains."
+      ],
+      "allow_expand": true,
+      "brief": "Fill this service's deploy environments (staging, then production behind an approval gate) and the post-deploy smoke_check_path (its readiness route, /readyz). Build, test, image, SBOM and scan are already wired — never edit workflow YAML. Replace the header and TODO(cognidev) comment lines.",
+      "files": [
+        "services/inventory/deploy/deploy.targets.yml"
+      ],
+      "grounding": [
+        ".cognidev/feature/service-map.json",
+        ".cognidev/feature/port-report.json"
+      ],
+      "id": "11-inventory-cicd",
+      "kind": "edit",
+      "order": 11,
+      "title": "CI/CD: inventory"
+    },
+    {
+      "acceptance": [
+        "strangler.values.yaml has a real weight; no CW-SEAM marker remains."
+      ],
+      "allow_expand": true,
+      "brief": "Set this context's strangler weight (0..100) and legacyPaths from its coupling — leaf higher, saga orchestrator canary low. Delete the marker.",
+      "files": [
+        "services/inventory/deploy/strangler.values.yaml"
+      ],
+      "grounding": [
+        ".cognidev/feature/service-map.json",
+        ".cognidev/feature/port-report.json"
+      ],
+      "id": "12-inventory-deployment",
+      "kind": "edit",
+      "order": 12,
+      "title": "Deployment: inventory"
+    },
+    {
+      "acceptance": [
+        "No CW-SEAM[kind=cross-call] marker remains in the clients.",
+        "go build ./... and go vet ./... stay green."
+      ],
+      "allow_expand": true,
+      "brief": "Implement each `// CW-SEAM[kind=cross-call]` stub in these generated clients: a real HTTP call to the provider's endpoint (baseURL(), the httpx client), mapping the JSON response into the declared result types. Delete each marker. Every module still builds (`go build ./... && go vet ./...`).",
+      "files": [
+        "services/orders/internal/clients/catalog/client.go",
+        "services/orders/internal/clients/catalog_contract_test.go",
+        "services/orders/internal/clients/customers/client.go",
+        "services/orders/internal/clients/customers_contract_test.go",
+        "services/orders/internal/clients/inventory/client.go",
+        "services/orders/internal/clients/payments/client.go"
+      ],
+      "grounding": [
+        ".cognidev/feature/service-map.json",
+        ".cognidev/feature/port-report.json"
+      ],
+      "id": "13-orders-clients",
+      "kind": "edit",
+      "order": 13,
+      "title": "Implement orders-service — cross-service calls"
+    },
+    {
+      "acceptance": [
+        "No CW-SEAM or TODO(cognidev) marker remains in these files.",
+        "go build ./... and go vet ./... stay green."
+      ],
+      "allow_expand": true,
+      "brief": "Resolve every remaining marker in this service's ported code: event seams publish through internal/events.Publish (the outbox) and consume from the broker; shared-state seams move to a shared store or are accepted explicitly; wiring seams port what the service needs from the monolith's main. Fill any `TODO(cognidev)` stub. Keep the ported code otherwise as it is — the monolith's own servers and routes that wire.go mounts stay mounted; never replace them with new handlers. Build and vet stay green.",
+      "files": [
+        "services/orders/internal/acl/legacy.go",
+        "services/orders/internal/events/order_placed.go",
+        "services/orders/internal/orders/orders_test.go",
+        "services/orders/internal/orders/service.go",
+        "services/orders/internal/outbox/outbox.go",
+        "services/orders/internal/store/db.go",
+        "services/orders/migrations/0001_init.sql",
+        "services/orders/test/equivalence/orders_equivalence_test.go"
+      ],
+      "grounding": [
+        ".cognidev/feature/service-map.json",
+        ".cognidev/feature/port-report.json"
+      ],
+      "id": "14-orders-core",
+      "kind": "edit",
+      "order": 14,
+      "title": "Implement orders-service — domain + wiring"
+    },
+    {
+      "acceptance": [
+        "The saga binds every participant with a compensation; no marker remains.",
+        "go test ./... passes."
+      ],
+      "allow_expand": true,
+      "brief": "Bind each saga participant to its generated client: a Do and a Compensate per step, the payment step last, state persisted with the outbox in one transaction. Replace the `// CW-SEAM[kind=saga]` transaction in the ported code with a call to the saga. Delete the markers.",
+      "files": [
+        "services/orders/internal/saga/create_order.go"
+      ],
+      "grounding": [
+        ".cognidev/feature/service-map.json",
+        ".cognidev/feature/port-report.json"
+      ],
+      "id": "15-orders-saga",
+      "kind": "edit",
+      "order": 15,
+      "title": "Implement orders-service — orchestration saga"
+    },
+    {
+      "acceptance": [
+        "README.md has a real business-capability paragraph; no CW-SEAM marker remains."
+      ],
+      "allow_expand": true,
+      "brief": "Fill the business-capability paragraph (2-3 sentences) from the ported code. Delete the marker.",
+      "files": [
+        "services/orders/README.md"
+      ],
+      "grounding": [
+        ".cognidev/feature/service-map.json",
+        ".cognidev/feature/port-report.json"
+      ],
+      "id": "16-orders-docs",
+      "kind": "edit",
+      "order": 16,
+      "title": "Docs: orders"
+    },
+    {
+      "acceptance": [
+        "deploy.targets.yml names real environments and a smoke_check_path; no TODO(cognidev) remains."
+      ],
+      "allow_expand": true,
+      "brief": "Fill this service's deploy environments (staging, then production behind an approval gate) and the post-deploy smoke_check_path (its readiness route, /readyz). Build, test, image, SBOM and scan are already wired — never edit workflow YAML. Replace the header and TODO(cognidev) comment lines.",
+      "files": [
+        "services/orders/deploy/deploy.targets.yml"
+      ],
+      "grounding": [
+        ".cognidev/feature/service-map.json",
+        ".cognidev/feature/port-report.json"
+      ],
+      "id": "17-orders-cicd",
+      "kind": "edit",
+      "order": 17,
+      "title": "CI/CD: orders"
+    },
+    {
+      "acceptance": [
+        "strangler.values.yaml has a real weight; no CW-SEAM marker remains."
+      ],
+      "allow_expand": true,
+      "brief": "Set this context's strangler weight (0..100) and legacyPaths from its coupling — leaf higher, saga orchestrator canary low. Delete the marker.",
+      "files": [
+        "services/orders/deploy/strangler.values.yaml"
+      ],
+      "grounding": [
+        ".cognidev/feature/service-map.json",
+        ".cognidev/feature/port-report.json"
+      ],
+      "id": "18-orders-deployment",
+      "kind": "edit",
+      "order": 18,
+      "title": "Deployment: orders"
+    },
+    {
+      "acceptance": [
+        "No CW-SEAM or TODO(cognidev) marker remains in these files.",
+        "go build ./... and go vet ./... stay green."
+      ],
+      "allow_expand": true,
+      "brief": "Resolve every remaining marker in this service's ported code: event seams publish through internal/events.Publish (the outbox) and consume from the broker; shared-state seams move to a shared store or are accepted explicitly; wiring seams port what the service needs from the monolith's main. Fill any `TODO(cognidev)` stub. Keep the ported code otherwise as it is — the monolith's own servers and routes that wire.go mounts stay mounted; never replace them with new handlers. Build and vet stay green.",
+      "files": [
+        "services/payments/internal/acl/legacy.go",
+        "services/payments/internal/httpapi/payment_handlers.go",
+        "services/payments/internal/payments/payments_test.go",
+        "services/payments/internal/store/db.go",
+        "services/payments/migrations/0001_init.sql",
+        "services/payments/test/equivalence/payments_equivalence_test.go"
+      ],
+      "grounding": [
+        ".cognidev/feature/service-map.json",
+        ".cognidev/feature/port-report.json"
+      ],
+      "id": "19-payments-core",
+      "kind": "edit",
+      "order": 19,
+      "title": "Implement payments-service — domain + wiring"
+    },
+    {
+      "acceptance": [
+        "README.md has a real business-capability paragraph; no CW-SEAM marker remains."
+      ],
+      "allow_expand": true,
+      "brief": "Fill the business-capability paragraph (2-3 sentences) from the ported code. Delete the marker.",
+      "files": [
+        "services/payments/README.md"
+      ],
+      "grounding": [
+        ".cognidev/feature/service-map.json",
+        ".cognidev/feature/port-report.json"
+      ],
+      "id": "20-payments-docs",
+      "kind": "edit",
+      "order": 20,
+      "title": "Docs: payments"
+    },
+    {
+      "acceptance": [
+        "deploy.targets.yml names real environments and a smoke_check_path; no TODO(cognidev) remains."
+      ],
+      "allow_expand": true,
+      "brief": "Fill this service's deploy environments (staging, then production behind an approval gate) and the post-deploy smoke_check_path (its readiness route, /readyz). Build, test, image, SBOM and scan are already wired — never edit workflow YAML. Replace the header and TODO(cognidev) comment lines.",
+      "files": [
+        "services/payments/deploy/deploy.targets.yml"
+      ],
+      "grounding": [
+        ".cognidev/feature/service-map.json",
+        ".cognidev/feature/port-report.json"
+      ],
+      "id": "21-payments-cicd",
+      "kind": "edit",
+      "order": 21,
+      "title": "CI/CD: payments"
+    },
+    {
+      "acceptance": [
+        "strangler.values.yaml has a real weight; no CW-SEAM marker remains."
+      ],
+      "allow_expand": true,
+      "brief": "Set this context's strangler weight (0..100) and legacyPaths from its coupling — leaf higher, saga orchestrator canary low. Delete the marker.",
+      "files": [
+        "services/payments/deploy/strangler.values.yaml"
+      ],
+      "grounding": [
+        ".cognidev/feature/service-map.json",
+        ".cognidev/feature/port-report.json"
+      ],
+      "id": "22-payments-deployment",
+      "kind": "edit",
+      "order": 22,
+      "title": "Deployment: payments"
+    },
+    {
+      "acceptance": [
+        "ARCHITECTURE.md explains the boundaries; no CW-SEAM marker remains."
+      ],
+      "allow_expand": true,
+      "brief": "Fill the decomposition-rationale seam — which candidates merged/split, which coupling was accepted vs redesigned. Delete the marker.",
+      "files": [
+        "ARCHITECTURE.md"
+      ],
+      "grounding": [
+        ".cognidev/feature/service-map.json",
+        ".cognidev/feature/port-report.json"
+      ],
+      "id": "23-docs-architecture",
+      "kind": "edit",
+      "order": 23,
+      "title": "Docs: architecture"
+    }
+  ]
+}

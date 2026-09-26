@@ -1,0 +1,362 @@
+{
+  "count": 13,
+  "entries": [
+    {
+      "category": "correctness",
+      "file": "loop-variable-semantics-changed-at-go-1-22.md",
+      "id": "loop-variable-semantics-changed-at-go-1-22",
+      "reference": "Go 1.22 release notes · per-iteration loop variables (go.dev/blog/loopvar-preview), gated on the module's go line",
+      "remedy": {
+        "kind": "investigate",
+        "name": "",
+        "value": ""
+      },
+      "runtime": "go",
+      "since": 22,
+      "symptoms": [
+        "loop variable",
+        "captured by func literal",
+        "loopclosure"
+      ],
+      "tags": [
+        "loopvar",
+        "go-directive",
+        "semantics",
+        "goroutines",
+        "upgrade"
+      ],
+      "title": "The service module's `go` line changed what a `for` loop means"
+    },
+    {
+      "category": "build-failure",
+      "file": "go-work-requires-a-newer-go.md",
+      "id": "go-work-requires-a-newer-go",
+      "reference": "Go 1.21 release notes · Go toolchains (go.dev/doc/toolchain) — the go line is a minimum requirement",
+      "remedy": {
+        "kind": "build-file",
+        "name": "",
+        "value": ""
+      },
+      "runtime": "go",
+      "since": 21,
+      "symptoms": [
+        "listed in go.work file requires go >=",
+        "but go.work lists go",
+        "go: downloading go1.",
+        "toolchain not available"
+      ],
+      "tags": [
+        "go-work",
+        "toolchain",
+        "go-directive",
+        "gotoolchain"
+      ],
+      "title": "One service moved to a newer Go and the workspace did not"
+    },
+    {
+      "category": "decomposition-failure",
+      "file": "a-green-build-is-not-a-decomposition.md",
+      "id": "a-green-build-is-not-a-decomposition",
+      "reference": "Carried over from the .NET twin (nopCommerce, five chained defects, every one exiting 0) — the failure is language-independent",
+      "remedy": {
+        "kind": "investigate",
+        "name": "",
+        "value": ""
+      },
+      "runtime": "go",
+      "since": 0,
+      "symptoms": [
+        "cross_context_client_calls: 0",
+        "sagas: 0",
+        "clients_wired: 0",
+        "go build ./... exit 0"
+      ],
+      "tags": [
+        "hollow",
+        "port-report",
+        "cross-context",
+        "sagas",
+        "verification",
+        "go-work"
+      ],
+      "title": "`go build ./...` is green, and nothing was decomposed"
+    },
+    {
+      "category": "runtime-failure",
+      "file": "context-deadline-exceeded-on-the-typed-client.md",
+      "id": "context-deadline-exceeded-on-the-typed-client",
+      "reference": "net/http Client.Timeout and context cancellation (pkg.go.dev/net/http#Client)",
+      "remedy": {
+        "kind": "environment",
+        "name": "",
+        "value": ""
+      },
+      "runtime": "go",
+      "since": 0,
+      "symptoms": [
+        "context deadline exceeded",
+        "client.timeout exceeded while awaiting headers",
+        "no such host",
+        "connection refused"
+      ],
+      "tags": [
+        "http-client",
+        "timeouts",
+        "service-discovery",
+        "resilience",
+        "typed-client"
+      ],
+      "title": "The method call that became a network call has no deadline budget"
+    },
+    {
+      "category": "build-failure",
+      "file": "govulncheck-fails-the-pipeline.md",
+      "id": "govulncheck-fails-the-pipeline",
+      "reference": "govulncheck (pkg.go.dev/golang.org/x/vuln/cmd/govulncheck) · exits 3 when a called vulnerable symbol is found",
+      "remedy": {
+        "kind": "build-file",
+        "name": "",
+        "value": ""
+      },
+      "runtime": "go",
+      "since": 0,
+      "symptoms": [
+        "your code is affected by",
+        "vulnerability #1: go-",
+        "found in:",
+        "fixed in:"
+      ],
+      "tags": [
+        "govulncheck",
+        "cve",
+        "advisory",
+        "ci",
+        "security",
+        "grype"
+      ],
+      "title": "The advisory the monolith carried now fails every service's pipeline"
+    },
+    {
+      "category": "build-failure",
+      "file": "import-cycle-not-allowed.md",
+      "id": "import-cycle-not-allowed",
+      "reference": "The Go Programming Language Specification · Import declarations (an import cycle is a compile error)",
+      "remedy": {
+        "kind": "seam",
+        "name": "",
+        "value": ""
+      },
+      "runtime": "go",
+      "since": 0,
+      "symptoms": [
+        "import cycle not allowed",
+        "package github.com/",
+        "imports github.com/"
+      ],
+      "tags": [
+        "packages",
+        "cycles",
+        "bounded-context",
+        "shared-kernel"
+      ],
+      "title": "The cut split a package pair that imported each other through a third"
+    },
+    {
+      "category": "build-failure",
+      "file": "module-found-but-does-not-contain-package.md",
+      "id": "module-found-but-does-not-contain-package",
+      "reference": "Go Modules Reference · go.dev/ref/mod#resolve-pkg-mod and #workspaces",
+      "remedy": {
+        "kind": "build-file",
+        "name": "",
+        "value": ""
+      },
+      "runtime": "go",
+      "since": 0,
+      "symptoms": [
+        "found, but does not contain package",
+        "no required module provides package",
+        "go: updates to go.mod needed"
+      ],
+      "tags": [
+        "modules",
+        "go-work",
+        "replace",
+        "module-path",
+        "shared-kernel"
+      ],
+      "title": "The module resolves and the package inside it does not"
+    },
+    {
+      "category": "runtime-failure",
+      "file": "nats-no-responders-or-stream-not-found.md",
+      "id": "nats-no-responders-or-stream-not-found",
+      "reference": "nats.go / jetstream package errors (pkg.go.dev/github.com/nats-io/nats.go/jetstream#pkg-variables)",
+      "remedy": {
+        "kind": "environment",
+        "name": "",
+        "value": ""
+      },
+      "runtime": "go",
+      "since": 0,
+      "symptoms": [
+        "nats: no responders available for request",
+        "nats: stream not found",
+        "nats: no stream matches subject",
+        "nats: no heartbeat received"
+      ],
+      "tags": [
+        "nats",
+        "jetstream",
+        "events",
+        "outbox",
+        "broker",
+        "startup-order"
+      ],
+      "title": "The in-process bus became a broker, and nobody created the stream"
+    },
+    {
+      "category": "cutover-failure",
+      "file": "the-cut-kept-the-code-and-dropped-the-pipelines.md",
+      "id": "the-cut-kept-the-code-and-dropped-the-pipelines",
+      "reference": "cutover-go keep_set — an allow-list, not a deny-list (same rule as cutover-dotnet)",
+      "remedy": {
+        "kind": "build-file",
+        "name": "",
+        "value": ""
+      },
+      "runtime": "go",
+      "since": 0,
+      "symptoms": [
+        "no such file or directory: .github/workflows",
+        "ci is missing after cutover",
+        "go: cannot load module pkg listed in go.work file"
+      ],
+      "tags": [
+        "cutover",
+        "ci",
+        "cd",
+        "keep-set",
+        "github-actions",
+        "deploy",
+        "go-work"
+      ],
+      "title": "The scaffold wrote it, the cutover threw it away"
+    },
+    {
+      "category": "runtime-failure",
+      "file": "too-many-clients-per-service-pools.md",
+      "id": "too-many-clients-per-service-pools",
+      "reference": "PostgreSQL max_connections (default 100) · pgxpool Config.MaxConns default = max(4, runtime.NumCPU())",
+      "remedy": {
+        "kind": "environment",
+        "name": "",
+        "value": ""
+      },
+      "runtime": "go",
+      "since": 0,
+      "symptoms": [
+        "sorry, too many clients already",
+        "sqlstate 53300",
+        "remaining connection slots are reserved",
+        "sql: database is closed"
+      ],
+      "tags": [
+        "postgres",
+        "pgx",
+        "gorm",
+        "connection-pool",
+        "autoscaling",
+        "database-per-service"
+      ],
+      "title": "One monolith pool became N services × replicas pools"
+    },
+    {
+      "category": "correctness",
+      "file": "two-gorm-dbs-are-not-one-transaction.md",
+      "id": "two-gorm-dbs-are-not-one-transaction",
+      "reference": "database/sql Tx semantics (pkg.go.dev/database/sql#Tx) · a Tx is bound to one connection of one database",
+      "remedy": {
+        "kind": "seam",
+        "name": "",
+        "value": ""
+      },
+      "runtime": "go",
+      "since": 0,
+      "symptoms": [
+        "sql: transaction has already been committed or rolled back",
+        "tx *gorm.db",
+        "db.transaction(func(tx *gorm.db) error",
+        "pgx: tx is closed"
+      ],
+      "tags": [
+        "gorm",
+        "pgx",
+        "transactions",
+        "saga",
+        "outbox",
+        "database-per-service",
+        "consistency"
+      ],
+      "title": "The `db.Transaction` the monolith had does not survive the cut"
+    },
+    {
+      "category": "build-failure",
+      "file": "undefined-the-type-the-monolith-shared-in-package.md",
+      "id": "undefined-the-type-the-monolith-shared-in-package",
+      "reference": "go/types error codes · UndeclaredImportedName / UnusedImport (pkg.go.dev/golang.org/x/tools/internal/typesinternal)",
+      "remedy": {
+        "kind": "seam",
+        "name": "",
+        "value": ""
+      },
+      "runtime": "go",
+      "since": 0,
+      "symptoms": [
+        "undefined: catalog.",
+        "undefined:",
+        "could not import",
+        "imported and not used"
+      ],
+      "tags": [
+        "port",
+        "packages",
+        "contracts",
+        "typed-client",
+        "cross-context"
+      ],
+      "title": "`undefined:` — the type the monolith shared by importing a package"
+    },
+    {
+      "category": "build-failure",
+      "file": "use-of-internal-package-not-allowed.md",
+      "id": "use-of-internal-package-not-allowed",
+      "reference": "Go spec for the go command · Internal Directories (go help internal / go.dev/doc/go1.4#internalpackages)",
+      "remedy": {
+        "kind": "build-file",
+        "name": "",
+        "value": ""
+      },
+      "runtime": "go",
+      "since": 0,
+      "symptoms": [
+        "use of internal package",
+        "not allowed"
+      ],
+      "tags": [
+        "modules",
+        "internal",
+        "go-work",
+        "shared-kernel",
+        "port"
+      ],
+      "title": "The ported package still imports the monolith's `internal/`"
+    }
+  ],
+  "required_build_properties": [],
+  "store": "/Users/rajasekharkarawalla/dev/2026/cognidev/.cw-worktrees/pb-go-jev-mono/playbooks-v2/modernization-go-monolith/knowledge",
+  "target": 26,
+  "target_from": "intent go_version",
+  "target_go": "1.26",
+  "tool": "index-go-knowledge"
+}

@@ -1,0 +1,30 @@
+{
+  "edges": [
+    {
+      "from": "orders",
+      "resolution": "sync-http",
+      "to": "catalog",
+      "why": "deterministic default — a resolved read call becomes a typed HttpClient"
+    },
+    {
+      "from": "orders",
+      "resolution": "sync-http",
+      "to": "customers",
+      "why": "deterministic default — a resolved read call becomes a typed HttpClient"
+    },
+    {
+      "from": "orders",
+      "resolution": "saga-step",
+      "to": "inventory",
+      "why": "the analysis saw this call write the other context"
+    },
+    {
+      "from": "orders",
+      "resolution": "saga-step",
+      "to": "payments",
+      "why": "the analysis saw this call write the other context"
+    }
+  ],
+  "note": "code resolves every measured call — not a Jev question",
+  "source": "deterministic"
+}

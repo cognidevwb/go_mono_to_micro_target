@@ -1,0 +1,18 @@
+{
+  "elapsedMs": 124,
+  "finishedAt": 1790392780,
+  "inputs": [],
+  "kind": "rust-binary",
+  "outputs": [
+    {
+      "exists": true,
+      "kind": null,
+      "name": "feasibility",
+      "optional": false,
+      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/.cognidev/feature/feasibility.json"
+    }
+  ],
+  "status": "Ok",
+  "step": "feasibility",
+  "summary": "Tool `../tools/go-feasibility/target/release/go-feasibility` completed."
+}

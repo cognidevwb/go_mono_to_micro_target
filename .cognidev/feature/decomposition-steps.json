@@ -1,0 +1,103 @@
+{
+  "facts_from": "decomposition-facts.json",
+  "facts_missing": [],
+  "jev": {
+    "candidates_asked": 5,
+    "input_tokens": 16763,
+    "needs_decision": 1,
+    "output_tokens": 1054,
+    "overridden_by_rule": 0,
+    "questions": 43,
+    "requests_cached": 0,
+    "requests_sent": 6
+  },
+  "kept_monolithic": [],
+  "measured": {
+    "candidates": 5,
+    "edges": 4,
+    "saga_candidates": 1,
+    "table_owning_candidates": 5,
+    "tables": 7
+  },
+  "path": "jev",
+  "result": {
+    "order": [
+      "orders",
+      "catalog",
+      "customers",
+      "inventory",
+      "payments"
+    ],
+    "sagas": [
+      "CreateOrder"
+    ],
+    "services": [
+      "catalog",
+      "customers",
+      "inventory",
+      "payments",
+      "orders"
+    ]
+  },
+  "steps": [
+    {
+      "accepted_from": "jev",
+      "answers_used": [
+        "driver",
+        "boundary_strategy",
+        "decomposition_granularity",
+        "scope",
+        "pilot_service"
+      ],
+      "attempts": 1,
+      "brief": ".cognidev/feature/decompose/jev.json",
+      "decision": "Where the service boundaries fall",
+      "note": "Jev: stays own / merges into, per candidate; the package rule applied after",
+      "rejected": [],
+      "step": "boundaries"
+    },
+    {
+      "accepted_from": "jev",
+      "answers_used": [
+        "data_ownership",
+        "database"
+      ],
+      "attempts": 1,
+      "brief": ".cognidev/feature/decompose/jev.json",
+      "decision": "Which service owns each table",
+      "note": "Jev: yes/no per candidate per table",
+      "rejected": [],
+      "step": "ownership"
+    },
+    {
+      "accepted_from": "deterministic",
+      "answers_used": [
+        "read_write_model",
+        "event_backbone",
+        "messaging_lib",
+        "api_versioning"
+      ],
+      "attempts": 0,
+      "brief": ".cognidev/feature/decompose/jev.json",
+      "decision": "What each cross-service call becomes",
+      "note": "code resolves every measured call — not a Jev question",
+      "rejected": [],
+      "step": "edges"
+    },
+    {
+      "accepted_from": "jev",
+      "answers_used": [
+        "coordination",
+        "outbox",
+        "event_backbone",
+        "messaging_lib"
+      ],
+      "attempts": 1,
+      "brief": ".cognidev/feature/decompose/jev.json",
+      "decision": "How each multi-service write is sequenced",
+      "note": "Jev: saga or keep per unit of work, yes/no per step for compensation",
+      "rejected": [],
+      "step": "sagas"
+    }
+  ]
+}

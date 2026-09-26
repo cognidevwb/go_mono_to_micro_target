@@ -1,0 +1,9 @@
+{
+  "extracted": [
+    "catalog",
+    "customers",
+    "inventory",
+    "orders",
+    "payments"
+  ]
+}

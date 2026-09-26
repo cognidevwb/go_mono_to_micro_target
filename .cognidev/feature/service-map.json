@@ -1,0 +1,71 @@
+{
+  "entities": {
+    "Category": "catalog-service",
+    "Customer": "customers-service",
+    "Order": "orders-service",
+    "OrderLine": "orders-service",
+    "Payment": "payments-service",
+    "Product": "catalog-service",
+    "StockItem": "inventory-service"
+  },
+  "files": {
+    "internal/catalog/handlers.go": "catalog-service",
+    "internal/catalog/model.go": "catalog-service",
+    "internal/catalog/service.go": "catalog-service",
+    "internal/customers/handlers.go": "customers-service",
+    "internal/customers/model.go": "customers-service",
+    "internal/customers/service.go": "customers-service",
+    "internal/inventory/model.go": "inventory-service",
+    "internal/inventory/service.go": "inventory-service",
+    "internal/orders/handlers.go": "orders-service",
+    "internal/orders/model.go": "orders-service",
+    "internal/orders/service.go": "orders-service",
+    "internal/payments/gateway.go": "payments-service",
+    "internal/payments/model.go": "payments-service",
+    "internal/payments/service.go": "payments-service"
+  },
+  "services": [
+    {
+      "context": "catalog",
+      "entities": [
+        "Category",
+        "Product"
+      ],
+      "label": "catalog",
+      "service": "catalog-service"
+    },
+    {
+      "context": "customers",
+      "entities": [
+        "Customer"
+      ],
+      "label": "customers",
+      "service": "customers-service"
+    },
+    {
+      "context": "inventory",
+      "entities": [
+        "StockItem"
+      ],
+      "label": "inventory",
+      "service": "inventory-service"
+    },
+    {
+      "context": "payments",
+      "entities": [
+        "Payment"
+      ],
+      "label": "payments",
+      "service": "payments-service"
+    },
+    {
+      "context": "orders",
+      "entities": [
+        "Order",
+        "OrderLine"
+      ],
+      "label": "orders",
+      "service": "orders-service"
+    }
+  ]
+}

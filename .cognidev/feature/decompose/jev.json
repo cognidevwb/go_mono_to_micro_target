@@ -1,0 +1,665 @@
+{
+  "answered_by": [
+    "jev-1.13.0"
+  ],
+  "bank_revision": "2026-09-25.1",
+  "candidates": [
+    {
+      "answers": {
+        "boundary": {
+          "first": {
+            "choice": "own",
+            "confidence": 0.98,
+            "probabilities": {
+              "into_customers": 0.0,
+              "into_inventory": 0.0,
+              "into_orders": 0.01,
+              "into_payments": 0.0,
+              "own": 0.99
+            },
+            "type": "choice"
+          },
+          "verdict": {
+            "choice": "own",
+            "confidence": 0.98,
+            "p": 0.99,
+            "verdict": "choice"
+          }
+        },
+        "owns__Category": {
+          "first": {
+            "noul": 0.95,
+            "type": "noul"
+          },
+          "verdict": {
+            "p": 0.95,
+            "verdict": "yes"
+          }
+        },
+        "owns__Customer": {
+          "first": {
+            "noul": 0.02,
+            "type": "noul"
+          },
+          "verdict": {
+            "p": 0.02,
+            "verdict": "no"
+          }
+        },
+        "owns__Order": {
+          "first": {
+            "noul": 0.02,
+            "type": "noul"
+          },
+          "verdict": {
+            "p": 0.02,
+            "verdict": "no"
+          }
+        },
+        "owns__OrderLine": {
+          "first": {
+            "noul": 0.02,
+            "type": "noul"
+          },
+          "verdict": {
+            "p": 0.02,
+            "verdict": "no"
+          }
+        },
+        "owns__Payment": {
+          "first": {
+            "noul": 0.02,
+            "type": "noul"
+          },
+          "verdict": {
+            "p": 0.02,
+            "verdict": "no"
+          }
+        },
+        "owns__Product": {
+          "first": {
+            "noul": 0.91,
+            "type": "noul"
+          },
+          "verdict": {
+            "p": 0.91,
+            "verdict": "yes"
+          }
+        },
+        "owns__StockItem": {
+          "first": {
+            "noul": 0.03,
+            "type": "noul"
+          },
+          "verdict": {
+            "p": 0.03,
+            "verdict": "no"
+          }
+        }
+      },
+      "candidate": "catalog",
+      "input_tokens": 2848,
+      "output_tokens": 191,
+      "questions": 8,
+      "requests_cached": 0,
+      "requests_sent": 1
+    },
+    {
+      "answers": {
+        "boundary": {
+          "first": {
+            "choice": "own",
+            "confidence": 0.97,
+            "probabilities": {
+              "into_catalog": 0.0,
+              "into_inventory": 0.0,
+              "into_orders": 0.02,
+              "into_payments": 0.0,
+              "own": 0.98
+            },
+            "type": "choice"
+          },
+          "verdict": {
+            "choice": "own",
+            "confidence": 0.97,
+            "p": 0.98,
+            "verdict": "choice"
+          }
+        },
+        "owns__Category": {
+          "first": {
+            "noul": 0.02,
+            "type": "noul"
+          },
+          "verdict": {
+            "p": 0.02,
+            "verdict": "no"
+          }
+        },
+        "owns__Customer": {
+          "first": {
+            "noul": 0.94,
+            "type": "noul"
+          },
+          "verdict": {
+            "p": 0.94,
+            "verdict": "yes"
+          }
+        },
+        "owns__Order": {
+          "first": {
+            "noul": 0.02,
+            "type": "noul"
+          },
+          "verdict": {
+            "p": 0.02,
+            "verdict": "no"
+          }
+        },
+        "owns__OrderLine": {
+          "first": {
+            "noul": 0.02,
+            "type": "noul"
+          },
+          "verdict": {
+            "p": 0.02,
+            "verdict": "no"
+          }
+        },
+        "owns__Payment": {
+          "first": {
+            "noul": 0.02,
+            "type": "noul"
+          },
+          "verdict": {
+            "p": 0.02,
+            "verdict": "no"
+          }
+        },
+        "owns__Product": {
+          "first": {
+            "noul": 0.02,
+            "type": "noul"
+          },
+          "verdict": {
+            "p": 0.02,
+            "verdict": "no"
+          }
+        },
+        "owns__StockItem": {
+          "first": {
+            "noul": 0.02,
+            "type": "noul"
+          },
+          "verdict": {
+            "p": 0.02,
+            "verdict": "no"
+          }
+        }
+      },
+      "candidate": "customers",
+      "input_tokens": 2829,
+      "output_tokens": 189,
+      "questions": 8,
+      "requests_cached": 0,
+      "requests_sent": 1
+    },
+    {
+      "answers": {
+        "boundary": {
+          "first": {
+            "choice": "own",
+            "confidence": 0.95,
+            "probabilities": {
+              "into_catalog": 0.0,
+              "into_customers": 0.0,
+              "into_orders": 0.03,
+              "into_payments": 0.0,
+              "own": 0.97
+            },
+            "type": "choice"
+          },
+          "verdict": {
+            "choice": "own",
+            "confidence": 0.95,
+            "p": 0.97,
+            "verdict": "choice"
+          }
+        },
+        "owns__Category": {
+          "first": {
+            "noul": 0.02,
+            "type": "noul"
+          },
+          "verdict": {
+            "p": 0.02,
+            "verdict": "no"
+          }
+        },
+        "owns__Customer": {
+          "first": {
+            "noul": 0.02,
+            "type": "noul"
+          },
+          "verdict": {
+            "p": 0.02,
+            "verdict": "no"
+          }
+        },
+        "owns__Order": {
+          "first": {
+            "noul": 0.02,
+            "type": "noul"
+          },
+          "verdict": {
+            "p": 0.02,
+            "verdict": "no"
+          }
+        },
+        "owns__OrderLine": {
+          "first": {
+            "noul": 0.02,
+            "type": "noul"
+          },
+          "verdict": {
+            "p": 0.02,
+            "verdict": "no"
+          }
+        },
+        "owns__Payment": {
+          "first": {
+            "noul": 0.02,
+            "type": "noul"
+          },
+          "verdict": {
+            "p": 0.02,
+            "verdict": "no"
+          }
+        },
+        "owns__Product": {
+          "first": {
+            "noul": 0.03,
+            "type": "noul"
+          },
+          "verdict": {
+            "p": 0.03,
+            "verdict": "no"
+          }
+        },
+        "owns__StockItem": {
+          "first": {
+            "noul": 0.95,
+            "type": "noul"
+          },
+          "verdict": {
+            "p": 0.95,
+            "verdict": "yes"
+          }
+        }
+      },
+      "candidate": "inventory",
+      "input_tokens": 2861,
+      "output_tokens": 191,
+      "questions": 8,
+      "requests_cached": 0,
+      "requests_sent": 1
+    },
+    {
+      "answers": {
+        "boundary": {
+          "first": {
+            "choice": "own",
+            "confidence": 0.96,
+            "probabilities": {
+              "into_catalog": 0.0,
+              "into_customers": 0.0,
+              "into_inventory": 0.0,
+              "into_orders": 0.03,
+              "own": 0.97
+            },
+            "type": "choice"
+          },
+          "verdict": {
+            "choice": "own",
+            "confidence": 0.96,
+            "p": 0.97,
+            "verdict": "choice"
+          }
+        },
+        "owns__Category": {
+          "first": {
+            "noul": 0.02,
+            "type": "noul"
+          },
+          "verdict": {
+            "p": 0.02,
+            "verdict": "no"
+          }
+        },
+        "owns__Customer": {
+          "first": {
+            "noul": 0.02,
+            "type": "noul"
+          },
+          "verdict": {
+            "p": 0.02,
+            "verdict": "no"
+          }
+        },
+        "owns__Order": {
+          "first": {
+            "noul": 0.02,
+            "type": "noul"
+          },
+          "verdict": {
+            "p": 0.02,
+            "verdict": "no"
+          }
+        },
+        "owns__OrderLine": {
+          "first": {
+            "noul": 0.02,
+            "type": "noul"
+          },
+          "verdict": {
+            "p": 0.02,
+            "verdict": "no"
+          }
+        },
+        "owns__Payment": {
+          "first": {
+            "noul": 0.94,
+            "type": "noul"
+          },
+          "verdict": {
+            "p": 0.94,
+            "verdict": "yes"
+          }
+        },
+        "owns__Product": {
+          "first": {
+            "noul": 0.02,
+            "type": "noul"
+          },
+          "verdict": {
+            "p": 0.02,
+            "verdict": "no"
+          }
+        },
+        "owns__StockItem": {
+          "first": {
+            "noul": 0.02,
+            "type": "noul"
+          },
+          "verdict": {
+            "p": 0.02,
+            "verdict": "no"
+          }
+        }
+      },
+      "candidate": "payments",
+      "input_tokens": 2829,
+      "output_tokens": 190,
+      "questions": 8,
+      "requests_cached": 0,
+      "requests_sent": 1
+    },
+    {
+      "answers": {
+        "boundary": {
+          "first": {
+            "choice": "own",
+            "confidence": 1.0,
+            "probabilities": {
+              "into_catalog": 0.0,
+              "into_customers": 0.0,
+              "into_inventory": 0.0,
+              "into_payments": 0.0,
+              "own": 1.0
+            },
+            "type": "choice"
+          },
+          "verdict": {
+            "choice": "own",
+            "confidence": 1.0,
+            "p": 1.0,
+            "verdict": "choice"
+          }
+        },
+        "compensable__0__0": {
+          "first": {
+            "noul": 0.88,
+            "type": "noul"
+          },
+          "verdict": {
+            "p": 0.88,
+            "verdict": "yes"
+          }
+        },
+        "compensable__0__1": {
+          "first": {
+            "noul": 0.66,
+            "type": "noul"
+          },
+          "reask": {
+            "noul": 0.52,
+            "type": "noul"
+          },
+          "verdict": {
+            "verdict": "unresolved",
+            "why": "P(yes)=0.52 stayed between 0.3 and 0.7 after the re-ask"
+          }
+        },
+        "owns__Category": {
+          "first": {
+            "noul": 0.02,
+            "type": "noul"
+          },
+          "verdict": {
+            "p": 0.02,
+            "verdict": "no"
+          }
+        },
+        "owns__Customer": {
+          "first": {
+            "noul": 0.03,
+            "type": "noul"
+          },
+          "verdict": {
+            "p": 0.03,
+            "verdict": "no"
+          }
+        },
+        "owns__Order": {
+          "first": {
+            "noul": 0.96,
+            "type": "noul"
+          },
+          "verdict": {
+            "p": 0.96,
+            "verdict": "yes"
+          }
+        },
+        "owns__OrderLine": {
+          "first": {
+            "noul": 0.96,
+            "type": "noul"
+          },
+          "verdict": {
+            "p": 0.96,
+            "verdict": "yes"
+          }
+        },
+        "owns__Payment": {
+          "first": {
+            "noul": 0.03,
+            "type": "noul"
+          },
+          "verdict": {
+            "p": 0.03,
+            "verdict": "no"
+          }
+        },
+        "owns__Product": {
+          "first": {
+            "noul": 0.03,
+            "type": "noul"
+          },
+          "verdict": {
+            "p": 0.03,
+            "verdict": "no"
+          }
+        },
+        "owns__StockItem": {
+          "first": {
+            "noul": 0.03,
+            "type": "noul"
+          },
+          "verdict": {
+            "p": 0.03,
+            "verdict": "no"
+          }
+        },
+        "saga__0": {
+          "first": {
+            "choice": "saga",
+            "confidence": 0.99,
+            "probabilities": {
+              "keep": 0.0,
+              "saga": 1.0
+            },
+            "type": "choice"
+          },
+          "verdict": {
+            "choice": "saga",
+            "confidence": 0.99,
+            "p": 1.0,
+            "verdict": "choice"
+          }
+        }
+      },
+      "candidate": "orders",
+      "input_tokens": 5396,
+      "output_tokens": 293,
+      "questions": 11,
+      "requests_cached": 0,
+      "requests_sent": 2
+    }
+  ],
+  "decisions": {
+    "boundaries": [
+      {
+        "answer": "own",
+        "candidate": "catalog",
+        "confidence": {
+          "confidence": 0.98,
+          "p": 0.99
+        }
+      },
+      {
+        "answer": "own",
+        "candidate": "customers",
+        "confidence": {
+          "confidence": 0.97,
+          "p": 0.98
+        }
+      },
+      {
+        "answer": "own",
+        "candidate": "inventory",
+        "confidence": {
+          "confidence": 0.95,
+          "p": 0.97
+        }
+      },
+      {
+        "answer": "own",
+        "candidate": "orders",
+        "confidence": {
+          "confidence": 1.0,
+          "p": 1.0
+        }
+      },
+      {
+        "answer": "own",
+        "candidate": "payments",
+        "confidence": {
+          "confidence": 0.96,
+          "p": 0.97
+        }
+      }
+    ],
+    "ownership": [
+      {
+        "deterministic_owner": "catalog",
+        "owner": "catalog",
+        "table": "Category"
+      },
+      {
+        "deterministic_owner": "catalog",
+        "owner": "catalog",
+        "table": "Product"
+      },
+      {
+        "deterministic_owner": "customers",
+        "owner": "customers",
+        "table": "Customer"
+      },
+      {
+        "deterministic_owner": "inventory",
+        "owner": "inventory",
+        "table": "StockItem"
+      },
+      {
+        "deterministic_owner": "payments",
+        "owner": "payments",
+        "table": "Payment"
+      },
+      {
+        "deterministic_owner": "orders",
+        "owner": "orders",
+        "table": "Order"
+      },
+      {
+        "deterministic_owner": "orders",
+        "owner": "orders",
+        "table": "OrderLine"
+      }
+    ],
+    "sagas": [
+      {
+        "answer": "saga",
+        "confidence": {
+          "confidence": 0.99,
+          "p": 1.0
+        },
+        "name": "CreateOrder",
+        "unit": "PlaceOrder"
+      }
+    ]
+  },
+  "model": "jev-1.13.0",
+  "needs_decision": [
+    {
+      "context": "payments",
+      "question": "compensable",
+      "stands": "no compensation designed for this step",
+      "step": "s.payments.Charge",
+      "unit": "PlaceOrder",
+      "why": "P(yes)=0.52 stayed between 0.3 and 0.7 after the re-ask"
+    }
+  ],
+  "overridden_by_rule": [],
+  "path": "jev",
+  "source_sent": false,
+  "summary": {
+    "candidates_asked": 5,
+    "input_tokens": 16763,
+    "needs_decision": 1,
+    "output_tokens": 1054,
+    "overridden_by_rule": 0,
+    "questions": 43,
+    "requests_cached": 0,
+    "requests_sent": 6
+  }
+}

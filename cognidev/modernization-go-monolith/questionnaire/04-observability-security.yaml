@@ -1,0 +1,64 @@
+apiVersion: cognidev.ai/v1
+kind: QuestionnaireSection
+
+section:
+  id: observability-security
+  title: "Observability & security"
+  intro: |
+    Cross-cutting concerns wired the same way in every service's main.go:
+    log/slog structured logs, OpenTelemetry traces and metrics over OTLP,
+    /healthz + /readyz, and token-based auth validated at the edge and re-checked
+    per service.
+  estimated_seconds: 35
+
+questions:
+
+  - id: observability
+    kind: enum
+    label: "Observability backend?"
+    description: "OpenTelemetry (go.opentelemetry.io/otel, OTLP exporter, otelhttp/otelgin middleware) is emitted from every service regardless — this only picks where it lands."
+    default: otel-lgtm
+    required: true
+    options:
+      - { value: otel-lgtm,     label: "OpenTelemetry → Grafana LGTM", hint: "Recommended — vendor-neutral; Tempo/Loki/Prometheus/Grafana (grafana/otel-lgtm bundled in docker compose)." }
+      - { value: azure-monitor, label: "Azure Monitor / Application Insights", hint: "Managed, for Azure estates (OTLP via the Azure Monitor exporter / collector)." }
+      - { value: otel-custom,   label: "OpenTelemetry → other OTLP backend", hint: "Datadog / Honeycomb / New Relic / a self-hosted collector." }
+
+  - id: auth
+    kind: enum
+    label: "Authentication / identity?"
+    description: "JWT bearer everywhere; validated at the gateway and re-validated per service (the monolith's auth middleware and its context.Value user key become a verified token claim each service reads)."
+    default: jwt-keycloak
+    required: true
+    options:
+      - { value: jwt-keycloak, label: "JWT + Keycloak (OIDC)", hint: "Recommended free-first — self-hosted OIDC provider." }
+      - { value: entra-id,     label: "Microsoft Entra ID", hint: "Managed OIDC for Microsoft/Azure estates." }
+      - { value: jwt-custom,   label: "JWT + existing IdP", hint: "Auth0 / Okta / your own issuer (JWKS URL)." }
+
+  - id: authz_boundary
+    kind: enum
+    label: "Where is authorization enforced?"
+    description: "Token validation vs business authorization. Best practice validates the token at the gateway AND re-validates + authorizes inside each service."
+    default: edge-and-service
+    required: false
+    options:
+      - { value: edge-and-service, label: "Gateway + per-service", hint: "Recommended — defence in depth; the gateway authenticates, each service authorizes." }
+      - { value: service-only,     label: "Per-service only", hint: "Each service validates the token itself; no trusted edge." }
+
+  - id: api_versioning
+    kind: enum
+    label: "API versioning?"
+    description: "How service contracts evolve without breaking callers."
+    default: url-segment
+    required: false
+    options:
+      - { value: url-segment, label: "URL segment (/v1/...)", hint: "Recommended — explicit, cache-friendly, gateway-routable." }
+      - { value: header,      label: "Header / media-type", hint: "Version negotiated via an Accept header." }
+      - { value: none,        label: "No versioning yet", hint: "Single version; add versioning when the first breaking change lands." }
+
+  - id: search_registry
+    kind: bool
+    label: "Check the modules this cut inherits against published advisories?"
+    description: "The cut does not choose the module versions — it inherits them and then multiplies them: a monolith carrying one advisory becomes N services each shipping the same vulnerable module, and the build is green throughout. Off, nothing about this project leaves the machine and the scan records that nobody looked, which the gate reports as SKIPPED rather than as a pass. On, the resolved module graph is checked with govulncheck (reachability-aware) or against OSV. Findings are reported, never failed. Recommended: yes if this machine has internet."
+    default: false
+    required: false

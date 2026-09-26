@@ -1,0 +1,13 @@
+{
+  "branch": "target-master",
+  "dropped": [
+    "cmd",
+    "go.mod",
+    "go.sum",
+    "internal"
+  ],
+  "kept_monolith_paths": [],
+  "monolith_removed": true,
+  "still_importing": [],
+  "strategy": "archive-and-adopt"
+}

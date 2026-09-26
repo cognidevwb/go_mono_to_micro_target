@@ -1,0 +1,60 @@
+{
+  "measured": {
+    "cross_service_calls": 2,
+    "files_planned": 74,
+    "owned_tables": 7,
+    "sagas": 1,
+    "services": 5
+  },
+  "steps": [
+    {
+      "by": "deterministic",
+      "detail": "5 service modules in one go.work workspace, a shared pkg/ kernel and a Go reverse-proxy gateway — generated filled and compiling before any domain code exists.",
+      "step": 1,
+      "what": "Scaffold the platform"
+    },
+    {
+      "by": "deterministic",
+      "detail": "Each owned package is relocated file by file into its service: package clause, import paths and the shared *gorm.DB split mechanically. 7 tables change owner. Nothing is rewritten.",
+      "step": 2,
+      "what": "Move the monolith's code in"
+    },
+    {
+      "by": "deterministic",
+      "detail": "2 cross-service calls get a typed client and a contract DTO, each left marked for the next step. No call is silently reinterpreted.",
+      "step": 3,
+      "what": "Mark the seams"
+    },
+    {
+      "by": "deterministic",
+      "detail": "The provider read-model shapes are recorded as the baseline the drift check compares against at the end.",
+      "step": 4,
+      "what": "Snapshot the contracts"
+    },
+    {
+      "by": "model",
+      "detail": "2 client calls and 1 saga. This is the only step where a model writes code, and it writes only inside the markers. Each task compiles with `go build ./...` and `go vet` and commits before the next starts.",
+      "step": 5,
+      "what": "Implement the marked seams"
+    },
+    {
+      "by": "deterministic",
+      "detail": "The shapes are recomputed and diffed against the baseline; a consumer depending on a changed provider is marked rather than left to find out later.",
+      "step": 6,
+      "what": "Check for contract drift"
+    },
+    {
+      "by": "deterministic",
+      "detail": "`go build ./...`, `go vet` and `go test` across every module in the go.work workspace. The run ends on evidence, not on a claim.",
+      "step": 7,
+      "what": "Prove it compiles"
+    },
+    {
+      "by": "deterministic",
+      "detail": "The end-state you chose up front — the monolith kept, archived, exported, or split per service. Local git only; nothing is pushed.",
+      "step": 8,
+      "what": "Apply your git strategy"
+    }
+  ],
+  "title": "What this run will do"
+}

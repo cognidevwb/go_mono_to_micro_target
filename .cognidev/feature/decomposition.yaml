@@ -1,0 +1,83 @@
+# The decomposition, as decided. Generated — edit the plan, not this.
+services:
+  - context: "catalog"
+    name: "catalog-service"
+    absorbed: ["catalog"]
+    why: "Jev: stays its own service"
+    tables: ["Category", "Product"]
+    aggregate_roots: ["Category"]
+  - context: "customers"
+    name: "customers-service"
+    absorbed: ["customers"]
+    why: "Jev: stays its own service"
+    tables: ["Customer"]
+    aggregate_roots: ["Customer"]
+  - context: "inventory"
+    name: "inventory-service"
+    absorbed: ["inventory"]
+    why: "Jev: stays its own service"
+    tables: ["StockItem"]
+    aggregate_roots: ["StockItem"]
+  - context: "payments"
+    name: "payments-service"
+    absorbed: ["payments"]
+    why: "Jev: stays its own service"
+    tables: ["Payment"]
+    aggregate_roots: ["Payment"]
+  - context: "orders"
+    name: "orders-service"
+    absorbed: ["orders"]
+    why: "Jev: stays its own service"
+    tables: ["Order", "OrderLine"]
+    aggregate_roots: ["Order"]
+
+# What each cross-service call becomes. `sync-http` is a call;
+# `event` is an outbox and a subscriber; `read-model` is a projection
+# to build and keep fed; `saga-step` is a step in a transaction below.
+edges:
+  - from: "orders"
+    to: "inventory"
+    becomes: "saga-step"
+    why: "the analysis saw this call write the other context"
+  - from: "orders"
+    to: "payments"
+    becomes: "saga-step"
+    why: "the analysis saw this call write the other context"
+  - from: "orders"
+    to: "catalog"
+    becomes: "sync-http"
+    why: "deterministic default — a resolved read call becomes a typed HttpClient"
+  - from: "orders"
+    to: "customers"
+    becomes: "sync-http"
+    why: "deterministic default — a resolved read call becomes a typed HttpClient"
+
+sagas:
+  - name: "CreateOrder"
+    orchestrator: "orders"
+    participants: ["inventory", "orders", "payments"]
+    pivot: "orders"
+    steps:
+      - context: "inventory"
+        action: "s.inventory.Reserve"
+        compensation: "compensable (Jev p=0.88): undo `s.inventory.Reserve` in inventory"
+      - context: "payments"
+        action: "s.payments.Charge"
+        compensation: "needs decision — Jev could not tell whether this step can be undone"
+
+# Owned by nobody, on purpose: each belongs to more than one side.
+# They still need somewhere to live — a shared kernel, a copy per
+# service, or a service of their own.
+shared_tables:
+  []
+
+# Deterministic — leaves first, the hub last. Never asked of a model.
+extraction_order: ["orders", "catalog", "customers", "inventory", "payments"]
+
+# Jev could not settle these. The deterministic answer on each stands until a
+# person decides; nothing here was guessed. Full record: decompose/jev.json.
+needs_decision:
+  - question: "compensable"
+    about: "PlaceOrder"
+    why: "P(yes)=0.52 stayed between 0.3 and 0.7 after the re-ask"
+    stands: "no compensation designed for this step"

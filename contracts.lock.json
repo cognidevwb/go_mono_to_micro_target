@@ -1,0 +1,140 @@
+{
+  "consumers": [
+    {
+      "consumer_ctx": "inventory-service",
+      "item": "TopicOrderPlaced",
+      "path": "services/inventory/internal/contracts/orders/contracts.go",
+      "provider_ctx": "orders-service"
+    },
+    {
+      "consumer_ctx": "orders-service",
+      "item": "Category",
+      "path": "services/orders/internal/contracts/catalog/contracts.go",
+      "provider_ctx": "catalog-service"
+    },
+    {
+      "consumer_ctx": "orders-service",
+      "item": "Product",
+      "path": "services/orders/internal/contracts/catalog/contracts.go",
+      "provider_ctx": "catalog-service"
+    },
+    {
+      "consumer_ctx": "orders-service",
+      "item": "Gateway",
+      "path": "services/orders/internal/contracts/payments/contracts.go",
+      "provider_ctx": "payments-service"
+    }
+  ],
+  "documents": [
+    "contracts/openapi/catalog-service.json",
+    "contracts/openapi/customers-service.json",
+    "contracts/openapi/orders-service.json",
+    "contracts/events/envelope.schema.json",
+    "contracts/events/order.placed.schema.json"
+  ],
+  "providers": [
+    {
+      "hash": "7d30f581416178f4",
+      "item": "Category",
+      "kind": "read-model",
+      "provider_ctx": "catalog-service",
+      "scalar_shape": [
+        "ID uint json:id",
+        "Name string json:name"
+      ]
+    },
+    {
+      "hash": "5995fd5e6a838369",
+      "item": "Product",
+      "kind": "read-model",
+      "provider_ctx": "catalog-service",
+      "scalar_shape": [
+        "CategoryID uint json:categoryId",
+        "ID uint json:id",
+        "Name string json:name",
+        "Price float64 json:price",
+        "SKU string json:sku"
+      ]
+    },
+    {
+      "hash": "0a9a05d8f368d72d",
+      "item": "Customer",
+      "kind": "read-model",
+      "provider_ctx": "customers-service",
+      "scalar_shape": [
+        "Active bool json:active",
+        "CreatedAt time.Time json:createdAt",
+        "Email string json:email",
+        "ID uint json:id",
+        "Name string json:name"
+      ]
+    },
+    {
+      "hash": "dfd1c2ac347a800d",
+      "item": "StockItem",
+      "kind": "read-model",
+      "provider_ctx": "inventory-service",
+      "scalar_shape": [
+        "ID uint json:ID",
+        "OnHand int json:OnHand",
+        "ProductID uint json:ProductID",
+        "Reserved int json:Reserved"
+      ]
+    },
+    {
+      "hash": "170c0aa9371c10f8",
+      "item": "Order",
+      "kind": "read-model",
+      "provider_ctx": "orders-service",
+      "scalar_shape": [
+        "CustomerID uint json:customerId",
+        "ID uint json:id",
+        "Status string json:status",
+        "Total float64 json:total"
+      ]
+    },
+    {
+      "hash": "d4ccb712874b5958",
+      "item": "OrderLine",
+      "kind": "read-model",
+      "provider_ctx": "orders-service",
+      "scalar_shape": [
+        "ID uint json:id",
+        "OrderID uint json:orderId",
+        "ProductID uint json:productId",
+        "Quantity int json:quantity",
+        "UnitPrice float64 json:unitPrice"
+      ]
+    },
+    {
+      "hash": "c88ee5f7d752b7c7",
+      "item": "TopicOrderPlaced",
+      "kind": "constant",
+      "provider_ctx": "orders-service",
+      "scalar_shape": [
+        "TopicOrderPlaced = \"order.placed\""
+      ]
+    },
+    {
+      "hash": "cbf29ce484222325",
+      "item": "Gateway",
+      "kind": "read-model",
+      "provider_ctx": "payments-service",
+      "scalar_shape": []
+    },
+    {
+      "hash": "f812d8fa384b51bc",
+      "item": "Payment",
+      "kind": "read-model",
+      "provider_ctx": "payments-service",
+      "scalar_shape": [
+        "Amount float64 json:Amount",
+        "ID uint json:ID",
+        "OrderID uint json:OrderID",
+        "Status string json:Status"
+      ]
+    }
+  ],
+  "schema": 1,
+  "tool": "contracts-go"
+}

@@ -1,0 +1,1 @@
+Edited services/orders/internal/clients/catalog/client.go — this task's work is complete. 17 seam(s) still in it belong to 3 later task(s) in this plan: 14-orders-core (13), 15-orders-saga (1), 19-payments-core (3).

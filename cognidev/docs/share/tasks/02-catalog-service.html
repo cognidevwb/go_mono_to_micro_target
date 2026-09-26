@@ -1,0 +1,58 @@
+<style>
+:root { --ink:#1b1b1b; --muted:#5b5b5b; --rule:#dcdcdc; --accent:#1a5fb4; --wash:#f6f8fb; }
+* { box-sizing:border-box; }
+body { margin:0; background:#fff; color:var(--ink);
+       font-family:"Charter","Bitstream Charter","Iowan Old Style",Georgia,serif;
+       font-size:16px; line-height:1.55; }
+main { max-width:64rem; margin:0 auto; padding:3rem 1.5rem 5rem; }
+h1 { font-size:1.85rem; line-height:1.25; margin:0 0 1rem; font-weight:600; }
+h2 { font-size:1.2rem; margin:2.5rem 0 .75rem; font-weight:600;
+     padding-bottom:.35rem; border-bottom:2px solid var(--accent); }
+h3 { font-size:1rem; margin:1.75rem 0 .5rem; font-weight:600; color:var(--accent); }
+p { margin:.7rem 0; }
+.scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+table { border-collapse:collapse; width:100%; font-size:.9rem; margin:.6rem 0 1.5rem; }
+th, td { text-align:left; vertical-align:top; padding:.5rem .7rem;
+         border-bottom:1px solid var(--rule); }
+th { font-weight:600; color:var(--muted); font-size:.78rem; text-transform:uppercase;
+     letter-spacing:.05em; border-bottom:1px solid var(--ink); }
+tbody tr:nth-child(even) { background:var(--wash); }
+code { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:.85em; }
+ul { margin:.5rem 0 1rem; padding-left:1.25rem; }
+li { margin:.28rem 0; }
+li ul { margin:.2rem 0; }
+.foot { color:var(--muted); font-size:.85rem; margin-top:3rem; padding-top:1rem;
+        border-top:1px solid var(--rule); }
+</style>
+<main>
+<h1>2. Catalog Service</h1>
+<p>Extracted at position 2 of 5. Owns 2 tables; makes 0 outbound calls.</p>
+<h2>Owns</h2>
+<ul>
+<li><code>Category</code> — aggregate root</li>
+<li><code>Product</code></li>
+</ul>
+<h2>Moved from</h2>
+<ul>
+<li><code>internal/catalog/handlers.go</code></li>
+<li><code>internal/catalog/model.go</code></li>
+<li><code>internal/catalog/service.go</code></li>
+</ul>
+<p>This is a sample of what the map assigned; the porter moves everything it owns, not just these.</p>
+<h2>Files this task writes</h2>
+<div class="scroll"><table><thead><tr><th>File</th><th>Layer</th><th>Purpose</th></tr></thead><tbody>
+<tr><td><code>services/catalog/internal/catalog/handlers.go</code></td><td>routing</td><td>handlers.go ported VERBATIM from the monolith's internal/catalog/handlers.go by port-monolith-go — package clause kept, import paths rewritten to this module. Do not rewrite it: fill only its <code>// CW-SEAM[...]</code> markers (catalog-service)</td></tr>
+<tr><td><code>services/catalog/internal/catalog/model.go</code></td><td>data</td><td>model.go ported VERBATIM from the monolith's internal/catalog/model.go by port-monolith-go — package clause kept, import paths rewritten to this module. Do not rewrite it: fill only its <code>// CW-SEAM[...]</code> markers (catalog-service)</td></tr>
+<tr><td><code>services/catalog/internal/catalog/service.go</code></td><td>services</td><td>service.go ported VERBATIM from the monolith's internal/catalog/service.go by port-monolith-go — package clause kept, import paths rewritten to this module. Do not rewrite it: fill only its <code>// CW-SEAM[...]</code> markers (catalog-service)</td></tr>
+<tr><td><code>services/catalog/cmd/catalog/main.go</code></td><td>routing</td><td>catalog's entrypoint: slog JSON handler, OpenTelemetry (OTLP) setup, its OWN database handle, the router, /healthz + /readyz, graceful shutdown on SIGTERM. Wire only this service's packages — the monolith's composition root is not ported (catalog-service)</td></tr>
+<tr><td><code>services/catalog/migrations/0001_init.sql</code></td><td>data</td><td>CREATE TABLE for the tables catalog OWNS and nothing else: categories (Category), products (Product). Replaces the monolith's shared AutoMigrate; a column another service needs is served by catalog's API, never by a cross-schema join (catalog-service)</td></tr>
+<tr><td><code>services/catalog/internal/store/db.go</code></td><td>data</td><td>open catalog's OWN *gorm.DB (gorm.io/driver/postgres) from its own DSN — models registered here are ONLY Category, Product; the monolith's shared platform.Open and global AutoMigrate do not come over (catalog-service)</td></tr>
+<tr><td><code>services/catalog/internal/acl/legacy.go</code></td><td>services</td><td>anti-corruption layer for catalog: translate the monolith's shapes for Category, Product into catalog's model — stringly-typed statuses to typed constants, legacy column names, invariants rejected at the boundary. Pure functions, no I/O. // CW-SEAM[kind=acl-translate] (catalog-service)</td></tr>
+<tr><td><code>services/catalog/internal/catalog/catalog_test.go</code></td><td>services</td><td>table-driven tests for catalog (Category): the happy path per aggregate, validation → 400, not-found → 404, and the concurrency / out-of-stock guard; database via testcontainers-go Postgres, skipped with t.Skip when no container runtime is present (catalog-service)</td></tr>
+<tr><td><code>services/catalog/deploy/deploy.targets.yml</code></td><td>cicd</td><td>CI/CD: fill catalog's deploy environments + post-deploy smoke-check path (# TODO(cognidev)) targeting Azure Container Apps (deploy/azure — azd), images in ACR; build (go build, go vet, go test -race), the distroless image, the Syft SBOM and the Grype scan are already wired (catalog-service)</td></tr>
+<tr><td><code>services/catalog/deploy/strangler.values.yaml</code></td><td>deploy</td><td>Deployment: set catalog's strangler traffic weight 0..100 + legacyPaths (CW-SEAM), grounded in catalog's coupling — a leaf higher, the hub / saga orchestrator canary low (catalog-service)</td></tr>
+<tr><td><code>services/catalog/README.md</code></td><td>docs</td><td>Docs: fill catalog's &lt;!-- CW-SEAM[kind=business-capability service=catalog] --&gt; — 2-3 sentences on the business capability catalog owns, grounded in its source (catalog-service)</td></tr>
+<tr><td><code>services/catalog/test/equivalence/catalog_equivalence_test.go</code></td><td>equivalence</td><td>Equivalence catalog: for each endpoint derive a {request, seed, expectedResponse} golden from the monolith's handler into testdata/equivalence/, replay it against the service with httptest, normalise volatile fields, assert new == legacy (catalog-service)</td></tr>
+</tbody></table></div>
+<p class="foot">Written by the Go decomposition planner. The same content is in <code>02-catalog-service.md</code> beside this file.</p>
+</main>

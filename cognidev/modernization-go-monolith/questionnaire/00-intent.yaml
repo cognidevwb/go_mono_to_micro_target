@@ -1,0 +1,108 @@
+apiVersion: cognidev.ai/v1
+kind: QuestionnaireSection
+
+section:
+  id: intent
+  title: "Decomposition goal"
+  intro: |
+    We've already mapped your monolith — the Go packages, the gin/echo/chi
+    routes, the gorm/sqlx models and their relations, the db.Transaction units
+    of work, the package-level maps, context keys, in-process topics and
+    outbound calls are read straight from the source. Now tell us the *goal* of
+    the split, how far to go, and how to sequence it. We only ask the decisions
+    a parser can't make for you.
+
+    Every service is generated with the SAME architecture — one uniform Go 1.26
+    module shape inside a go.work workspace; per-service variation can come
+    later.
+
+    In a hurry? Pick "Use defaults for the rest" to accept the pinned 2026 Go
+    stack in one click — Go 1.26 / your current web framework / gorm kept /
+    Postgres per service / NATS JetStream + outbox / Go reverse-proxy gateway /
+    slog + OpenTelemetry → LGTM / Azure Container Apps. The next step validates
+    whatever you pick.
+  estimated_seconds: 50
+
+questions:
+
+  - id: driver
+    kind: enum
+    label: "What's driving the decomposition?"
+    description: "The primary reason shapes how aggressively we cut and what we extract first."
+    default: independent-deploy
+    required: true
+    options:
+      - { value: independent-deploy, label: "Independent deploy & scale", hint: "Teams ship services on their own cadence; scale hot paths alone." }
+      - { value: team-autonomy,      label: "Team / ownership boundaries", hint: "Conway's law — one team per bounded context." }
+      - { value: fault-isolation,    label: "Fault & blast-radius isolation", hint: "A panic or a leaking goroutine in one domain must not take the app down." }
+      - { value: tech-heterogeneity, label: "Per-service technology freedom", hint: "Different datastores or runtimes per service." }
+
+  - id: boundary_strategy
+    kind: enum
+    label: "How should service boundaries be drawn?"
+    description: "Domain-driven boundaries (recommended) follow business contexts — in Go usually one package per context under internal/; technical splits follow layers. The analysis proposes the cut either way."
+    default: domain
+    required: true
+    options:
+      - { value: domain,    label: "Domain-driven (bounded contexts)", hint: "Recommended — group by business domain from package + owned-table + co-write clusters." }
+      - { value: subdomain, label: "Fine-grained subdomains", hint: "Smaller services; more network hops." }
+      - { value: technical, label: "Technical layers (api / service / store)", hint: "Horizontal slices — rarely the right first cut." }
+
+  - id: decomposition_granularity
+    kind: enum
+    label: "How granular should the services be?"
+    description: "Tunes how aggressively thin packages that own NO tables (a notifications or pricing helper package) are folded into the service they front. The mapping is computed from the code either way — this only sets the grain."
+    default: balanced
+    required: true
+    options:
+      - { value: balanced, label: "Balanced — one per bounded context", hint: "Recommended — fold table-less helper packages into the service they front." }
+      - { value: coarse,   label: "Coarse — fewer, larger services", hint: "Also fold single-table contexts into their host; fewest services and hops." }
+      - { value: fine,     label: "Fine — one service per package", hint: "Keep every domain package as its own service; most services, most calls." }
+
+  - id: migration_approach
+    kind: enum
+    label: "How do you want to cut over?"
+    description: "The strangler-fig pattern (recommended) extracts one context at a time behind the gateway while the monolith keeps serving everything else. A big-bang rewrite is higher-risk and rarely advised."
+    default: strangler
+    required: true
+    options:
+      - { value: strangler,    label: "Strangler fig — incremental", hint: "Recommended — route one extracted context at a time through the gateway; the monolith shrinks safely." }
+      - { value: parallel-run, label: "Strangler + parallel run", hint: "Run old + new against synchronised data (outbox), compare, then flip traffic." }
+      - { value: big-bang,     label: "Big-bang rewrite", hint: "Extract everything at once — highest risk; only for small monoliths." }
+
+  - id: base_module
+    kind: string
+    label: "Base module path for the new services?"
+    description: "Optional. The Go module path prefix the extracted services live under, e.g. github.com/acme/shop — each service becomes <base>/services/<name> and the shared contracts <base>/pkg. Leave blank to inherit the monolith's `module` line from go.mod (detected from source) or fall back to example.com/platform."
+    default: ""
+    required: false
+
+  - id: scope
+    kind: string
+    label: "Anything to keep monolithic?"
+    description: "Optional. Name packages/domains to leave in the monolith for now (e.g. `reporting, admin`). Leave blank to let the strangler-fig order decide (leaf, low-coupling domains first). Honoured deterministically — a named context is removed before the refine step is asked."
+    default: ""
+    multiline: true
+    required: false
+
+  - id: pilot_service
+    kind: string
+    label: "Carve only some services first?"
+    description: "Optional. Name the bounded contexts to carve on this run — one (e.g. `payments`) or several, comma-separated (`payments, catalog`) — so you can read the real output before the rest are extracted. You can also tick them on the target-architecture table later instead of answering here. Re-run naming others and they are added beside the first: go.work, the gateway routes, docker compose and the deploy manifests are rebuilt to describe every service extracted so far, already-carved code is never touched, and the readiness gates judge the run on the services it carved rather than the whole cut. Leave blank to extract everything in one run."
+    default: ""
+    required: false
+
+  # Jev (TypeSafe, api.typesafe.ai) answers the typed questions this playbook
+  # asks about your code: what each Go declaration touches (the `classify`
+  # step) and how the candidate services are cut (`plan-decomposition`). This
+  # decides what it may read. Asked because it is a disclosure choice, not a
+  # fact a parser can derive.
+  - id: jev_source_consent
+    kind: enum
+    label: "May Jev read the source of each Go declaration?"
+    description: "The classify step asks Jev, one request per declaration, which categories of change it belongs to (authentication, persistence, messaging, …). With `yes` the request carries the declaration's source and the facts the analysis found; with `facts-only` it carries only those facts and the declaration's signature, and the answers are less sure (recorded as such). The decomposition questions carry measured facts only, never source. With no Jev key nothing is sent at all: the classification keeps what code settles, and the decomposition questions go to your configured model instead."
+    default: "yes"
+    required: true
+    options:
+      - { value: "yes",      label: "Yes — send declaration source", hint: "Recommended — the sharpest answers. Source goes to api.typesafe.ai and nowhere else." }
+      - { value: facts-only, label: "Facts only",                    hint: "Only the analysis facts and each signature leave this machine." }

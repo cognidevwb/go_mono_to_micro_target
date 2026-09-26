@@ -1,0 +1,21 @@
+name: workspace-ci
+
+# The whole go.work workspace: every module builds, vets and tests together.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  workspace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with: { go-version: "1.26" }
+      - run: go work sync
+      - name: Build, vet and test every module
+        run: |
+          for m in $(go list -m -f '{{.Dir}}'); do
+            (cd "$m" && go build ./... && go vet ./... && go test -race ./...)
+          done

@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "allOf": [
+    {
+      "$ref": "envelope.schema.json"
+    },
+    {
+      "properties": {
+        "type": {
+          "const": "order.placed"
+        }
+      }
+    }
+  ],
+  "description": "orders-service publishes `order.placed` (TopicOrderPlaced); every consumer receives it in the envelope.",
+  "title": "order.placed"
+}

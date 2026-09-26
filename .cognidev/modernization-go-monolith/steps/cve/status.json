@@ -1,0 +1,25 @@
+{
+  "elapsedMs": 122,
+  "finishedAt": 1790395127,
+  "inputs": [],
+  "kind": "rust-binary",
+  "outputs": [
+    {
+      "exists": true,
+      "kind": null,
+      "name": "cve",
+      "optional": false,
+      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/.cognidev/feature/cve.json"
+    },
+    {
+      "exists": true,
+      "kind": null,
+      "name": "cve-findings",
+      "optional": false,
+      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/.cognidev/feature/cve-findings.json"
+    }
+  ],
+  "status": "Ok",
+  "step": "cve",
+  "summary": "Tool `../tools/go-cve/target/release/go-cve` completed."
+}

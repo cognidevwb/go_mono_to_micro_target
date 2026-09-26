@@ -1,0 +1,39 @@
+apiVersion: cognidev.ai/v1
+kind: QuestionnaireSection
+
+# ─────────────────────────────────────────────────────────────
+#  Git strategy — DECOMPOSE variant (monolith → microservices). The shared first
+#  section for replace/decompose playbooks (PLAYBOOK-AUTHORING-RUNBOOK.md §3).
+#  Asked FIRST; executed at the end by the `finalize` phase (git-finalize, or the
+#  stack-specific cutover tool). Non-destructive — the monolith history is always
+#  preserved somewhere.
+#  CANONICAL COPY — keep per-playbook copies in sync.
+# ─────────────────────────────────────────────────────────────
+
+section:
+  id: git-strategy
+  title: "Git strategy"
+  intro: |
+    Where the finished microservices should land, so the monolith and the new
+    services never sit mixed in your working tree with no decision. The default
+    keeps your current branch (the monolith) as-is and puts the services on a new
+    branch to review + merge.
+  estimated_seconds: 25
+
+questions:
+
+  - id: git_strategy
+    kind: enum
+    label: "Where should the finished microservices go?"
+    description: "Chosen up front; executed by a deterministic git cutover at the end. Nothing is destructive — the monolith's history is always preserved somewhere (an untouched branch, an archive branch, or a separate repo)."
+    # DEFAULT BY SHAPE. This playbook REPLACES the code it reads, so leaving
+    # both trees side by side on one branch is the wrong end-state — that is the
+    # "old and new mangled together" the review's first finding described.
+    # Additive and in-place playbooks keep `work-branch`.
+    default: archive-and-adopt
+    required: true
+    options:
+      - { value: work-branch,       label: "Keep the monolith branch as-is; put the microservices on a new branch", hint: "Recommended default. Your current branch (the monolith) is untouched; the microservices land on a clean branch to review + merge. The pkg/ contracts kernel stays in-repo." }
+      - { value: archive-and-adopt, label: "The microservices become main; archive the monolith to a branch", hint: "The microservices become your current branch; the monolith is snapshotted onto an archive branch." }
+      - { value: new-repo,          label: "Move the microservices to a brand-new repository", hint: "The microservices are exported to a fresh standalone repo under `dist/`, leaving this repo entirely as-is." }
+      - { value: repo-per-service,  label: "Split each service into its own repository", hint: "Each service becomes its own standalone repo under `dist/repos/`, with pkg/contracts vendored in and its go.mod made standalone (no go.work, no replace), so it builds alone." }

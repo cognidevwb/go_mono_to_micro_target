@@ -1,0 +1,25 @@
+{
+  "elapsedMs": 124,
+  "finishedAt": 1790392783,
+  "inputs": [],
+  "kind": "rust-binary",
+  "outputs": [
+    {
+      "exists": true,
+      "kind": null,
+      "name": "briefing",
+      "optional": false,
+      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/.cognidev/feature/briefing.json"
+    },
+    {
+      "exists": true,
+      "kind": null,
+      "name": "steps",
+      "optional": false,
+      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/.cognidev/feature/steps.json"
+    }
+  ],
+  "status": "Ok",
+  "step": "briefing",
+  "summary": "Tool `../tools/brief-go-monolith/target/release/brief-go-monolith` completed."
+}

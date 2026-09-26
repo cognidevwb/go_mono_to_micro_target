@@ -1,0 +1,15 @@
+#!/bin/sh
+# Cheap checks only. Install with `make hooks`.
+set -e
+staged=$(git diff --cached --name-only --diff-filter=ACM)
+if printf '%s\n' "$staged" | grep -qE '(^|/)\.env$'; then
+  echo "pre-commit: refusing to commit a .env — commit .env.example instead" >&2; exit 1
+fi
+go_files=$(printf '%s\n' "$staged" | grep -E '\.go$' || true)
+if [ -n "$go_files" ]; then
+  unformatted=$(gofmt -l $go_files)
+  [ -z "$unformatted" ] || { echo "pre-commit: gofmt needed: $unformatted" >&2; exit 1; }
+  if printf '%s\n' $go_files | xargs grep -l 'CW-SEAM\[kind=' 2>/dev/null | grep -q .; then
+    echo "pre-commit: a staged file still carries a CW-SEAM marker" >&2; exit 1
+  fi
+fi

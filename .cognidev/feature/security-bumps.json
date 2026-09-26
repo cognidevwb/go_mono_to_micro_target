@@ -1,0 +1,5 @@
+{
+  "tool": "bump-security-go",
+  "scanned": false,
+  "why": "the advisory scan did not run (offline by default — search_registry: false); nothing is bumped and the advisory claim stays NOT VERIFIED"
+}

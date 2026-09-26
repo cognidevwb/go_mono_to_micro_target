@@ -1,0 +1,108 @@
+apiVersion: cognidev.ai/v1
+kind: QuestionnaireSection
+
+section:
+  id: platform
+  title: "Build, container & platform"
+  intro: |
+    How the services are packaged, shipped, and run. All optional — the defaults
+    are the clean 2026 path: static CGO_ENABLED=0 binaries in distroless non-root
+    images, Azure Container Apps, a per-service CI pipeline with govulncheck and
+    a Syft SBOM + Grype scan. Pick "Use defaults for the rest" to accept them.
+  estimated_seconds: 50
+
+questions:
+
+  - id: cloud
+    kind: enum
+    label: "Target cloud?"
+    description: "Drives the deploy artifacts under deploy/<cloud>/ (container platform, registry, secrets, CI deploy job). The Kubernetes/Helm manifests, docker compose and OpenTelemetry are cloud-agnostic — identical either way."
+    default: azure
+    required: false
+    options:
+      - { value: azure, label: "Microsoft Azure", hint: "Recommended default. Azure Container Apps + ACR + Key Vault; deploy with `azd up` or the generated Bicep." }
+      - { value: aws,   label: "Amazon Web Services", hint: "ECS Fargate + ECR + Secrets Manager; a GitHub OIDC → ECR → ECS deploy job." }
+    # NOTE: Google Cloud (Cloud Run) is on the roadmap (BACKLOG.md), not generated.
+
+  - id: container
+    kind: enum
+    label: "Container build?"
+    description: "How each service becomes an image. Both are multi-stage builds from golang:1.26; they differ in the runtime base."
+    default: distroless
+    required: false
+    options:
+      - { value: distroless,        label: "Distroless static, non-root", hint: "Recommended — gcr.io/distroless/static-debian12:nonroot; no shell, smallest attack surface. Needs CGO_ENABLED=0." }
+      - { value: dockerfile-alpine, label: "Alpine runtime", hint: "alpine:3.22 with a shell and ca-certificates — for services that need cgo or debugging tools in the image." }
+
+  - id: orchestrator
+    kind: enum
+    label: "Where do the services run?"
+    description: "The deployment target."
+    default: azure-containerapps
+    required: false
+    options:
+      - { value: azure-containerapps, label: "Azure Container Apps", hint: "Recommended default — managed, scale-to-zero, Dapr-free; KEDA scaling on the NATS/Kafka consumer lag." }
+      - { value: kubernetes,          label: "Kubernetes", hint: "Deployment + Service + ConfigMap + HPA per service (raw manifests or Helm)." }
+      - { value: compose,             label: "Docker Compose", hint: "Single-host / simplest; the generated compose file runs the fleet." }
+
+  - id: ci
+    kind: enum
+    label: "CI/CD system?"
+    description: "One pipeline per service: go vet + golangci-lint + go test + govulncheck + build image + Syft SBOM + Grype scan (never the trivy-action)."
+    default: github
+    required: false
+    options:
+      - { value: github, label: "GitHub Actions", hint: "Recommended default." }
+      - { value: azdo,   label: "Azure DevOps Pipelines", hint: "For Azure DevOps estates." }
+      - { value: gitlab, label: "GitLab CI", hint: "For GitLab estates." }
+
+  - id: goproxy
+    kind: enum
+    label: "Go module proxy?"
+    description: "Where `go mod download` pulls modules from."
+    default: public
+    required: false
+    options:
+      - { value: public,   label: "proxy.golang.org (public)", hint: "Recommended — the default GOPROXY with sum.golang.org checksum verification." }
+      - { value: internal, label: "Internal proxy (Athens / Artifactory / JFrog)", hint: "An internal mirror; you supply the URL. GONOSUMDB/GOPRIVATE for your own modules." }
+
+  - id: goproxy_url
+    kind: string
+    label: "Internal GOPROXY URL"
+    description: "e.g. https://athens.acme.internal. Nothing in the monolith knows this address, and it has to be right before the FIRST module download. Left blank, the generated CI and Dockerfiles carry a marked TODO instead of a guessed URL and fall back to proxy.golang.org. Credentials never go here — use a netrc secret in CI."
+    default: ""
+    required: false
+    show_when: { goproxy: internal }
+
+  - id: load_profile
+    kind: enum
+    label: "What load will these services carry in production?"
+    description: "The one scaling input the monolith cannot supply. Its route inventory shows which side of each service is wider — how many endpoints read versus write — but nothing records how OFTEN any of them is called. This sets each service's replica floor and autoscaler, and the connection-pool budget the database has to survive."
+    default: bursty
+    required: false
+    options:
+      - { value: internal,    label: "Internal / line-of-business", hint: "Tens of concurrent users, working hours. One replica, no autoscaler, small pools." }
+      - { value: steady,      label: "Steady production load", hint: "A replica floor of 2 for availability; CPU autoscaling with modest headroom." }
+      - { value: bursty,      label: "Bursty — sharp peaks", hint: "Recommended default. Wide CPU autoscaling; queue-lag scaling on the consumers." }
+      - { value: high-volume, label: "Sustained high throughput", hint: "Wide autoscaling, read-routed connections on read-heavy services, a pool budget sized against the database's limit." }
+
+  - id: service_size
+    kind: enum
+    label: "How much CPU and memory should each service request?"
+    description: "The container resource requests and limits. The autoscaler computes utilisation against the REQUEST. GOMAXPROCS follows the CPU limit (Go 1.25+ is cgroup-aware) and GOMEMLIMIT is set to 90% of the memory limit so the GC works before the OOM killer does."
+    default: small
+    required: false
+    options:
+      - { value: small,  label: "Small — 50m / 64Mi (limits 1 CPU / 256Mi)", hint: "Recommended default. A typical Go CRUD service; dense packing." }
+      - { value: medium, label: "Medium — 250m / 128Mi (limits 2 CPU / 512Mi)", hint: "Heavier request paths or real serialization work." }
+      - { value: large,  label: "Large — 500m / 512Mi (limits 4 CPU / 2Gi)", hint: "Compute-bound work in the request path — reporting, batch, documents." }
+
+  - id: deploy_packaging
+    kind: enum
+    label: "How should the Kubernetes workload be packaged?"
+    description: "Used when the orchestrator is Kubernetes. Both render from one source, so they never drift."
+    default: raw-k8s
+    required: false
+    options:
+      - { value: raw-k8s, label: "Raw Kubernetes manifests", hint: "Recommended default. Deployment + Service + ConfigMap + Secret + HPA per service under deploy/k8s/." }
+      - { value: helm,    label: "Helm charts", hint: "A per-service chart + an umbrella chart. `helm upgrade --install platform deploy/chart`." }

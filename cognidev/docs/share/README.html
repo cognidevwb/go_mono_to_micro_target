@@ -1,0 +1,35 @@
+<style>
+:root { --ink:#1b1b1b; --muted:#5b5b5b; --rule:#dcdcdc; --accent:#1a5fb4; --wash:#f6f8fb; }
+* { box-sizing:border-box; }
+body { margin:0; background:#fff; color:var(--ink);
+       font-family:"Charter","Bitstream Charter","Iowan Old Style",Georgia,serif;
+       font-size:16px; line-height:1.55; }
+main { max-width:64rem; margin:0 auto; padding:3rem 1.5rem 5rem; }
+h1 { font-size:1.85rem; line-height:1.25; margin:0 0 1rem; font-weight:600; }
+h2 { font-size:1.2rem; margin:2.5rem 0 .75rem; font-weight:600;
+     padding-bottom:.35rem; border-bottom:2px solid var(--accent); }
+h3 { font-size:1rem; margin:1.75rem 0 .5rem; font-weight:600; color:var(--accent); }
+p { margin:.7rem 0; }
+.scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+table { border-collapse:collapse; width:100%; font-size:.9rem; margin:.6rem 0 1.5rem; }
+th, td { text-align:left; vertical-align:top; padding:.5rem .7rem;
+         border-bottom:1px solid var(--rule); }
+th { font-weight:600; color:var(--muted); font-size:.78rem; text-transform:uppercase;
+     letter-spacing:.05em; border-bottom:1px solid var(--ink); }
+tbody tr:nth-child(even) { background:var(--wash); }
+code { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:.85em; }
+ul { margin:.5rem 0 1rem; padding-left:1.25rem; }
+li { margin:.28rem 0; }
+li ul { margin:.2rem 0; }
+.foot { color:var(--muted); font-size:.85rem; margin-top:3rem; padding-top:1rem;
+        border-top:1px solid var(--rule); }
+</style>
+<main>
+<h1>Decomposing this monolith</h1>
+<p>5 services will be extracted from this repository, owning 7 tables between them, with 2 cross-service calls to resolve and 1 saga.</p>
+<p>Read in this order:</p>
+<p>1. <code>what-changes.md</code> — what moves where, and what it costs. 2. <code>the-plan.md</code> — the extraction order, and why that order. 3. <code>what-you-learn.md</code> — the architecture this cut teaches, and where to read it. 4. <code>tasks/</code> — one document per service, with its files. 5. <code>your-choices.yaml</code> — what you were asked, and what was decided for you. 6. <code>status/</code> — filled after the run: what each task actually did.</p>
+<p><code>share/</code> holds the same documents as standalone pages, for sending to someone without a checkout.</p>
+<p>Every number here was measured by an earlier phase of this run. Nothing in these documents was re-derived by reading the tree a second time.</p>
+<p class="foot">Written by the Go decomposition planner. The same content is in <code>README.md</code> beside this file.</p>
+</main>

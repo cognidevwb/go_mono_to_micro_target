@@ -1,0 +1,29 @@
+# Learning card — surfaced on the learning rail while this playbook runs.
+# Owned by the playbook; the IDE loads learn/*.yaml and renders generically.
+id: saga-outbox
+title: "The Transaction You Cannot Have Any More"
+hook: "One db.Transaction across four packages becomes four services and a compensation for each."
+concepts: [saga, outbox, transaction, consistency, wolverine, compensation, decompose]
+intents: [modernize, migrate]
+phases: [map-services, briefing, port-monolith, develop, decompose]
+minutes: 4
+diagram:
+  direction: TB
+  groups:
+    - { id: orch, label: "Orders — the orchestrator", tone: brand }
+    - { id: parts, label: "Participants", tone: success }
+  nodes:
+    - { id: saga, label: "CreateOrder saga", sub: "drives each step", icon: split, group: orch, tone: brand }
+    - { id: outbox, label: "Outbox table", sub: "same transaction as the row", icon: database, group: orch, tone: brand }
+    - { id: inv, label: "Inventory", sub: "reserve → release", icon: server, group: parts, tone: success }
+    - { id: pay, label: "Payments", sub: "charge → refund", icon: server, group: parts, tone: warning }
+  edges:
+    - { from: saga, to: outbox, label: "write row + message atomically" }
+    - { from: outbox, to: inv, label: "1. reserve stock" }
+    - { from: inv, to: pay, label: "2. take payment" }
+    - { from: pay, to: saga, label: "failed → compensate in reverse" }
+takeaways:
+  - "Across services there is no database transaction. Every step needs an explicit way to be undone."
+  - "The outbox writes the row and the message in ONE local transaction — without it you have a dual-write that silently loses messages."
+  - "Order the steps so the hardest one to reverse runs LAST. Refunding a card is worse than releasing stock."
+  - "Delivery is at-least-once, so every handler must survive seeing the same message twice."

@@ -1,0 +1,18 @@
+{
+  "elapsedMs": 124,
+  "finishedAt": 1790395127,
+  "inputs": [],
+  "kind": "rust-binary",
+  "outputs": [
+    {
+      "exists": true,
+      "kind": null,
+      "name": "gates",
+      "optional": false,
+      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/.cognidev/feature/gates.json"
+    }
+  ],
+  "status": "Ok",
+  "step": "gates",
+  "summary": "Tool `../tools/go-gates/target/release/go-gates` completed."
+}

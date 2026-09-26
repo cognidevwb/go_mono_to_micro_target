@@ -1,0 +1,25 @@
+{
+  "elapsedMs": 2114,
+  "finishedAt": 1790392779,
+  "inputs": [],
+  "kind": "rust-binary",
+  "outputs": [
+    {
+      "exists": true,
+      "kind": null,
+      "name": "classification",
+      "optional": false,
+      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/.cognidev/go-classify/classification.json"
+    },
+    {
+      "exists": true,
+      "kind": "report",
+      "name": "CLASSIFICATION",
+      "optional": false,
+      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/.cognidev/go-classify/CLASSIFICATION.md"
+    }
+  ],
+  "status": "Ok",
+  "step": "classify",
+  "summary": "Tool `../tools/classify-go/target/release/classify-go` completed."
+}

@@ -1,0 +1,7 @@
+{
+  "method": "POST",
+  "path": "/v1/stockitem/reserve",
+  "seed": {"product_id": 7, "on_hand": 10, "reserved": 0},
+  "body": {"product_id": 7, "quantity": 4},
+  "expected": {"reserved": true}
+}

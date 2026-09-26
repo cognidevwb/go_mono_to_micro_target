@@ -1,0 +1,63 @@
+apiVersion: cognidev.ai/v1
+kind: QuestionnaireSection
+
+section:
+  id: data
+  title: "Data ownership & persistence"
+  intro: |
+    The heart of a clean decomposition: each service owns its tables. We split
+    the monolith's models by the bounded-context clusters and replace what the
+    single shared *gorm.DB did for free (cross-context reads → API calls or
+    events; one db.Transaction across contexts → a saga with a transactional
+    outbox).
+  estimated_seconds: 45
+
+questions:
+
+  - id: data_access
+    kind: enum
+    label: "Data access in the services?"
+    description: "`keep-gorm` moves the monolith's gorm models and queries verbatim — a port, not a rewrite, and the default. pgx + sqlc is the 2026 Go default for new code; choosing it turns every ported query into a develop task (write the SQL, generate with sqlc), so pick it only when the rewrite is wanted."
+    default: keep-gorm
+    required: true
+    options:
+      - { value: keep-gorm, label: "Keep gorm (v1.31)", hint: "Recommended for a port — models and queries move verbatim; each service opens its own *gorm.DB on its own database." }
+      - { value: pgx-sqlc,  label: "pgx v5 + sqlc",     hint: "Typed SQL, fastest Postgres driver; ported gorm calls become marked develop tasks." }
+
+  - id: database
+    kind: enum
+    label: "Database engine?"
+    description: "The engine each service's owned database runs on."
+    default: postgres
+    required: true
+    options:
+      - { value: postgres, label: "PostgreSQL 17", hint: "Recommended — one logical database per service." }
+      - { value: mysql,    label: "MySQL 8.4 LTS", hint: "For MySQL estates (gorm mysql driver / go-sql-driver)." }
+
+  - id: data_ownership
+    kind: enum
+    label: "How is each service's data separated?"
+    description: "Database-per-service is the target; the question is how far to go on this run. Every option gives each service its own connection and its own migrations — they differ in where the tables physically live."
+    default: database-per-service
+    required: true
+    options:
+      - { value: database-per-service,  label: "Database per service", hint: "Recommended — a separate logical database (and DSN) per service; no service can join another's tables." }
+      - { value: schema-per-service,    label: "Schema per service, one server", hint: "One Postgres server, one schema and one role per service — cheaper to run, same isolation at the permission level." }
+      - { value: shared-db-transitional, label: "Shared database (transitional)", hint: "Services keep the monolith's database for now, each touching only its own tables; the gates report every cross-owner access. A waypoint, not an end state." }
+
+  - id: db_max_connections
+    kind: integer
+    label: "How many connections will each service's database accept?"
+    description: "PostgreSQL ships `max_connections = 100`, and database/sql's pool is unbounded unless SetMaxOpenConns is set — so one pod at defaults can exhaust a whole database, and an autoscaled service asks for that many times its replica ceiling. The generated SetMaxOpenConns is divided out of this number. It is a property of the server you will run against, not of the repository: check it with `SHOW max_connections;`."
+    default: 100
+    required: false
+
+  - id: outbox
+    kind: enum
+    label: "Cross-service write consistency?"
+    description: "A write that touches two services must be a saga with a transactional outbox — persist the change and the outgoing message in ONE local transaction (the same gorm/pgx tx), then relay asynchronously. Consumers must be idempotent."
+    default: sql-outbox
+    required: true
+    options:
+      - { value: sql-outbox, label: "SQL outbox + saga", hint: "Recommended — an outbox table written in the service's own transaction and a relay to the broker; no dual-write." }
+      - { value: none,       label: "No cross-service writes yet", hint: "Only if the split has no cross-context transaction (read-mostly)." }

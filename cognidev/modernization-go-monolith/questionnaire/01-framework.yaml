@@ -1,0 +1,38 @@
+apiVersion: cognidev.ai/v1
+kind: QuestionnaireSection
+
+section:
+  id: framework
+  title: "Toolchain & service framework"
+  intro: |
+    The Go release and the HTTP router every extracted service is built on.
+    The default keeps the router your monolith already uses, because a port
+    moves handlers verbatim — changing the framework in the same run would turn
+    a move into a rewrite, and a failure afterwards would have two causes.
+  estimated_seconds: 30
+
+questions:
+
+  - id: go_version
+    kind: enum
+    label: "Target Go version?"
+    description: "The `go` directive every new service module and go.work declare. Go 1.26 is the current release (2026). The environment gate provisions this toolchain if the host lacks it; the Go 1 compatibility promise means monolith code written for an older 1.x compiles under it unchanged."
+    default: "1.26"
+    required: true
+    # The pinned 2026 module set (OpenTelemetry 1.44, pgx 5.8, chi 5.3, gin 1.12)
+    # is verified against 1.26 only; a 1.25 option would need a second matrix
+    # this playbook does not ship.
+    options:
+      - { value: "1.26", label: "Go 1.26", hint: "Current release — the version this playbook generates and verifies." }
+
+  - id: web_framework
+    kind: enum
+    label: "HTTP framework for the services?"
+    description: "`keep` ports each handler onto the SAME router the monolith uses (gin stays gin, echo stays echo, chi stays chi) — a move, not a rewrite, and the default. chi / gin / echo pin that router for every service instead; handlers written against a different framework become explicit develop tasks rather than a verbatim move."
+    default: keep
+    required: true
+    options:
+      - { value: keep, label: "Keep the monolith's framework", hint: "Recommended — handlers move verbatim; detected from go.mod (gin, echo, chi, net/http)." }
+      - { value: chi,  label: "net/http + chi v5",              hint: "Stdlib http.Handler everywhere, chi routing + middleware; zero framework lock-in." }
+      - { value: gin,  label: "Gin v1.12",                      hint: "Binding, validation, the largest ecosystem." }
+      - { value: echo, label: "Echo v4",                        hint: "Ergonomic API and middleware, lighter than Gin." }

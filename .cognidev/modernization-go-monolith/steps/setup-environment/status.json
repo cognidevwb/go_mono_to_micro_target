@@ -1,0 +1,10 @@
+{
+  "elapsedMs": 628,
+  "finishedAt": 1790392780,
+  "inputs": [],
+  "kind": "rust-binary",
+  "outputs": [],
+  "status": "Ok",
+  "step": "setup-environment",
+  "summary": "Tool `../tools/go-setup-env/target/release/go-setup-env` completed."
+}

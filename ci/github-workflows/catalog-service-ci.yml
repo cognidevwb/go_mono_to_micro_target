@@ -1,0 +1,16 @@
+name: ci-catalog-service
+
+on:
+  push:
+    branches: [main]
+    paths: ["services/catalog/**", "pkg/**", ".github/workflows/catalog-service-ci.yml"]
+  pull_request:
+    paths: ["services/catalog/**", "pkg/**"]
+
+jobs:
+  ci:
+    uses: ./.github/workflows/_service-ci.yml
+    with:
+      module: services/catalog
+      image: catalog-service
+    secrets: inherit

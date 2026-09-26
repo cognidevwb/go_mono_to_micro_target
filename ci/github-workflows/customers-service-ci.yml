@@ -1,0 +1,16 @@
+name: ci-customers-service
+
+on:
+  push:
+    branches: [main]
+    paths: ["services/customers/**", "pkg/**", ".github/workflows/customers-service-ci.yml"]
+  pull_request:
+    paths: ["services/customers/**", "pkg/**"]
+
+jobs:
+  ci:
+    uses: ./.github/workflows/_service-ci.yml
+    with:
+      module: services/customers
+      image: customers-service
+    secrets: inherit

@@ -1,0 +1,25 @@
+{
+  "elapsedMs": 125,
+  "finishedAt": 1790395128,
+  "inputs": [],
+  "kind": "rust-binary",
+  "outputs": [
+    {
+      "exists": true,
+      "kind": "report",
+      "name": "VALIDATION-REPORT",
+      "optional": false,
+      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/VALIDATION-REPORT.html"
+    },
+    {
+      "exists": true,
+      "kind": "report",
+      "name": "signoff",
+      "optional": false,
+      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/.cognidev/run/signoff.json"
+    }
+  ],
+  "status": "Ok",
+  "step": "signoff",
+  "summary": "Tool `../tools/signoff-report/target/release/signoff-report` completed."
+}

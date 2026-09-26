@@ -1,0 +1,39 @@
+playbook_id: modernization-go-monolith
+captured_at: 2026-09-26T03:19:43Z
+workdir: /Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev
+answers:
+  api_versioning: url-segment
+  auth: jwt-keycloak
+  authz_boundary: edge-and-service
+  base_module: ''
+  boundary_strategy: domain
+  ci: github
+  cloud: azure
+  container: distroless
+  coordination: orchestration
+  data_access: keep-gorm
+  data_ownership: database-per-service
+  database: postgres
+  db_max_connections: 100
+  decomposition_granularity: balanced
+  deploy_packaging: raw-k8s
+  driver: independent-deploy
+  event_backbone: nats
+  gateway: go-reverse-proxy
+  git_strategy: archive-and-adopt
+  go_version: '1.26'
+  goproxy: public
+  jev_source_consent: yes
+  load_profile: bursty
+  messaging_lib: watermill
+  migration_approach: strangler
+  observability: otel-lgtm
+  orchestrator: azure-containerapps
+  outbox: sql-outbox
+  read_write_model: crud
+  run_tests: true
+  scope: ''
+  search_registry: false
+  service_internal_structure: flat-package
+  service_size: small
+  web_framework: keep

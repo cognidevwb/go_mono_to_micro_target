@@ -1,0 +1,6 @@
+{
+  "method": "POST",
+  "path": "/v1/payment/charge",
+  "body": {"order_id": 7, "amount": 42.5},
+  "expected": {"OrderID": 7, "Amount": 42.5, "Status": "captured"}
+}

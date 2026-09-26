@@ -1,0 +1,24 @@
+id: message-queue-decouple
+title: "How a Message Queue Decouples Services"
+hook: "Why async messaging survives spikes that sync calls can't."
+concepts: [messaging, queue, events, microservices, async, decompose, saga, outbox]
+intents: [modernize, migrate]
+phases: [decompose, plan, develop]
+minutes: 3
+diagram:
+  direction: LR
+  nodes:
+    - { id: prod, label: "Producer", sub: "Order Service", icon: send, tone: brand }
+    - { id: broker, label: "Broker", sub: "durable log / queue", icon: layers, tone: success }
+    - { id: c1, label: "Consumer A", sub: "Email Service", icon: inbox, tone: neutral }
+    - { id: c2, label: "Consumer B", sub: "Billing Service", icon: inbox, tone: neutral }
+    - { id: dlq, label: "Dead Letter Queue", sub: "poison messages", icon: box, tone: danger }
+  edges:
+    - { from: prod, to: broker, label: "publish event" }
+    - { from: broker, to: c1, label: "at-least-once" }
+    - { from: broker, to: c2, label: "independent offset" }
+    - { from: broker, to: dlq, label: "after N retries", dashed: true }
+takeaways:
+  - "The producer never waits on consumers — it publishes and moves on, absorbing spikes."
+  - "Each consumer tracks its own offset, so a slow one can't block the others."
+  - "Failed messages route to a DLQ instead of blocking the partition forever."

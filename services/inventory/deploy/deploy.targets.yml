@@ -1,0 +1,7 @@
+# cicd · CI/CD: inventory's deploy environments + post-deploy smoke-check path targeting Azure Container Apps (deploy/azure — azd), images in ACR; build (go build, go vet, go test -race), the distroless image, the Syft SBOM and the Grype scan are already wired (inventory-service)
+environments:
+  - name: staging
+    approval: none
+  - name: production
+    approval: required
+smoke_check_path: /readyz

@@ -1,0 +1,131 @@
+<style>
+:root { --ink:#1b1b1b; --muted:#5b5b5b; --rule:#dcdcdc; --accent:#1a5fb4; --wash:#f6f8fb; }
+* { box-sizing:border-box; }
+body { margin:0; background:#fff; color:var(--ink);
+       font-family:"Charter","Bitstream Charter","Iowan Old Style",Georgia,serif;
+       font-size:16px; line-height:1.55; }
+main { max-width:64rem; margin:0 auto; padding:3rem 1.5rem 5rem; }
+h1 { font-size:1.85rem; line-height:1.25; margin:0 0 1rem; font-weight:600; }
+h2 { font-size:1.2rem; margin:2.5rem 0 .75rem; font-weight:600;
+     padding-bottom:.35rem; border-bottom:2px solid var(--accent); }
+h3 { font-size:1rem; margin:1.75rem 0 .5rem; font-weight:600; color:var(--accent); }
+p { margin:.7rem 0; }
+.scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+table { border-collapse:collapse; width:100%; font-size:.9rem; margin:.6rem 0 1.5rem; }
+th, td { text-align:left; vertical-align:top; padding:.5rem .7rem;
+         border-bottom:1px solid var(--rule); }
+th { font-weight:600; color:var(--muted); font-size:.78rem; text-transform:uppercase;
+     letter-spacing:.05em; border-bottom:1px solid var(--ink); }
+tbody tr:nth-child(even) { background:var(--wash); }
+code { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:.85em; }
+ul { margin:.5rem 0 1rem; padding-left:1.25rem; }
+li { margin:.28rem 0; }
+li ul { margin:.2rem 0; }
+.foot { color:var(--muted); font-size:.85rem; margin-top:3rem; padding-top:1rem;
+        border-top:1px solid var(--rule); }
+</style>
+<main>
+<h1>Decomposing this monolith</h1>
+<p>5 services will be extracted, owning 7 tables between them, with 2 cross-service calls to resolve and 1 saga. Nothing below was guessed — every number was measured by an earlier phase of this run.</p>
+<h2>The services</h2>
+<p>Each owns its tables outright, and no other service may read them. That constraint is what makes an independent deploy real, and it is also the entire cost of the cut.</p>
+<div class="scroll"><table><thead><tr><th>#</th><th>Service</th><th>Owns</th><th>Calls</th><th>Files planned</th></tr></thead><tbody>
+<tr><td>1</td><td><code>orders-service</code></td><td><code>Order</code>, <code>OrderLine</code></td><td><code>catalog-service</code>, <code>customers-service</code></td><td>19</td></tr>
+<tr><td>2</td><td><code>catalog-service</code></td><td><code>Category</code>, <code>Product</code></td><td><em>nothing</em></td><td>12</td></tr>
+<tr><td>3</td><td><code>customers-service</code></td><td><code>Customer</code></td><td><em>nothing</em></td><td>12</td></tr>
+<tr><td>4</td><td><code>inventory-service</code></td><td><code>StockItem</code></td><td><em>nothing</em></td><td>14</td></tr>
+<tr><td>5</td><td><code>payments-service</code></td><td><code>Payment</code></td><td><em>nothing</em></td><td>13</td></tr>
+</tbody></table></div>
+<h2>What this costs you</h2>
+<p><strong>2 method calls that cannot fail today become network calls that can.</strong> Each gets a typed HttpClient with a timeout, a retry and a circuit breaker — which is a mitigation, not a removal. This is the honest price of the boundary.</p>
+<div class="scroll"><table><thead><tr><th>From</th><th>To</th><th>Becomes</th></tr></thead><tbody>
+<tr><td><code>orders-service</code></td><td><code>catalog-service</code></td><td>typed HttpClient + contract DTO</td></tr>
+<tr><td><code>orders-service</code></td><td><code>customers-service</code></td><td>typed HttpClient + contract DTO</td></tr>
+</tbody></table></div>
+<p>A transaction that spans services cannot be a database transaction. Each of these becomes a saga with an explicit compensation per step, and the hardest step to reverse runs last.</p>
+<div class="scroll"><table><thead><tr><th>Saga</th><th>Orchestrator</th><th>Participants</th></tr></thead><tbody>
+<tr><td><strong>CreateOrder</strong></td><td><code>orders-service</code></td><td><code>inventory-service</code>, <code>orders-service</code>, <code>payments-service</code></td></tr>
+</tbody></table></div>
+<h2>The order, and why</h2>
+<p>Leaves first, the hub last. A service with no outbound calls can be extracted and routed on its own; one that calls three others cannot be extracted until they exist. The riskiest cut happens once the cheap wins are already in.</p>
+<ul>
+<li><strong>1. Orders Service</strong> — needs catalog-service, customers-service first</li>
+<li><strong>2. Catalog Service</strong> — a leaf — nothing to wait for</li>
+<li><strong>3. Customers Service</strong> — a leaf — nothing to wait for</li>
+<li><strong>4. Inventory Service</strong> — a leaf — nothing to wait for</li>
+<li><strong>5. Payments Service</strong> — a leaf — nothing to wait for</li>
+</ul>
+<h2>What you will be running, and what it teaches</h2>
+<p>A decomposition that leaves a team with services they cannot reason about has moved the problem rather than solved it. These are the 40 patterns this cut actually applies, why each one applies <em>here</em>, and the file in this repository that explains it.</p>
+<div class="scroll"><table><thead><tr><th>Pattern</th><th>What it teaches you</th><th>Why it applies here</th><th>Read</th></tr></thead><tbody>
+<tr><td><strong>Gateway aggregation</strong><br><small>communication · default</small></td><td>When one screen needs three services, compose once at the edge with bounded fan-out — not three round-trips from the client.</td><td>2 cross-context calls</td><td><code>architecture/communication/aggregator.md</code></td></tr>
+<tr><td><strong>API gateway</strong><br><small>communication · invariant</small></td><td>One edge for every client — routing, auth, rate limits and the strangler route table live there, not in each service.</td><td>applies to every decomposition</td><td><code>architecture/communication/api-gateway.md</code></td></tr>
+<tr><td><strong>Contract testing</strong><br><small>communication · default</small></td><td>Each consumer pins what it reads from a provider; the provider’s CI fails when it would break a consumer — independent deploys stay safe.</td><td>5 services</td><td><code>architecture/communication/contract-testing.md</code></td></tr>
+<tr><td><strong>Event-driven messaging</strong><br><small>communication · default</small></td><td>The in-process bus becomes a broker: every topic a context publishes becomes a durable subject, published through the outbox.</td><td>you chose event_backbone = nats, which is not none</td><td><code>architecture/communication/event-driven.md</code></td></tr>
+<tr><td><strong>Saga — orchestration</strong><br><small>communication · default</small></td><td>One coordinator owns the multi-service write: each step a local transaction, each failure a compensating step, the riskiest step last.</td><td>you chose coordination = orchestration</td><td><code>architecture/communication/saga-orchestration.md</code></td></tr>
+<tr><td><strong>Service discovery</strong><br><small>communication · default</small></td><td>Let the platform resolve names — compose service names, Kubernetes Services, Container Apps app names — and pass base URLs by environment.</td><td>applies to every decomposition</td><td><code>architecture/communication/service-discovery.md</code></td></tr>
+<tr><td><strong>Synchronous transport — REST at the edge, gRPC inside</strong><br><small>communication · invariant</small></td><td>Every cross-service read is a typed net/http client with a context deadline; gRPC is ported where the monolith already speaks it, not imposed.</td><td>applies to every decomposition</td><td><code>architecture/communication/sync-transport.md</code></td></tr>
+<tr><td><strong>API composition</strong><br><small>data · default</small></td><td>Answer a cross-service query by calling the owners and joining in memory — try this before building a read model.</td><td>2 cross-context calls</td><td><code>architecture/data/api-composition.md</code></td></tr>
+<tr><td><strong>Connection-pool budget</strong><br><small>data · invariant</small></td><td>Pods × pool size must fit under the database’s max_connections — set it, don’t inherit a default.</td><td>you chose orchestrator = azure-containerapps, which is not compose</td><td><code>architecture/data/connection-pool-budget.md</code></td></tr>
+<tr><td><strong>Domain events and aggregates</strong><br><small>data · invariant</small></td><td>An aggregate is the consistency boundary; what it records as having happened is the event other services react to.</td><td>applies to every decomposition</td><td><code>architecture/data/domain-event-aggregate.md</code></td></tr>
+<tr><td><strong>Expand–contract schema change</strong><br><small>data · invariant</small></td><td>Two versions of the code always share the schema during a rollout — add, migrate, then remove, never rename in place.</td><td>applies to every decomposition</td><td><code>architecture/data/expand-contract.md</code></td></tr>
+<tr><td><strong>Idempotency key</strong><br><small>data · invariant</small></td><td>The same guarantee at the HTTP edge — a caller-supplied key makes a retried write a no-op.</td><td>5 services</td><td><code>architecture/data/idempotency-key.md</code></td></tr>
+<tr><td><strong>Idempotent consumer</strong><br><small>data · invariant</small></td><td>At-least-once is reality — record each processed message id in the same transaction as its effect.</td><td>you chose event_backbone = nats, which is not none</td><td><code>architecture/data/idempotent-consumer.md</code></td></tr>
+<tr><td><strong>Optimistic concurrency</strong><br><small>data · invariant</small></td><td>A version column and a conditional UPDATE — the split widened every write window, and last-writer-wins now loses data.</td><td>applies to every decomposition</td><td><code>architecture/data/optimistic-concurrency.md</code></td></tr>
+<tr><td><strong>Outbox relay topology</strong><br><small>data · invariant</small></td><td>Decide who drains the outbox — one relay per service, leader-elected or SKIP LOCKED — and make sure every replica is allowed to run it.</td><td>you chose outbox = sql-outbox, which is not none</td><td><code>architecture/data/outbox-relay-topology.md</code></td></tr>
+<tr><td><strong>Saga isolation countermeasures</strong><br><small>data · invariant</small></td><td>A saga has no isolation — other requests see its intermediate states, so design semantic locks and reversible steps.</td><td>1 saga candidate</td><td><code>architecture/data/saga-isolation.md</code></td></tr>
+<tr><td><strong>Transactional outbox</strong><br><small>data · invariant</small></td><td>Write the row and the message in one local transaction, relay after commit — the only honest way out of the dual write.</td><td>you chose outbox = sql-outbox, which is not none</td><td><code>architecture/data/transactional-outbox.md</code></td></tr>
+<tr><td><strong>Anti-corruption layer</strong><br><small>decomposition · invariant</small></td><td>Translate at every boundary — the consumer maps the provider’s contract into its own types, so one service’s model never leaks into another.</td><td>2 cross-context calls</td><td><code>architecture/decomposition/anti-corruption-layer.md</code></td></tr>
+<tr><td><strong>Branch by abstraction</strong><br><small>decomposition · choice</small></td><td>Put an interface in front of the in-process call, swap the implementation for a client behind it — the in-code half of the strangler.</td><td>you chose migration_approach = strangler</td><td><code>architecture/decomposition/branch-by-abstraction.md</code></td></tr>
+<tr><td><strong>Database per service</strong><br><small>decomposition · invariant</small></td><td>Each service owns its tables; nobody else reads them — the one invariant that makes independent deployment real.</td><td>applies to every decomposition</td><td><code>architecture/decomposition/database-per-service.md</code></td></tr>
+<tr><td><strong>Decompose by business capability</strong><br><small>decomposition · default</small></td><td>A service is a thing the business does and owns data for — catalog, orders, payments — never a technical layer.</td><td>you chose boundary_strategy = domain</td><td><code>architecture/decomposition/decompose-by-business-capability.md</code></td></tr>
+<tr><td><strong>Right-sizing</strong><br><small>decomposition · invariant</small></td><td>Extract a service only against a named force — team, scale, isolation or lifecycle; everything else stays in a bounded core.</td><td>applies to every decomposition</td><td><code>architecture/decomposition/right-sizing.md</code></td></tr>
+<tr><td><strong>Strangler fig</strong><br><small>decomposition · invariant</small></td><td>Put a gateway in front of the monolith and move one route group at a time; the monolith shrinks while production keeps working.</td><td>applies to every decomposition</td><td><code>architecture/decomposition/strangler-fig.md</code></td></tr>
+<tr><td><strong>How the cut is computed</strong><br><small>method · reference</small></td><td>Boundaries come from data ownership and co-writes measured in the shards; the model only refines names and edges it can be checked against.</td><td>applies to every decomposition</td><td><code>architecture/_stack/decomposition-method.md</code></td></tr>
+<tr><td><strong>Go microservice conventions</strong><br><small>method · reference</small></td><td>Every service looks the same when you open it — cmd/, internal/, migrations/, one go.mod — so a reader learns the fleet once.</td><td>applies to every decomposition</td><td><code>architecture/_stack/microservices-conventions.md</code></td></tr>
+<tr><td><strong>The 2026 Go target architecture</strong><br><small>method · reference</small></td><td>One pinned stack, stated once — Go 1.26, a module per service in one go.work, slog + OpenTelemetry, NATS JetStream, distroless nonroot images.</td><td>applies to every decomposition</td><td><code>architecture/_stack/target-architecture-2026.md</code></td></tr>
+<tr><td><strong>Microservice chassis</strong><br><small>observability · invariant</small></td><td>One small shared startup path — config, slog, OTel, health, graceful shutdown — so every main.go is the same ten lines.</td><td>applies to every decomposition</td><td><code>architecture/observability/chassis.md</code></td></tr>
+<tr><td><strong>Health checks</strong><br><small>observability · invariant</small></td><td>/healthz says the process lives; /readyz says it can serve — keep them different or the orchestrator restarts healthy pods.</td><td>applies to every decomposition</td><td><code>architecture/observability/health-checks.md</code></td></tr>
+<tr><td><strong>Observability — slog + OpenTelemetry</strong><br><small>observability · invariant</small></td><td>Traces, metrics and logs over one OTLP pipe; the trace id in every log line; the backend is a swap.</td><td>applies to every decomposition</td><td><code>architecture/observability/observability.md</code></td></tr>
+<tr><td><strong>Secrets and configuration</strong><br><small>observability · invariant</small></td><td>Configuration from the environment, secrets from the platform’s store via workload identity — never in git, never in the image.</td><td>applies to every decomposition</td><td><code>architecture/observability/secrets-config.md</code></td></tr>
+<tr><td><strong>Security — JWT at the edge and in every service</strong><br><small>observability · invariant</small></td><td>Validate the token at the gateway and again in each service; carry identity as a claim, not as an in-process context value.</td><td>applies to every decomposition</td><td><code>architecture/observability/security.md</code></td></tr>
+<tr><td><strong>Integration testing with real dependencies</strong><br><small>observability · invariant</small></td><td>Test against real Postgres and NATS in containers, not mocks — the split moved the risk into the edges mocks hide.</td><td>applies to every decomposition</td><td><code>architecture/observability/testing.md</code></td></tr>
+<tr><td><strong>Autoscaling — HPA and KEDA</strong><br><small>reliability · choice</small></td><td>Scale HTTP services on CPU/RPS and consumers on queue depth — CPU is the wrong signal for a JetStream consumer.</td><td>you chose orchestrator = azure-containerapps, which is not compose</td><td><code>architecture/reliability/autoscaling.md</code></td></tr>
+<tr><td><strong>Chaos engineering</strong><br><small>reliability · choice</small></td><td>Prove the timeouts, breakers and compensations work by breaking things on purpose, in a test environment first.</td><td>5 services</td><td><code>architecture/reliability/chaos-engineering.md</code></td></tr>
+<tr><td><strong>Deployment — compose, Kubernetes, Azure Container Apps</strong><br><small>reliability · default</small></td><td>One static binary per service in a distroless nonroot image, deployed the same way everywhere — compose locally, Kubernetes/Helm or Container Apps in production.</td><td>applies to every decomposition</td><td><code>architecture/reliability/deployment.md</code></td></tr>
+<tr><td><strong>Progressive delivery</strong><br><small>reliability · choice</small></td><td>Move traffic to an extracted service gradually — weighted routes and flags, with a fast way back.</td><td>you chose migration_approach = strangler</td><td><code>architecture/reliability/progressive-delivery.md</code></td></tr>
+<tr><td><strong>Rate limiting</strong><br><small>reliability · default</small></td><td>Limit at the edge per client, and inside services on expensive endpoints — shed load before the database does.</td><td>applies to every decomposition</td><td><code>architecture/reliability/rate-limiting.md</code></td></tr>
+<tr><td><strong>Resilience — timeouts, retries, breakers</strong><br><small>reliability · invariant</small></td><td>Every hop has a deadline, bounded retries with jitter for idempotent calls, and a breaker per upstream.</td><td>applies to every decomposition</td><td><code>architecture/reliability/resilience.md</code></td></tr>
+<tr><td><strong>Flat package per context</strong><br><small>structure · default</small></td><td>Keep the ported package as the unit — one package per context inside the service, wiring in cmd/, adapters beside it; Go rewards fewer layers.</td><td>you chose service_internal_structure = flat-package</td><td><code>architecture/structure/flat-package.md</code></td></tr>
+<tr><td><strong>Architecture styles this playbook does not apply</strong><br><small>structure · reference</small></td><td>Omissions are decisions — plugin architectures, space-based grids, serverless-per-function and a shared-library "platform" are not targets here.</td><td>applies to every decomposition</td><td><code>architecture/structure/styles-not-applied.md</code></td></tr>
+</tbody></table></div>
+<h3>Considered and not applied</h3>
+<p>An architecture review that lists only what you did is half a review. These were evaluated against this repository and left out.</p>
+<ul>
+<li><strong>Backend for frontend</strong> — A single Go gateway is what this run scaffolds; per-client backends are a later refinement you add by hand.</li>
+<li><strong>Dapr</strong> — This run talks to NATS/Kafka and HTTP directly from Go; Dapr is an additional sidecar runtime nothing here installs.</li>
+<li><strong>Saga — choreography</strong> — needs coordination = choreography — you chose orchestration</li>
+<li><strong>Synchronous compensated call chain</strong> — needs event_backbone = none — you chose nats</li>
+<li><strong>Change data capture</strong> — needs migration_approach = parallel-run — you chose strangler</li>
+<li><strong>CQRS</strong> — needs read_write_model = cqrs — you chose crud</li>
+<li><strong>Durable execution</strong> — This platform generates a saga whose state lives in the orchestrating service’s own database — no extra runtime to operate. Durable execution (Temporal Go SDK) is the upgrade path when flows outgrow it.</li>
+<li><strong>Event sourcing</strong> — needs read_write_model = event-sourced — you chose crud</li>
+<li><strong>Materialized view / read model</strong> — needs read_write_model = cqrs — you chose crud</li>
+<li><strong>Read replica</strong> — needs at least 1 read_heavy_services — this run has 0</li>
+<li><strong>Read-through cache</strong> — needs at least 1 read_heavy_services — this run has 0</li>
+<li><strong>Try–Confirm–Cancel</strong> — TCC requires every participant to expose Try/Confirm/Cancel; this platform generates compensating sagas because a strangler extraction has participants (and a legacy monolith) that cannot be reshaped that way. Adopt it per participant where isolation is worth it.</li>
+<li><strong>Decompose by subdomain (DDD)</strong> — needs boundary_strategy = subdomain — you chose domain</li>
+<li><strong>Modular monolith first</strong> — needs at most 2 services — this run has 5</li>
+<li><strong>Parallel run</strong> — needs migration_approach = parallel-run — you chose strangler</li>
+<li><strong>Service-to-service identity</strong> — needs at least 6 services — this run has 5</li>
+<li><strong>Service mesh</strong> — needs at least 6 services — this run has 5</li>
+<li><strong>Sidecar / ambassador</strong> — Sidecarless (ambient / eBPF) meshes are displacing it, and nothing in this run scaffolds a sidecar.</li>
+<li><strong>Hexagonal (ports and adapters)</strong> — needs service_internal_structure = hexagonal — you chose flat-package</li>
+</ul>
+<h2>What happens next</h2>
+<p>The platform is generated first and compiles before any domain code exists. Your own code is then <em>moved</em> in verbatim — package clauses, import paths and the shared *gorm.DB split mechanically, nothing rewritten. Only the marked seams are implemented by a model, and only inside the markers. Each task compiles and commits on its own.</p>
+<p>This run moved <strong>954</strong> lines verbatim and generated <strong>404</strong> deterministically, out of 1358 in total — 97% of the result before a model wrote anything. 12 seam points were left marked, across 5 client calls and 1 saga.</p>
+<p>The map planned 2 cross-service calls and the porter marked 5. The difference is not an error on its own — a call can resolve inside one service once its code is together — but it is worth a look before you approve.</p>
+<p>When it finishes, the git strategy you chose is applied: <code>archive-and-adopt</code>. Local git only — nothing is pushed anywhere.</p>
+<p class="foot">The same content is in <code>cognidev/docs/</code> as markdown, one document per question, plus one per service under <code>tasks/</code>. After the run, <code>cognidev/docs/status/</code> holds what each task actually did.</p>
+</main>

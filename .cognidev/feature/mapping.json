@@ -1,0 +1,46 @@
+{
+  "columns": [
+    "Service",
+    "#tables",
+    "Owns tables",
+    "Calls",
+    "Carved from (monolith)"
+  ],
+  "rows": [
+    [
+      "catalog-service",
+      "2",
+      "Category, Product",
+      "—",
+      "handlers.go, model.go, service.go"
+    ],
+    [
+      "customers-service",
+      "1",
+      "Customer",
+      "—",
+      "handlers.go, model.go, service.go"
+    ],
+    [
+      "inventory-service",
+      "1",
+      "StockItem",
+      "—",
+      "model.go, service.go"
+    ],
+    [
+      "payments-service",
+      "1",
+      "Payment",
+      "—",
+      "gateway.go, model.go, service.go"
+    ],
+    [
+      "orders-service ⚙ saga",
+      "2",
+      "Order, OrderLine",
+      "catalog, customers",
+      "handlers.go, model.go, service.go"
+    ]
+  ]
+}

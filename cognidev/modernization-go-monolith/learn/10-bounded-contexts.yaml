@@ -1,0 +1,29 @@
+# Learning card — surfaced on the learning rail while this playbook runs.
+# Owned by the playbook; the IDE loads learn/*.yaml and renders generically.
+id: bounded-contexts
+title: "Where to Cut a Monolith: Bounded Contexts"
+hook: "Service seams follow data ownership, not code folders."
+concepts: [microservices, decompose, ddd, boundaries, monolith, domain, entity]
+intents: [modernize, migrate]
+phases: [decompose, understand, plan, map-services]
+minutes: 4
+diagram:
+  direction: TB
+  groups:
+    - { id: orders, label: "Orders Context", tone: brand }
+    - { id: billing, label: "Billing Context", tone: success }
+  nodes:
+    - { id: cart, label: "Cart", sub: "owns line items", icon: table, group: orders, tone: brand }
+    - { id: order, label: "Order", sub: "owns order state", icon: table, group: orders, tone: brand }
+    - { id: invoice, label: "Invoice", sub: "owns money", icon: table, group: billing, tone: success }
+    - { id: payment, label: "Payment", sub: "owns settlement", icon: table, group: billing, tone: success }
+    - { id: acl, label: "Anti-Corruption Layer", sub: "translate across seam", icon: split, tone: warning }
+  edges:
+    - { from: order, to: acl, label: "OrderPlaced event" }
+    - { from: acl, to: invoice, label: "maps to billing model" }
+    - { from: cart, to: order, label: "checkout" }
+    - { from: invoice, to: payment, label: "charge" }
+takeaways:
+  - "A bounded context owns its data — no other service reads its tables directly."
+  - "Cut where entities stop sharing a transaction, not where the code is biggest."
+  - "Cross-seam calls go through events + an anti-corruption layer, never a shared DB."

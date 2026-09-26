@@ -1,0 +1,59 @@
+<style>
+:root { --ink:#1b1b1b; --muted:#5b5b5b; --rule:#dcdcdc; --accent:#1a5fb4; --wash:#f6f8fb; }
+* { box-sizing:border-box; }
+body { margin:0; background:#fff; color:var(--ink);
+       font-family:"Charter","Bitstream Charter","Iowan Old Style",Georgia,serif;
+       font-size:16px; line-height:1.55; }
+main { max-width:64rem; margin:0 auto; padding:3rem 1.5rem 5rem; }
+h1 { font-size:1.85rem; line-height:1.25; margin:0 0 1rem; font-weight:600; }
+h2 { font-size:1.2rem; margin:2.5rem 0 .75rem; font-weight:600;
+     padding-bottom:.35rem; border-bottom:2px solid var(--accent); }
+h3 { font-size:1rem; margin:1.75rem 0 .5rem; font-weight:600; color:var(--accent); }
+p { margin:.7rem 0; }
+.scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+table { border-collapse:collapse; width:100%; font-size:.9rem; margin:.6rem 0 1.5rem; }
+th, td { text-align:left; vertical-align:top; padding:.5rem .7rem;
+         border-bottom:1px solid var(--rule); }
+th { font-weight:600; color:var(--muted); font-size:.78rem; text-transform:uppercase;
+     letter-spacing:.05em; border-bottom:1px solid var(--ink); }
+tbody tr:nth-child(even) { background:var(--wash); }
+code { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:.85em; }
+ul { margin:.5rem 0 1rem; padding-left:1.25rem; }
+li { margin:.28rem 0; }
+li ul { margin:.2rem 0; }
+.foot { color:var(--muted); font-size:.85rem; margin-top:3rem; padding-top:1rem;
+        border-top:1px solid var(--rule); }
+</style>
+<main>
+<h1>What changes</h1>
+<h2>The services</h2>
+<p>Each service owns its tables outright. No other service may read them — that constraint is what makes an independent deploy possible, and it is also the whole cost of the cut.</p>
+<div class="scroll"><table><thead><tr><th>Service</th><th>Owns</th><th>Aggregate roots</th><th>Calls</th><th>Files planned</th></tr></thead><tbody>
+<tr><td><code>orders-service</code></td><td><code>Order</code>, <code>OrderLine</code></td><td><code>Order</code></td><td><code>catalog-service</code>, <code>customers-service</code></td><td>22</td></tr>
+<tr><td><code>catalog-service</code></td><td><code>Category</code>, <code>Product</code></td><td><code>Category</code></td><td>nothing</td><td>12</td></tr>
+<tr><td><code>customers-service</code></td><td><code>Customer</code></td><td><code>Customer</code></td><td>nothing</td><td>12</td></tr>
+<tr><td><code>inventory-service</code></td><td><code>StockItem</code></td><td><code>StockItem</code></td><td>nothing</td><td>14</td></tr>
+<tr><td><code>payments-service</code></td><td><code>Payment</code></td><td><code>Payment</code></td><td>nothing</td><td>13</td></tr>
+</tbody></table></div>
+<h2>What becomes a network call</h2>
+<p>2 calls that cannot fail today become ones that can. Each one gets a typed, resilient HttpClient with a timeout, a retry and a circuit breaker.</p>
+<div class="scroll"><table><thead><tr><th>From</th><th>To</th><th>Becomes</th></tr></thead><tbody>
+<tr><td><code>orders-service</code></td><td><code>catalog-service</code></td><td>typed HttpClient + contract DTO</td></tr>
+<tr><td><code>orders-service</code></td><td><code>customers-service</code></td><td>typed HttpClient + contract DTO</td></tr>
+</tbody></table></div>
+<h2>Cross-service writes</h2>
+<p>A transaction that spans services cannot be a database transaction. Each one below becomes a saga with an explicit compensation per step.</p>
+<div class="scroll"><table><thead><tr><th>Saga</th><th>Orchestrator</th><th>Participants</th></tr></thead><tbody>
+<tr><td><strong>CreateOrder</strong></td><td><code>orders-service</code></td><td><code>inventory-service</code>, <code>orders-service</code>, <code>payments-service</code></td></tr>
+</tbody></table></div>
+<h2>Files that belong to the fleet, not to one service</h2>
+<div class="scroll"><table><thead><tr><th>File</th><th>Purpose</th></tr></thead><tbody>
+<tr><td><code>ARCHITECTURE.md</code></td><td>Docs: fill the &lt;!-- CW-SEAM[kind=decomposition-rationale] --&gt; in ARCHITECTURE.md — WHY these bounded contexts were drawn this way (which candidates merged/split, which coupling was accepted vs redesigned)</td></tr>
+</tbody></table></div>
+<h2>Monolith files this rewrites</h2>
+<p>Everything else is MOVED verbatim. These are the files where the old shape cannot survive the cut.</p>
+<div class="scroll"><table><thead><tr><th>File</th><th>Why</th></tr></thead><tbody>
+<tr><td><code>internal/orders/service.go</code></td><td>replace the cross-service unit of work in PlaceOrder with the CreateOrder saga (outbox + compensations) — writes in inventory, orders, payments</td></tr>
+</tbody></table></div>
+<p class="foot">Written by the Go decomposition planner. The same content is in <code>what-changes.md</code> beside this file.</p>
+</main>

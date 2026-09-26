@@ -1,0 +1,10 @@
+{
+  "elapsedMs": 126,
+  "finishedAt": 1790392773,
+  "inputs": [],
+  "kind": "rust-binary",
+  "outputs": [],
+  "status": "Ok",
+  "step": "playbook-baseline",
+  "summary": "Tool `../tools/playbook-integrity/target/release/playbook-integrity` completed."
+}

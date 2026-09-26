@@ -1,0 +1,250 @@
+# Readiness gates for a Go monolith → microservices decomposition.
+#
+# ## Why these are declarative and the others are not
+#
+# `go-gates` (the compiled tool) owns the judgements that need real logic: is a
+# client's body an HTTP call or still a marker, does a saga compensate every
+# remote step, does a service's import resolve into another service's module,
+# do two services create the same table. None of that is a flat fact about a
+# file.
+#
+# What lives HERE is the other half — the flat, checkable facts that say the
+# platform was actually delivered: the workspace exists, every service is an
+# image, the decisions are recorded, no secret was committed. A reviewer most
+# wants to audit these without opening a Rust file.
+#
+# Deliberately NOT a copy of the compiled gates. Two definitions of "ready"
+# that can disagree are worse than one, so nothing here re-checks something
+# go-gates measures (go.work membership, Go version, distroless/non-root,
+# health probes, outbox, database ownership are all compiled).
+#
+# Executed by `go-gates` on every run; the results land in
+# `.cognidev/feature/gates.json` as ONE measurement (`declarative_readiness_gates`)
+# whose count is the number of blocking failures. A gate the engine cannot
+# evaluate is a Skip, and a Skip at severity `fail` BLOCKS — silence is not a pass.
+#
+# Deterministic — file_exists / file_absent / file_contains / count_min. No model.
+
+id: modernization-go-monolith-gates
+version: 1
+
+gates:
+
+  # ── The platform was delivered ──────────────────────────────────────────
+  - id: services-written
+    kind: file_exists
+    severity: fail
+    any_of:
+      - services
+    note: "The cut produced a services/ tree. Without it every claim below is about nothing."
+
+  - id: workspace-exists
+    kind: file_exists
+    severity: fail
+    any_of:
+      - go.work
+    note: >-
+      go.work is what `go build ./...`, gopls and every CI job act on across
+      the service modules. A service module outside it is a directory the
+      tooling never sees, and a green build says nothing about it.
+
+  - id: every-service-is-a-module
+    kind: count_min
+    severity: fail
+    glob: "services/*/go.mod"
+    min: 1
+    note: >-
+      One module per service is what makes a service independently versioned
+      and built. A services/ tree with no go.mod under it is the monolith's
+      packages in new folders, compiled as one module.
+
+  - id: dependencies-pinned
+    kind: count_min
+    severity: warn
+    glob: "services/*/go.sum"
+    min: 1
+    note: >-
+      go.sum pins the checksum of every module a service builds against.
+      Without it the first `go build` in CI resolves whatever the proxy serves
+      that day. WARN: a service with no third-party dependency legitimately has
+      none.
+
+  - id: shared-kernel-is-a-module
+    kind: file_exists
+    severity: warn
+    any_of:
+      - pkg/go.mod
+    note: >-
+      The shared kernel (pkg/) is a module of its own, listed in go.work, so
+      what the services share is explicit and versioned. WARN: a cut whose
+      services share nothing has no kernel to write.
+
+  - id: gateway-present
+    kind: file_exists
+    severity: fail
+    any_of:
+      - gateway/go.mod
+      - gateway/traefik.yml
+      - gateway/traefik.yaml
+      - gateway/envoy.yaml
+      - gateway/dynamic.yml
+    note: >-
+      The gateway is the cutover control plane — a Go reverse proxy module, or
+      Traefik / Envoy configuration. Without it the strangler rollback
+      (repointing a route at the monolith) has nothing to repoint.
+
+  # ── Each service can actually be deployed ───────────────────────────────
+  - id: services-are-containerised
+    kind: count_min
+    severity: fail
+    glob: "services/*/Dockerfile"
+    min: 1
+    note: >-
+      A service that cannot become an image is a module in a folder. Whether
+      each image is distroless and non-root is judged by go-gates
+      (`containers_distroless_nonroot`); this only says images exist at all.
+
+  - id: local-stack-described
+    kind: file_exists
+    severity: warn
+    any_of:
+      - docker-compose.yml
+      - compose.yaml
+      - compose.yml
+      - deploy/compose/docker-compose.yml
+      - deploy/docker-compose.yml
+    note: "How the fleet is run locally — services, databases, broker and gateway together. WARN: an estate deployed only to a cluster may describe itself there."
+
+  - id: ci-per-service
+    kind: count_min
+    severity: warn
+    glob: ".github/workflows/*-ci.yml"
+    min: 1
+    note: >-
+      Independent deployability means an independent pipeline. One workflow
+      for the whole workspace rebuilds every service to ship one. WARN: an
+      Azure DevOps-only run writes its pipelines elsewhere.
+
+  - id: no-trivy-action
+    kind: file_contains
+    severity: fail
+    glob: ".github/workflows/*.yml"
+    absent_any: ["aquasecurity/trivy-action"]
+    note: >-
+      The image and dependency scan is Syft + Grype (and govulncheck for Go
+      reachability). trivy-action was pulled after its supply-chain
+      compromise; a workflow that references it runs someone else's code with
+      the repository's token.
+
+  - id: deploy-path-exists
+    kind: file_exists
+    severity: warn
+    any_of:
+      - deploy/k8s
+      - deploy/helm/Chart.yaml
+      - deploy/chart/Chart.yaml
+      - deploy/aca
+      - deploy/azure
+      - azure.yaml
+    note: "At least one concrete path from the repository to a running environment — Kubernetes/Helm or Azure Container Apps."
+
+  - id: lint-config-shipped
+    kind: file_exists
+    severity: warn
+    any_of:
+      - .golangci.yml
+      - .golangci.yaml
+    note: >-
+      The estate arrives with one golangci-lint configuration, not one per
+      service. Services that each decide their own linters produce different
+      definitions of "clean". WARN: a monolith that brought its own keeps it.
+
+  # ── It can be operated and understood ───────────────────────────────────
+  - id: architecture-recorded
+    kind: file_exists
+    severity: fail
+    any_of:
+      - ARCHITECTURE.md
+    note: "Why the boundaries were drawn where they were — the question every reader of a decomposition asks first."
+
+  - id: state-flow-recorded
+    kind: file_exists
+    severity: fail
+    any_of:
+      - STATE-FLOW.md
+    note: >-
+      Where state lives and how it moves: which service owns which table,
+      which package-level cache went where, which writes stopped being one
+      db.Transaction and what compensates them now.
+
+  - id: runbook-recorded
+    kind: file_exists
+    severity: fail
+    any_of:
+      - RUNBOOK.md
+    note: "Day-2 operations and the rollback. A cutover with no documented way back is a one-way door."
+
+  - id: migration-log-recorded
+    kind: file_exists
+    severity: warn
+    any_of:
+      - MIGRATION-LOG.md
+    note: >-
+      What moved out of the monolith, in the order it moved. WARN because
+      `record-status` writes it only when the develop loop produced outcomes.
+
+  - id: decisions-recorded
+    kind: count_min
+    severity: fail
+    glob: "docs/adr/*.md"
+    min: 5
+    note: >-
+      The decisions arrive recorded rather than implied — database-per-service,
+      saga over a distributed transaction, typed net/http clients, the
+      transactional outbox, and the strangler cutover order.
+
+  - id: secrets-documented
+    kind: file_exists
+    severity: warn
+    any_of:
+      - .env.example
+    note: "Every DSN, broker URL and signing key the fleet needs, named with a safe placeholder."
+
+  # ── What must NOT be in the deliverable ─────────────────────────────────
+  - id: no-committed-secrets
+    kind: file_absent
+    severity: fail
+    any_of:
+      - .env
+      - services/.env
+      - gateway/.env
+      - deploy/.env
+    note: "A real .env beside the example is how a DSN reaches a public remote."
+
+  - id: no-nested-repository
+    kind: file_absent
+    severity: fail
+    any_of:
+      - services/.git
+      - gateway/.git
+      - pkg/.git
+    note: "A nested repository inside the deliverable is never intentional."
+
+  - id: gateway-has-no-unfilled-seam
+    kind: file_contains
+    severity: fail
+    glob: "gateway/**"
+    absent_any: ["CW-SEAM[kind=", "TODO(cognidev)"]
+    note: >-
+      Every request passes through the gateway. A marker left in it is not a
+      service that half works — it is the whole estate unreachable.
+
+  - id: no-vendored-copies-of-siblings
+    kind: file_absent
+    severity: warn
+    any_of:
+      - services/vendor
+      - pkg/vendor
+    note: >-
+      A vendor/ directory at the services/ or pkg/ level is a copy of shared
+      code outside any module — the drift go.work exists to prevent.

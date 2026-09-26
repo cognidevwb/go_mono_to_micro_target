@@ -1,0 +1,65 @@
+name: _service-ci
+
+# Reusable: build, vet, test, vulnerability-check, containerize, SBOM + scan,
+# and push ONE module. Called by each <service>-ci.yml.
+on:
+  workflow_call:
+    inputs:
+      module: { type: string, required: true }
+      image: { type: string, required: true }
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ inputs.module }}
+    env:
+      GOWORK: "off"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.26"
+          cache-dependency-path: ${{ inputs.module }}/go.sum
+      - run: go build ./...
+      - run: go vet ./...
+      - run: go test -race ./...
+      - run: go run golang.org/x/vuln/cmd/govulncheck@v1.1.4 ./...
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ inputs.module }}/Dockerfile
+          load: true
+          tags: ${{ inputs.image }}:${{ github.sha }}
+      - name: SBOM (Syft)
+        uses: anchore/sbom-action@v0.20.1
+        with:
+          image: ${{ inputs.image }}:${{ github.sha }}
+          format: spdx-json
+          output-file: sbom.spdx.json
+      - name: Vulnerability scan (Grype)
+        uses: anchore/scan-action@v6.3.0
+        with:
+          image: ${{ inputs.image }}:${{ github.sha }}
+          fail-build: true
+          severity-cutoff: high
+      - name: Azure login (OIDC — no secrets)
+        if: github.event_name == 'push'
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      - name: Push to ACR
+        if: github.event_name == 'push'
+        working-directory: .
+        run: |
+          az acr login --name ${{ vars.ACR_NAME }}
+          docker tag ${{ inputs.image }}:${{ github.sha }} ${{ vars.ACR_NAME }}.azurecr.io/${{ inputs.image }}:${{ github.sha }}
+          docker push ${{ vars.ACR_NAME }}.azurecr.io/${{ inputs.image }}:${{ github.sha }}

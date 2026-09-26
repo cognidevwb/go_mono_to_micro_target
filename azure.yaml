@@ -1,0 +1,48 @@
+# azd manifest — `azd up` provisions deploy/azure/main.bicep and ships every service.
+name: platform
+infra:
+  provider: bicep
+  path: deploy/azure
+services:
+  catalog-service:
+    project: ./services/catalog
+    language: go
+    host: containerapp
+    docker:
+      path: ./Dockerfile
+      context: ../..
+  customers-service:
+    project: ./services/customers
+    language: go
+    host: containerapp
+    docker:
+      path: ./Dockerfile
+      context: ../..
+  inventory-service:
+    project: ./services/inventory
+    language: go
+    host: containerapp
+    docker:
+      path: ./Dockerfile
+      context: ../..
+  payments-service:
+    project: ./services/payments
+    language: go
+    host: containerapp
+    docker:
+      path: ./Dockerfile
+      context: ../..
+  orders-service:
+    project: ./services/orders
+    language: go
+    host: containerapp
+    docker:
+      path: ./Dockerfile
+      context: ../..
+  gateway:
+    project: ./gateway
+    language: go
+    host: containerapp
+    docker:
+      path: ./Dockerfile
+      context: ..

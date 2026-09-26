@@ -1,0 +1,25 @@
+{
+  "elapsedMs": 124,
+  "finishedAt": 1790395035,
+  "inputs": [],
+  "kind": "rust-binary",
+  "outputs": [
+    {
+      "exists": true,
+      "kind": null,
+      "name": "contracts-drift",
+      "optional": false,
+      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/.cognidev/feature/contracts-drift.json"
+    },
+    {
+      "exists": false,
+      "kind": null,
+      "name": "contracts-drift",
+      "optional": true,
+      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/contracts-drift.md"
+    }
+  ],
+  "status": "Ok",
+  "step": "contracts-check",
+  "summary": "Tool `../tools/contracts-go/target/release/contracts-go` completed."
+}

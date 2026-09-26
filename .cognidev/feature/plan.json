@@ -1,0 +1,898 @@
+{
+  "feature": "monolith-to-microservices",
+  "files": [
+    {
+      "depends_on": [],
+      "group": "catalog",
+      "layer": "routing",
+      "path": "services/catalog/internal/catalog/handlers.go",
+      "purpose": "handlers.go ported VERBATIM from the monolith's internal/catalog/handlers.go by port-monolith-go — package clause kept, import paths rewritten to this module. Do not rewrite it: fill only its `// CW-SEAM[...]` markers (catalog-service)",
+      "sources": [
+        "internal/catalog/handlers.go"
+      ]
+    },
+    {
+      "depends_on": [],
+      "group": "catalog",
+      "layer": "data",
+      "path": "services/catalog/internal/catalog/model.go",
+      "purpose": "model.go ported VERBATIM from the monolith's internal/catalog/model.go by port-monolith-go — package clause kept, import paths rewritten to this module. Do not rewrite it: fill only its `// CW-SEAM[...]` markers (catalog-service)",
+      "sources": [
+        "internal/catalog/model.go"
+      ]
+    },
+    {
+      "depends_on": [],
+      "group": "catalog",
+      "layer": "services",
+      "path": "services/catalog/internal/catalog/service.go",
+      "purpose": "service.go ported VERBATIM from the monolith's internal/catalog/service.go by port-monolith-go — package clause kept, import paths rewritten to this module. Do not rewrite it: fill only its `// CW-SEAM[...]` markers (catalog-service)",
+      "sources": [
+        "internal/catalog/service.go"
+      ]
+    },
+    {
+      "depends_on": [],
+      "group": "catalog",
+      "layer": "routing",
+      "path": "services/catalog/cmd/catalog/main.go",
+      "purpose": "catalog's entrypoint: slog JSON handler, OpenTelemetry (OTLP) setup, its OWN database handle, the router, /healthz + /readyz, graceful shutdown on SIGTERM. Wire only this service's packages — the monolith's composition root is not ported (catalog-service)",
+      "sources": []
+    },
+    {
+      "depends_on": [],
+      "group": "catalog",
+      "layer": "data",
+      "path": "services/catalog/migrations/0001_init.sql",
+      "purpose": "CREATE TABLE for the tables catalog OWNS and nothing else: categories (Category), products (Product). Replaces the monolith's shared AutoMigrate; a column another service needs is served by catalog's API, never by a cross-schema join (catalog-service)",
+      "sources": []
+    },
+    {
+      "depends_on": [
+        "services/catalog/migrations/0001_init.sql"
+      ],
+      "group": "catalog",
+      "layer": "data",
+      "path": "services/catalog/internal/store/db.go",
+      "purpose": "open catalog's OWN *gorm.DB (gorm.io/driver/postgres) from its own DSN — models registered here are ONLY Category, Product; the monolith's shared platform.Open and global AutoMigrate do not come over (catalog-service)",
+      "sources": []
+    },
+    {
+      "depends_on": [
+        "services/catalog/internal/catalog/handlers.go"
+      ],
+      "group": "catalog",
+      "layer": "services",
+      "path": "services/catalog/internal/acl/legacy.go",
+      "purpose": "anti-corruption layer for catalog: translate the monolith's shapes for Category, Product into catalog's model — stringly-typed statuses to typed constants, legacy column names, invariants rejected at the boundary. Pure functions, no I/O. // CW-SEAM[kind=acl-translate] (catalog-service)",
+      "sources": []
+    },
+    {
+      "depends_on": [
+        "services/catalog/internal/catalog/handlers.go"
+      ],
+      "group": "catalog",
+      "layer": "services",
+      "path": "services/catalog/internal/catalog/catalog_test.go",
+      "purpose": "table-driven tests for catalog (Category): the happy path per aggregate, validation → 400, not-found → 404, and the concurrency / out-of-stock guard; database via testcontainers-go Postgres, skipped with t.Skip when no container runtime is present (catalog-service)",
+      "sources": []
+    },
+    {
+      "depends_on": [
+        "services/catalog/internal/catalog/handlers.go"
+      ],
+      "group": "cicd:catalog",
+      "layer": "cicd",
+      "path": "services/catalog/deploy/deploy.targets.yml",
+      "purpose": "CI/CD: fill catalog's deploy environments + post-deploy smoke-check path (# TODO(cognidev)) targeting Azure Container Apps (deploy/azure — azd), images in ACR; build (go build, go vet, go test -race), the distroless image, the Syft SBOM and the Grype scan are already wired (catalog-service)",
+      "sources": []
+    },
+    {
+      "depends_on": [
+        "services/catalog/internal/catalog/handlers.go"
+      ],
+      "group": "deploy",
+      "layer": "deploy",
+      "path": "services/catalog/deploy/strangler.values.yaml",
+      "purpose": "Deployment: set catalog's strangler traffic weight 0..100 + legacyPaths (CW-SEAM), grounded in catalog's coupling — a leaf higher, the hub / saga orchestrator canary low (catalog-service)",
+      "sources": []
+    },
+    {
+      "depends_on": [
+        "services/catalog/internal/catalog/handlers.go"
+      ],
+      "group": "docs-catalog",
+      "layer": "docs",
+      "path": "services/catalog/README.md",
+      "purpose": "Docs: fill catalog's <!-- CW-SEAM[kind=business-capability service=catalog] --> — 2-3 sentences on the business capability catalog owns, grounded in its source (catalog-service)",
+      "sources": [
+        "internal/catalog/handlers.go",
+        "internal/catalog/model.go",
+        "internal/catalog/service.go"
+      ]
+    },
+    {
+      "depends_on": [
+        "services/catalog/internal/catalog/handlers.go"
+      ],
+      "group": "equivalence:catalog",
+      "layer": "equivalence",
+      "path": "services/catalog/test/equivalence/catalog_equivalence_test.go",
+      "purpose": "Equivalence catalog: for each endpoint derive a {request, seed, expectedResponse} golden from the monolith's handler into testdata/equivalence/, replay it against the service with httptest, normalise volatile fields, assert new == legacy (catalog-service)",
+      "sources": [
+        "internal/catalog/handlers.go",
+        "internal/catalog/model.go",
+        "internal/catalog/service.go"
+      ]
+    },
+    {
+      "depends_on": [],
+      "group": "customers",
+      "layer": "routing",
+      "path": "services/customers/internal/customers/handlers.go",
+      "purpose": "handlers.go ported VERBATIM from the monolith's internal/customers/handlers.go by port-monolith-go — package clause kept, import paths rewritten to this module. Do not rewrite it: fill only its `// CW-SEAM[...]` markers (customers-service)",
+      "sources": [
+        "internal/customers/handlers.go"
+      ]
+    },
+    {
+      "depends_on": [],
+      "group": "customers",
+      "layer": "data",
+      "path": "services/customers/internal/customers/model.go",
+      "purpose": "model.go ported VERBATIM from the monolith's internal/customers/model.go by port-monolith-go — package clause kept, import paths rewritten to this module. Do not rewrite it: fill only its `// CW-SEAM[...]` markers (customers-service)",
+      "sources": [
+        "internal/customers/model.go"
+      ]
+    },
+    {
+      "depends_on": [],
+      "group": "customers",
+      "layer": "services",
+      "path": "services/customers/internal/customers/service.go",
+      "purpose": "service.go ported VERBATIM from the monolith's internal/customers/service.go by port-monolith-go — package clause kept, import paths rewritten to this module. Do not rewrite it: fill only its `// CW-SEAM[...]` markers (customers-service)",
+      "sources": [
+        "internal/customers/service.go"
+      ]
+    },
+    {
+      "depends_on": [],
+      "group": "customers",
+      "layer": "routing",
+      "path": "services/customers/cmd/customers/main.go",
+      "purpose": "customers's entrypoint: slog JSON handler, OpenTelemetry (OTLP) setup, its OWN database handle, the router, /healthz + /readyz, graceful shutdown on SIGTERM. Wire only this service's packages — the monolith's composition root is not ported (customers-service)",
+      "sources": []
+    },
+    {
+      "depends_on": [],
+      "group": "customers",
+      "layer": "data",
+      "path": "services/customers/migrations/0001_init.sql",
+      "purpose": "CREATE TABLE for the tables customers OWNS and nothing else: customers (Customer). Replaces the monolith's shared AutoMigrate; a column another service needs is served by customers's API, never by a cross-schema join (customers-service)",
+      "sources": []
+    },
+    {
+      "depends_on": [
+        "services/customers/migrations/0001_init.sql"
+      ],
+      "group": "customers",
+      "layer": "data",
+      "path": "services/customers/internal/store/db.go",
+      "purpose": "open customers's OWN *gorm.DB (gorm.io/driver/postgres) from its own DSN — models registered here are ONLY Customer; the monolith's shared platform.Open and global AutoMigrate do not come over (customers-service)",
+      "sources": []
+    },
+    {
+      "depends_on": [
+        "services/customers/internal/customers/handlers.go"
+      ],
+      "group": "customers",
+      "layer": "services",
+      "path": "services/customers/internal/acl/legacy.go",
+      "purpose": "anti-corruption layer for customers: translate the monolith's shapes for Customer into customers's model — stringly-typed statuses to typed constants, legacy column names, invariants rejected at the boundary. Pure functions, no I/O. // CW-SEAM[kind=acl-translate] (customers-service)",
+      "sources": []
+    },
+    {
+      "depends_on": [
+        "services/customers/internal/customers/handlers.go"
+      ],
+      "group": "customers",
+      "layer": "services",
+      "path": "services/customers/internal/customers/customers_test.go",
+      "purpose": "table-driven tests for customers (Customer): the happy path per aggregate, validation → 400, not-found → 404, and the concurrency / out-of-stock guard; database via testcontainers-go Postgres, skipped with t.Skip when no container runtime is present (customers-service)",
+      "sources": []
+    },
+    {
+      "depends_on": [
+        "services/customers/internal/customers/handlers.go"
+      ],
+      "group": "cicd:customers",
+      "layer": "cicd",
+      "path": "services/customers/deploy/deploy.targets.yml",
+      "purpose": "CI/CD: fill customers's deploy environments + post-deploy smoke-check path (# TODO(cognidev)) targeting Azure Container Apps (deploy/azure — azd), images in ACR; build (go build, go vet, go test -race), the distroless image, the Syft SBOM and the Grype scan are already wired (customers-service)",
+      "sources": []
+    },
+    {
+      "depends_on": [
+        "services/customers/internal/customers/handlers.go"
+      ],
+      "group": "deploy",
+      "layer": "deploy",
+      "path": "services/customers/deploy/strangler.values.yaml",
+      "purpose": "Deployment: set customers's strangler traffic weight 0..100 + legacyPaths (CW-SEAM), grounded in customers's coupling — a leaf higher, the hub / saga orchestrator canary low (customers-service)",
+      "sources": []
+    },
+    {
+      "depends_on": [
+        "services/customers/internal/customers/handlers.go"
+      ],
+      "group": "docs-customers",
+      "layer": "docs",
+      "path": "services/customers/README.md",
+      "purpose": "Docs: fill customers's <!-- CW-SEAM[kind=business-capability service=customers] --> — 2-3 sentences on the business capability customers owns, grounded in its source (customers-service)",
+      "sources": [
+        "internal/customers/handlers.go",
+        "internal/customers/model.go",
+        "internal/customers/service.go"
+      ]
+    },
+    {
+      "depends_on": [
+        "services/customers/internal/customers/handlers.go"
+      ],
+      "group": "equivalence:customers",
+      "layer": "equivalence",
+      "path": "services/customers/test/equivalence/customers_equivalence_test.go",
+      "purpose": "Equivalence customers: for each endpoint derive a {request, seed, expectedResponse} golden from the monolith's handler into testdata/equivalence/, replay it against the service with httptest, normalise volatile fields, assert new == legacy (customers-service)",
+      "sources": [
+        "internal/customers/handlers.go",
+        "internal/customers/model.go",
+        "internal/customers/service.go"
+      ]
+    },
+    {
+      "depends_on": [],
+      "group": "inventory",
+      "layer": "data",
+      "path": "services/inventory/internal/inventory/model.go",
+      "purpose": "model.go ported VERBATIM from the monolith's internal/inventory/model.go by port-monolith-go — package clause kept, import paths rewritten to this module. Do not rewrite it: fill only its `// CW-SEAM[...]` markers (inventory-service)",
+      "sources": [
+        "internal/inventory/model.go"
+      ]
+    },
+    {
+      "depends_on": [],
+      "group": "inventory",
+      "layer": "services",
+      "path": "services/inventory/internal/inventory/service.go",
+      "purpose": "service.go ported VERBATIM from the monolith's internal/inventory/service.go by port-monolith-go — package clause kept, import paths rewritten to this module. Do not rewrite it: fill only its `// CW-SEAM[...]` markers (inventory-service)",
+      "sources": [
+        "internal/inventory/service.go"
+      ]
+    },
+    {
+      "depends_on": [],
+      "group": "inventory",
+      "layer": "routing",
+      "path": "services/inventory/cmd/inventory/main.go",
+      "purpose": "inventory's entrypoint: slog JSON handler, OpenTelemetry (OTLP) setup, its OWN database handle, the router, /healthz + /readyz, graceful shutdown on SIGTERM. Wire only this service's packages — the monolith's composition root is not ported (inventory-service)",
+      "sources": []
+    },
+    {
+      "depends_on": [],
+      "group": "inventory",
+      "layer": "data",
+      "path": "services/inventory/migrations/0001_init.sql",
+      "purpose": "CREATE TABLE for the tables inventory OWNS and nothing else: stock_items (StockItem). Replaces the monolith's shared AutoMigrate; a column another service needs is served by inventory's API, never by a cross-schema join (inventory-service)",
+      "sources": []
+    },
+    {
+      "depends_on": [
+        "services/inventory/migrations/0001_init.sql"
+      ],
+      "group": "inventory",
+      "layer": "data",
+      "path": "services/inventory/internal/store/db.go",
+      "purpose": "open inventory's OWN *gorm.DB (gorm.io/driver/postgres) from its own DSN — models registered here are ONLY StockItem; the monolith's shared platform.Open and global AutoMigrate do not come over (inventory-service)",
+      "sources": []
+    },
+    {
+      "depends_on": [
+        "services/inventory/internal/inventory/model.go",
+        "services/inventory/internal/inventory/service.go",
+        "services/inventory/internal/store/db.go"
+      ],
+      "group": "inventory",
+      "layer": "routing",
+      "path": "services/inventory/internal/httpapi/stock_item_handlers.go",
+      "purpose": "HTTP handlers for StockItem on the monolith's own router, kept (gin) under /v1/stockitem: bind + validate the request → call the ported service → JSON response, errors as RFC 9457 problem+json. context.Context flows from the request into every call. Routes carry the /v1 segment. (inventory-service)",
+      "sources": []
+    },
+    {
+      "depends_on": [
+        "services/inventory/internal/inventory/model.go",
+        "services/inventory/internal/inventory/service.go"
+      ],
+      "group": "inventory",
+      "layer": "services",
+      "path": "services/inventory/internal/events/order_placed_consumer.go",
+      "purpose": "consume `order.placed` (raised by orders) over NATS JetStream (github.com/nats-io/nats.go/jetstream: a durable consumer per subscriber, Nats-Msg-Id header for publish de-duplication, explicit Ack after the local commit): an idempotent handler keyed on the message id (processed-message table), acking only after the local commit — replaces the in-process bus Subscribe (inventory-service)",
+      "sources": []
+    },
+    {
+      "depends_on": [
+        "services/inventory/internal/inventory/model.go",
+        "services/inventory/internal/inventory/service.go"
+      ],
+      "group": "inventory",
+      "layer": "services",
+      "path": "services/inventory/internal/jobs/scheduler.go",
+      "purpose": "the scheduled work inventory inherits (StartRestockJob): run it exactly once across replicas — a single-replica worker, a Postgres advisory-lock lease, or a Kubernetes CronJob — started from cmd/inventory with the service's context so SIGTERM stops it (inventory-service)",
+      "sources": []
+    },
+    {
+      "depends_on": [
+        "services/inventory/internal/inventory/model.go"
+      ],
+      "group": "inventory",
+      "layer": "services",
+      "path": "services/inventory/internal/acl/legacy.go",
+      "purpose": "anti-corruption layer for inventory: translate the monolith's shapes for StockItem into inventory's model — stringly-typed statuses to typed constants, legacy column names, invariants rejected at the boundary. Pure functions, no I/O. // CW-SEAM[kind=acl-translate] (inventory-service)",
+      "sources": []
+    },
+    {
+      "depends_on": [
+        "services/inventory/internal/httpapi/stock_item_handlers.go"
+      ],
+      "group": "inventory",
+      "layer": "services",
+      "path": "services/inventory/internal/inventory/inventory_test.go",
+      "purpose": "table-driven tests for inventory (StockItem): the happy path per aggregate, validation → 400, not-found → 404, and the concurrency / out-of-stock guard; database via testcontainers-go Postgres, skipped with t.Skip when no container runtime is present (inventory-service)",
+      "sources": []
+    },
+    {
+      "depends_on": [
+        "services/inventory/internal/httpapi/stock_item_handlers.go"
+      ],
+      "group": "cicd:inventory",
+      "layer": "cicd",
+      "path": "services/inventory/deploy/deploy.targets.yml",
+      "purpose": "CI/CD: fill inventory's deploy environments + post-deploy smoke-check path (# TODO(cognidev)) targeting Azure Container Apps (deploy/azure — azd), images in ACR; build (go build, go vet, go test -race), the distroless image, the Syft SBOM and the Grype scan are already wired (inventory-service)",
+      "sources": []
+    },
+    {
+      "depends_on": [
+        "services/inventory/internal/httpapi/stock_item_handlers.go"
+      ],
+      "group": "deploy",
+      "layer": "deploy",
+      "path": "services/inventory/deploy/strangler.values.yaml",
+      "purpose": "Deployment: set inventory's strangler traffic weight 0..100 + legacyPaths (CW-SEAM), grounded in inventory's coupling — a leaf higher, the hub / saga orchestrator canary low (inventory-service)",
+      "sources": []
+    },
+    {
+      "depends_on": [
+        "services/inventory/internal/httpapi/stock_item_handlers.go"
+      ],
+      "group": "docs-inventory",
+      "layer": "docs",
+      "path": "services/inventory/README.md",
+      "purpose": "Docs: fill inventory's <!-- CW-SEAM[kind=business-capability service=inventory] --> — 2-3 sentences on the business capability inventory owns, grounded in its source (inventory-service)",
+      "sources": [
+        "internal/inventory/model.go",
+        "internal/inventory/service.go"
+      ]
+    },
+    {
+      "depends_on": [
+        "services/inventory/internal/httpapi/stock_item_handlers.go"
+      ],
+      "group": "equivalence:inventory",
+      "layer": "equivalence",
+      "path": "services/inventory/test/equivalence/inventory_equivalence_test.go",
+      "purpose": "Equivalence inventory: for each endpoint derive a {request, seed, expectedResponse} golden from the monolith's handler into testdata/equivalence/, replay it against the service with httptest, normalise volatile fields, assert new == legacy (inventory-service)",
+      "sources": [
+        "internal/inventory/model.go",
+        "internal/inventory/service.go"
+      ]
+    },
+    {
+      "depends_on": [],
+      "group": "payments",
+      "layer": "services",
+      "path": "services/payments/internal/payments/gateway.go",
+      "purpose": "gateway.go ported VERBATIM from the monolith's internal/payments/gateway.go by port-monolith-go — package clause kept, import paths rewritten to this module. Do not rewrite it: fill only its `// CW-SEAM[...]` markers (payments-service)",
+      "sources": [
+        "internal/payments/gateway.go"
+      ]
+    },
+    {
+      "depends_on": [],
+      "group": "payments",
+      "layer": "data",
+      "path": "services/payments/internal/payments/model.go",
+      "purpose": "model.go ported VERBATIM from the monolith's internal/payments/model.go by port-monolith-go — package clause kept, import paths rewritten to this module. Do not rewrite it: fill only its `// CW-SEAM[...]` markers (payments-service)",
+      "sources": [
+        "internal/payments/model.go"
+      ]
+    },
+    {
+      "depends_on": [],
+      "group": "payments",
+      "layer": "services",
+      "path": "services/payments/internal/payments/service.go",
+      "purpose": "service.go ported VERBATIM from the monolith's internal/payments/service.go by port-monolith-go — package clause kept, import paths rewritten to this module. Do not rewrite it: fill only its `// CW-SEAM[...]` markers (payments-service)",
+      "sources": [
+        "internal/payments/service.go"
+      ]
+    },
+    {
+      "depends_on": [],
+      "group": "payments",
+      "layer": "routing",
+      "path": "services/payments/cmd/payments/main.go",
+      "purpose": "payments's entrypoint: slog JSON handler, OpenTelemetry (OTLP) setup, its OWN database handle, the router, /healthz + /readyz, graceful shutdown on SIGTERM. Wire only this service's packages — the monolith's composition root is not ported (payments-service)",
+      "sources": []
+    },
+    {
+      "depends_on": [],
+      "group": "payments",
+      "layer": "data",
+      "path": "services/payments/migrations/0001_init.sql",
+      "purpose": "CREATE TABLE for the tables payments OWNS and nothing else: payments (Payment). Replaces the monolith's shared AutoMigrate; a column another service needs is served by payments's API, never by a cross-schema join (payments-service)",
+      "sources": []
+    },
+    {
+      "depends_on": [
+        "services/payments/migrations/0001_init.sql"
+      ],
+      "group": "payments",
+      "layer": "data",
+      "path": "services/payments/internal/store/db.go",
+      "purpose": "open payments's OWN *gorm.DB (gorm.io/driver/postgres) from its own DSN — models registered here are ONLY Payment; the monolith's shared platform.Open and global AutoMigrate do not come over (payments-service)",
+      "sources": []
+    },
+    {
+      "depends_on": [
+        "services/payments/internal/payments/gateway.go",
+        "services/payments/internal/payments/model.go",
+        "services/payments/internal/payments/service.go",
+        "services/payments/internal/store/db.go"
+      ],
+      "group": "payments",
+      "layer": "routing",
+      "path": "services/payments/internal/httpapi/payment_handlers.go",
+      "purpose": "HTTP handlers for Payment on the monolith's own router, kept (gin) under /v1/payment: bind + validate the request → call the ported service → JSON response, errors as RFC 9457 problem+json. context.Context flows from the request into every call. Routes carry the /v1 segment. (payments-service)",
+      "sources": []
+    },
+    {
+      "depends_on": [
+        "services/payments/internal/payments/gateway.go"
+      ],
+      "group": "payments",
+      "layer": "services",
+      "path": "services/payments/internal/acl/legacy.go",
+      "purpose": "anti-corruption layer for payments: translate the monolith's shapes for Payment into payments's model — stringly-typed statuses to typed constants, legacy column names, invariants rejected at the boundary. Pure functions, no I/O. // CW-SEAM[kind=acl-translate] (payments-service)",
+      "sources": []
+    },
+    {
+      "depends_on": [
+        "services/payments/internal/httpapi/payment_handlers.go"
+      ],
+      "group": "payments",
+      "layer": "services",
+      "path": "services/payments/internal/payments/payments_test.go",
+      "purpose": "table-driven tests for payments (Payment): the happy path per aggregate, validation → 400, not-found → 404, and the concurrency / out-of-stock guard; database via testcontainers-go Postgres, skipped with t.Skip when no container runtime is present (payments-service)",
+      "sources": []
+    },
+    {
+      "depends_on": [
+        "services/payments/internal/httpapi/payment_handlers.go"
+      ],
+      "group": "cicd:payments",
+      "layer": "cicd",
+      "path": "services/payments/deploy/deploy.targets.yml",
+      "purpose": "CI/CD: fill payments's deploy environments + post-deploy smoke-check path (# TODO(cognidev)) targeting Azure Container Apps (deploy/azure — azd), images in ACR; build (go build, go vet, go test -race), the distroless image, the Syft SBOM and the Grype scan are already wired (payments-service)",
+      "sources": []
+    },
+    {
+      "depends_on": [
+        "services/payments/internal/httpapi/payment_handlers.go"
+      ],
+      "group": "deploy",
+      "layer": "deploy",
+      "path": "services/payments/deploy/strangler.values.yaml",
+      "purpose": "Deployment: set payments's strangler traffic weight 0..100 + legacyPaths (CW-SEAM), grounded in payments's coupling — a leaf higher, the hub / saga orchestrator canary low (payments-service)",
+      "sources": []
+    },
+    {
+      "depends_on": [
+        "services/payments/internal/httpapi/payment_handlers.go"
+      ],
+      "group": "docs-payments",
+      "layer": "docs",
+      "path": "services/payments/README.md",
+      "purpose": "Docs: fill payments's <!-- CW-SEAM[kind=business-capability service=payments] --> — 2-3 sentences on the business capability payments owns, grounded in its source (payments-service)",
+      "sources": [
+        "internal/payments/gateway.go",
+        "internal/payments/model.go",
+        "internal/payments/service.go"
+      ]
+    },
+    {
+      "depends_on": [
+        "services/payments/internal/httpapi/payment_handlers.go"
+      ],
+      "group": "equivalence:payments",
+      "layer": "equivalence",
+      "path": "services/payments/test/equivalence/payments_equivalence_test.go",
+      "purpose": "Equivalence payments: for each endpoint derive a {request, seed, expectedResponse} golden from the monolith's handler into testdata/equivalence/, replay it against the service with httptest, normalise volatile fields, assert new == legacy (payments-service)",
+      "sources": [
+        "internal/payments/gateway.go",
+        "internal/payments/model.go",
+        "internal/payments/service.go"
+      ]
+    },
+    {
+      "depends_on": [],
+      "group": "orders",
+      "layer": "routing",
+      "path": "services/orders/internal/orders/handlers.go",
+      "purpose": "handlers.go ported VERBATIM from the monolith's internal/orders/handlers.go by port-monolith-go — package clause kept, import paths rewritten to this module. Do not rewrite it: fill only its `// CW-SEAM[...]` markers (orders-service)",
+      "sources": [
+        "internal/orders/handlers.go"
+      ]
+    },
+    {
+      "depends_on": [],
+      "group": "orders",
+      "layer": "data",
+      "path": "services/orders/internal/orders/model.go",
+      "purpose": "model.go ported VERBATIM from the monolith's internal/orders/model.go by port-monolith-go — package clause kept, import paths rewritten to this module. Do not rewrite it: fill only its `// CW-SEAM[...]` markers (orders-service)",
+      "sources": [
+        "internal/orders/model.go"
+      ]
+    },
+    {
+      "depends_on": [],
+      "group": "orders",
+      "layer": "services",
+      "path": "services/orders/internal/orders/service.go",
+      "purpose": "service.go ported VERBATIM from the monolith's internal/orders/service.go by port-monolith-go — package clause kept, import paths rewritten to this module. Do not rewrite it: fill only its `// CW-SEAM[...]` markers (orders-service)",
+      "sources": [
+        "internal/orders/service.go"
+      ]
+    },
+    {
+      "depends_on": [],
+      "group": "orders",
+      "layer": "routing",
+      "path": "services/orders/cmd/orders/main.go",
+      "purpose": "orders's entrypoint: slog JSON handler, OpenTelemetry (OTLP) setup, its OWN database handle, the router, /healthz + /readyz, graceful shutdown on SIGTERM. Wire only this service's packages — the monolith's composition root is not ported (orders-service)",
+      "sources": []
+    },
+    {
+      "depends_on": [],
+      "group": "orders",
+      "layer": "data",
+      "path": "services/orders/migrations/0001_init.sql",
+      "purpose": "CREATE TABLE for the tables orders OWNS and nothing else: orders (Order), order_lines (OrderLine). Replaces the monolith's shared AutoMigrate; a column another service needs is served by orders's API, never by a cross-schema join (orders-service)",
+      "sources": []
+    },
+    {
+      "depends_on": [
+        "services/orders/migrations/0001_init.sql"
+      ],
+      "group": "orders",
+      "layer": "data",
+      "path": "services/orders/internal/store/db.go",
+      "purpose": "open orders's OWN *gorm.DB (gorm.io/driver/postgres) from its own DSN — models registered here are ONLY Order, OrderLine; the monolith's shared platform.Open and global AutoMigrate do not come over (orders-service)",
+      "sources": []
+    },
+    {
+      "depends_on": [
+        "services/orders/internal/orders/handlers.go",
+        "services/orders/internal/orders/model.go",
+        "services/orders/internal/orders/service.go"
+      ],
+      "group": "orders",
+      "layer": "services",
+      "path": "services/orders/internal/events/order_placed.go",
+      "purpose": "publish `order.placed` over NATS JetStream (github.com/nats-io/nats.go/jetstream: a durable consumer per subscriber, Nats-Msg-Id header for publish de-duplication, explicit Ack after the local commit) — written to this service's outbox table in the SAME transaction as the change it announces, relayed afterwards; replaces the in-process bus Publish. Payload is a versioned struct in this service's internal/events package, wrapped in the pkg/events envelope (orders-service)",
+      "sources": []
+    },
+    {
+      "depends_on": [
+        "services/orders/internal/orders/handlers.go"
+      ],
+      "group": "orders",
+      "layer": "services",
+      "path": "services/orders/internal/acl/legacy.go",
+      "purpose": "anti-corruption layer for orders: translate the monolith's shapes for Order, OrderLine into orders's model — stringly-typed statuses to typed constants, legacy column names, invariants rejected at the boundary. Pure functions, no I/O. // CW-SEAM[kind=acl-translate] (orders-service)",
+      "sources": []
+    },
+    {
+      "depends_on": [
+        "services/orders/internal/orders/handlers.go"
+      ],
+      "group": "orders",
+      "layer": "services",
+      "path": "services/orders/internal/orders/orders_test.go",
+      "purpose": "table-driven tests for orders (Order): the happy path per aggregate, validation → 400, not-found → 404, and the concurrency / out-of-stock guard; database via testcontainers-go Postgres, skipped with t.Skip when no container runtime is present (orders-service)",
+      "sources": []
+    },
+    {
+      "depends_on": [
+        "services/orders/internal/store/db.go"
+      ],
+      "group": "orders",
+      "layer": "data",
+      "path": "services/orders/internal/outbox/outbox.go",
+      "purpose": "transactional outbox for orders: an outbox table written in the SAME transaction as the business change, and a relay goroutine that publishes unsent rows over NATS JetStream (github.com/nats-io/nats.go/jetstream: a durable consumer per subscriber, Nats-Msg-Id header for publish de-duplication, explicit Ack after the local commit) with the row id as the de-duplication id, marking them sent only after the broker acks (orders-service)",
+      "sources": []
+    },
+    {
+      "depends_on": [
+        "services/orders/internal/store/db.go",
+        "services/orders/internal/outbox/outbox.go"
+      ],
+      "group": "orders",
+      "layer": "services",
+      "path": "services/orders/internal/saga/create_order.go",
+      "purpose": "the CreateOrder ORCHESTRATED saga replacing the monolith's single db.Transaction across inventory → orders → payments: persist saga state in orders's database, send each step as a command over NATS JetStream (github.com/nats-io/nats.go/jetstream: a durable consumer per subscriber, Nats-Msg-Id header for publish de-duplication, explicit Ack after the local commit), the hardest-to-reverse step (the payment charge) LAST as the pivot, compensations in reverse (release stock, void payment). State change + outgoing message commit together through the outbox. Run(ctx, cmd) executes the steps in order and returns the final Outcome (Completed or Compensated) — the test calls Run and asserts the Outcome and the persisted saga state; it never waits for a published event. // CW-SEAM[kind=saga] (orders-service)",
+      "sources": [
+        "internal/orders/handlers.go",
+        "internal/orders/model.go",
+        "internal/orders/service.go"
+      ]
+    },
+    {
+      "depends_on": [
+        "services/orders/internal/saga/create_order.go"
+      ],
+      "group": "orders",
+      "layer": "services",
+      "path": "services/orders/internal/saga/create_order_test.go",
+      "purpose": "CreateOrder saga test with fake participants: the happy path completes across inventory → orders → payments; a failure at the pivot runs the compensations in reverse. Run(ctx, cmd) executes the steps in order and returns the final Outcome (Completed or Compensated) — the test calls Run and asserts the Outcome and the persisted saga state; it never waits for a published event (orders-service)",
+      "sources": []
+    },
+    {
+      "depends_on": [
+        "services/orders/internal/orders/handlers.go"
+      ],
+      "group": "cicd:orders",
+      "layer": "cicd",
+      "path": "services/orders/deploy/deploy.targets.yml",
+      "purpose": "CI/CD: fill orders's deploy environments + post-deploy smoke-check path (# TODO(cognidev)) targeting Azure Container Apps (deploy/azure — azd), images in ACR; build (go build, go vet, go test -race), the distroless image, the Syft SBOM and the Grype scan are already wired (orders-service)",
+      "sources": []
+    },
+    {
+      "depends_on": [
+        "services/orders/internal/orders/handlers.go"
+      ],
+      "group": "deploy",
+      "layer": "deploy",
+      "path": "services/orders/deploy/strangler.values.yaml",
+      "purpose": "Deployment: set orders's strangler traffic weight 0..100 + legacyPaths (CW-SEAM), grounded in orders's coupling — a leaf higher, the hub / saga orchestrator canary low (orders-service)",
+      "sources": []
+    },
+    {
+      "depends_on": [
+        "services/orders/internal/orders/handlers.go"
+      ],
+      "group": "docs-orders",
+      "layer": "docs",
+      "path": "services/orders/README.md",
+      "purpose": "Docs: fill orders's <!-- CW-SEAM[kind=business-capability service=orders] --> — 2-3 sentences on the business capability orders owns, grounded in its source (orders-service)",
+      "sources": [
+        "internal/orders/handlers.go",
+        "internal/orders/model.go",
+        "internal/orders/service.go"
+      ]
+    },
+    {
+      "depends_on": [
+        "services/orders/internal/orders/handlers.go"
+      ],
+      "group": "contracts:orders-catalog",
+      "layer": "contracts",
+      "path": "services/orders/internal/clients/catalog_contract_test.go",
+      "purpose": "Contract tests orders->catalog: for each testdata/contracts/catalog/*.json golden response assert it decodes into internal/contracts/catalog with no unknown fields (json.Decoder.DisallowUnknownFields) and satisfies the value invariants; record one fixture (orders-service)",
+      "sources": []
+    },
+    {
+      "depends_on": [
+        "services/orders/internal/orders/handlers.go"
+      ],
+      "group": "contracts:orders-customers",
+      "layer": "contracts",
+      "path": "services/orders/internal/clients/customers_contract_test.go",
+      "purpose": "Contract tests orders->customers: for each testdata/contracts/customers/*.json golden response assert it decodes into internal/contracts/customers with no unknown fields (json.Decoder.DisallowUnknownFields) and satisfies the value invariants; record one fixture (orders-service)",
+      "sources": []
+    },
+    {
+      "depends_on": [
+        "services/orders/internal/orders/handlers.go"
+      ],
+      "group": "equivalence:orders",
+      "layer": "equivalence",
+      "path": "services/orders/test/equivalence/orders_equivalence_test.go",
+      "purpose": "Equivalence orders: for each endpoint derive a {request, seed, expectedResponse} golden from the monolith's handler into testdata/equivalence/, replay it against the service with httptest, normalise volatile fields, assert new == legacy (orders-service)",
+      "sources": [
+        "internal/orders/handlers.go",
+        "internal/orders/model.go",
+        "internal/orders/service.go"
+      ]
+    },
+    {
+      "depends_on": [],
+      "group": "contracts:catalog",
+      "layer": "data",
+      "path": "services/orders/internal/contracts/catalog/contracts.go",
+      "purpose": "orders-service's own copy of the catalog service's contract: the request/response DTOs it decodes (JSON tags, no gorm tags, no behaviour), copied from the provider's API — never imported from another module",
+      "sources": []
+    },
+    {
+      "depends_on": [],
+      "group": "docs-architecture",
+      "layer": "docs",
+      "path": "ARCHITECTURE.md",
+      "purpose": "Docs: fill the <!-- CW-SEAM[kind=decomposition-rationale] --> in ARCHITECTURE.md — WHY these bounded contexts were drawn this way (which candidates merged/split, which coupling was accepted vs redesigned)",
+      "sources": [
+        ".cognidev/feature/decomposition.json"
+      ]
+    }
+  ],
+  "folders": [
+    "services/orders",
+    "services/catalog",
+    "services/customers",
+    "services/inventory",
+    "services/payments"
+  ],
+  "modify": [
+    {
+      "depends_on": [],
+      "group": "modify",
+      "layer": "services",
+      "path": "internal/orders/service.go",
+      "purpose": "replace the cross-service unit of work in PlaceOrder with the CreateOrder saga (outbox + compensations) — writes in inventory, orders, payments",
+      "sources": []
+    }
+  ],
+  "order": [
+    "orders-service",
+    "catalog-service",
+    "customers-service",
+    "inventory-service",
+    "payments-service"
+  ],
+  "sagas": [
+    {
+      "name": "CreateOrder",
+      "orchestrator": "orders-service",
+      "participants": [
+        "inventory",
+        "orders",
+        "payments"
+      ],
+      "pivot": "orders",
+      "steps": [
+        {
+          "action": "s.inventory.Reserve",
+          "compensation": "compensable (Jev p=0.88): undo `s.inventory.Reserve` in inventory",
+          "context": "inventory"
+        },
+        {
+          "action": "s.payments.Charge",
+          "compensation": "needs decision — Jev could not tell whether this step can be undone",
+          "context": "payments"
+        }
+      ]
+    }
+  ],
+  "services": [
+    {
+      "aggregates": [
+        "Category"
+      ],
+      "calls": [],
+      "context": "catalog",
+      "entities": [
+        "Category",
+        "Product"
+      ],
+      "name": "catalog-service",
+      "reads": 1,
+      "sources": [
+        "internal/catalog/handlers.go",
+        "internal/catalog/model.go",
+        "internal/catalog/service.go"
+      ],
+      "why": "Jev: stays its own service",
+      "writes": 1
+    },
+    {
+      "aggregates": [
+        "Customer"
+      ],
+      "calls": [],
+      "context": "customers",
+      "entities": [
+        "Customer"
+      ],
+      "name": "customers-service",
+      "reads": 1,
+      "sources": [
+        "internal/customers/handlers.go",
+        "internal/customers/model.go",
+        "internal/customers/service.go"
+      ],
+      "why": "Jev: stays its own service",
+      "writes": 1
+    },
+    {
+      "aggregates": [
+        "StockItem"
+      ],
+      "calls": [],
+      "context": "inventory",
+      "entities": [
+        "StockItem"
+      ],
+      "name": "inventory-service",
+      "reads": 0,
+      "sources": [
+        "internal/inventory/model.go",
+        "internal/inventory/service.go"
+      ],
+      "why": "Jev: stays its own service",
+      "writes": 0
+    },
+    {
+      "aggregates": [
+        "Payment"
+      ],
+      "calls": [],
+      "context": "payments",
+      "entities": [
+        "Payment"
+      ],
+      "name": "payments-service",
+      "reads": 0,
+      "sources": [
+        "internal/payments/gateway.go",
+        "internal/payments/model.go",
+        "internal/payments/service.go"
+      ],
+      "why": "Jev: stays its own service",
+      "writes": 0
+    },
+    {
+      "aggregates": [
+        "Order"
+      ],
+      "calls": [
+        "catalog",
+        "customers"
+      ],
+      "context": "orders",
+      "entities": [
+        "Order",
+        "OrderLine"
+      ],
+      "name": "orders-service",
+      "reads": 1,
+      "sources": [
+        "internal/orders/handlers.go",
+        "internal/orders/model.go",
+        "internal/orders/service.go"
+      ],
+      "why": "Jev: stays its own service",
+      "writes": 1
+    }
+  ],
+  "state_owners": {
+    "catalog.priceCache": "catalog",
+    "platform.Models": "*"
+  }
+}

@@ -1,0 +1,1 @@
+Edited services/catalog/README.md; compiled in the end-of-run pass.

@@ -1,0 +1,40 @@
+<style>
+:root { --ink:#1b1b1b; --muted:#5b5b5b; --rule:#dcdcdc; --accent:#1a5fb4; --wash:#f6f8fb; }
+* { box-sizing:border-box; }
+body { margin:0; background:#fff; color:var(--ink);
+       font-family:"Charter","Bitstream Charter","Iowan Old Style",Georgia,serif;
+       font-size:16px; line-height:1.55; }
+main { max-width:64rem; margin:0 auto; padding:3rem 1.5rem 5rem; }
+h1 { font-size:1.85rem; line-height:1.25; margin:0 0 1rem; font-weight:600; }
+h2 { font-size:1.2rem; margin:2.5rem 0 .75rem; font-weight:600;
+     padding-bottom:.35rem; border-bottom:2px solid var(--accent); }
+h3 { font-size:1rem; margin:1.75rem 0 .5rem; font-weight:600; color:var(--accent); }
+p { margin:.7rem 0; }
+.scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+table { border-collapse:collapse; width:100%; font-size:.9rem; margin:.6rem 0 1.5rem; }
+th, td { text-align:left; vertical-align:top; padding:.5rem .7rem;
+         border-bottom:1px solid var(--rule); }
+th { font-weight:600; color:var(--muted); font-size:.78rem; text-transform:uppercase;
+     letter-spacing:.05em; border-bottom:1px solid var(--ink); }
+tbody tr:nth-child(even) { background:var(--wash); }
+code { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:.85em; }
+ul { margin:.5rem 0 1rem; padding-left:1.25rem; }
+li { margin:.28rem 0; }
+li ul { margin:.2rem 0; }
+.foot { color:var(--muted); font-size:.85rem; margin-top:3rem; padding-top:1rem;
+        border-top:1px solid var(--rule); }
+</style>
+<main>
+<h1>The plan</h1>
+<p>Leaves first, the hub last. A service with no outbound calls can be extracted and routed on its own; one that calls three others cannot be extracted until they exist. That is the whole reason for this order, and it is why the riskiest service is cut once the cheap wins are already in.</p>
+<div class="scroll"><table><thead><tr><th>#</th><th>Service</th><th>Owns</th><th>Depends on</th><th>Why here</th></tr></thead><tbody>
+<tr><td>1</td><td><code>orders-service</code></td><td>2</td><td><code>catalog-service</code>, <code>customers-service</code></td><td>every service it calls has to exist first, so it is cut after them</td></tr>
+<tr><td>2</td><td><code>catalog-service</code></td><td>2</td><td>nothing</td><td>a leaf — nothing to wait for</td></tr>
+<tr><td>3</td><td><code>customers-service</code></td><td>1</td><td>nothing</td><td>a leaf — nothing to wait for</td></tr>
+<tr><td>4</td><td><code>inventory-service</code></td><td>1</td><td>nothing</td><td>a leaf — nothing to wait for</td></tr>
+<tr><td>5</td><td><code>payments-service</code></td><td>1</td><td>nothing</td><td>a leaf — nothing to wait for</td></tr>
+</tbody></table></div>
+<h2>How each service is built</h2>
+<p>1. The platform is scaffolded first — every project compiles before any domain code exists. 2. The monolith's own code is MOVED in verbatim, with package clauses, import paths and the shared *gorm.DB split mechanically. Nothing is rewritten. 3. Only the marked seams are then implemented — the typed client calls and the saga. Everything else is the code you already had. 4. Each task compiles and commits on its own before the next one starts.</p>
+<p class="foot">Written by the Go decomposition planner. The same content is in <code>the-plan.md</code> beside this file.</p>
+</main>

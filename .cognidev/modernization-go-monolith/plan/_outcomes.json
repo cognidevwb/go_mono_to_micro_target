@@ -1,0 +1,140 @@
+[
+  {
+    "id": "01-catalog-core",
+    "title": "Implement catalog-service — domain + wiring",
+    "status": "done",
+    "summary": "Edited services/catalog/internal/acl/legacy.go (7 files); compiled in the end-of-run pass."
+  },
+  {
+    "id": "02-catalog-docs",
+    "title": "Docs: catalog",
+    "status": "done",
+    "summary": "Edited services/catalog/README.md; compiled in the end-of-run pass."
+  },
+  {
+    "id": "03-catalog-cicd",
+    "title": "CI/CD: catalog",
+    "status": "done",
+    "summary": "Edited services/catalog/deploy/deploy.targets.yml; compiled in the end-of-run pass."
+  },
+  {
+    "id": "04-catalog-deployment",
+    "title": "Deployment: catalog",
+    "status": "done",
+    "summary": "Edited services/catalog/deploy/strangler.values.yaml; compiled in the end-of-run pass."
+  },
+  {
+    "id": "05-customers-core",
+    "title": "Implement customers-service — domain + wiring",
+    "status": "done",
+    "summary": "Edited services/customers/internal/acl/legacy.go (6 files); compiled in the end-of-run pass."
+  },
+  {
+    "id": "06-customers-docs",
+    "title": "Docs: customers",
+    "status": "done",
+    "summary": "Edited services/customers/README.md; compiled in the end-of-run pass."
+  },
+  {
+    "id": "07-customers-cicd",
+    "title": "CI/CD: customers",
+    "status": "done",
+    "summary": "Edited services/customers/deploy/deploy.targets.yml; compiled in the end-of-run pass."
+  },
+  {
+    "id": "08-customers-deployment",
+    "title": "Deployment: customers",
+    "status": "done",
+    "summary": "Edited services/customers/deploy/strangler.values.yaml; compiled in the end-of-run pass."
+  },
+  {
+    "id": "09-inventory-core",
+    "title": "Implement inventory-service — domain + wiring",
+    "status": "done",
+    "summary": "Edited services/inventory/internal/acl/legacy.go (10 files); compiled in the end-of-run pass."
+  },
+  {
+    "id": "10-inventory-docs",
+    "title": "Docs: inventory",
+    "status": "done",
+    "summary": "Edited services/inventory/README.md; compiled in the end-of-run pass."
+  },
+  {
+    "id": "11-inventory-cicd",
+    "title": "CI/CD: inventory",
+    "status": "done",
+    "summary": "Edited services/inventory/deploy/deploy.targets.yml; compiled in the end-of-run pass."
+  },
+  {
+    "id": "12-inventory-deployment",
+    "title": "Deployment: inventory",
+    "status": "done",
+    "summary": "Edited services/inventory/deploy/strangler.values.yaml; compiled in the end-of-run pass."
+  },
+  {
+    "id": "13-orders-clients",
+    "title": "Implement orders-service — cross-service calls",
+    "status": "done",
+    "summary": "Edited services/orders/internal/clients/catalog/client.go — this task's work is complete. 17 seam(s) still in it belong to 3 later task(s) in this plan: 14-orders-core (13), 15-orders-saga (1), 19-payments-core (3)."
+  },
+  {
+    "id": "14-orders-core",
+    "title": "Implement orders-service — domain + wiring",
+    "status": "done",
+    "summary": "Edited services/orders/internal/acl/legacy.go — this task's work is complete. 1 seam(s) still in it belong to 1 later task(s) in this plan: 15-orders-saga (1)."
+  },
+  {
+    "id": "15-orders-saga",
+    "title": "Implement orders-service — orchestration saga",
+    "status": "done",
+    "summary": "Edited services/orders/internal/saga/create_order.go; compiled in the end-of-run pass."
+  },
+  {
+    "id": "16-orders-docs",
+    "title": "Docs: orders",
+    "status": "done",
+    "summary": "Edited services/orders/README.md; compiled in the end-of-run pass."
+  },
+  {
+    "id": "17-orders-cicd",
+    "title": "CI/CD: orders",
+    "status": "done",
+    "summary": "Edited services/orders/deploy/deploy.targets.yml; compiled in the end-of-run pass."
+  },
+  {
+    "id": "18-orders-deployment",
+    "title": "Deployment: orders",
+    "status": "done",
+    "summary": "Edited services/orders/deploy/strangler.values.yaml; compiled in the end-of-run pass."
+  },
+  {
+    "id": "19-payments-core",
+    "title": "Implement payments-service — domain + wiring",
+    "status": "done",
+    "summary": "Edited services/payments/internal/acl/legacy.go (7 files); compiled in the end-of-run pass."
+  },
+  {
+    "id": "20-payments-docs",
+    "title": "Docs: payments",
+    "status": "done",
+    "summary": "Edited services/payments/README.md; compiled in the end-of-run pass."
+  },
+  {
+    "id": "21-payments-cicd",
+    "title": "CI/CD: payments",
+    "status": "done",
+    "summary": "Edited services/payments/deploy/deploy.targets.yml; compiled in the end-of-run pass."
+  },
+  {
+    "id": "22-payments-deployment",
+    "title": "Deployment: payments",
+    "status": "done",
+    "summary": "Edited services/payments/deploy/strangler.values.yaml; compiled in the end-of-run pass."
+  },
+  {
+    "id": "23-docs-architecture",
+    "title": "Docs: architecture",
+    "status": "done",
+    "summary": "Edited ARCHITECTURE.md; compiled in the end-of-run pass."
+  }
+]

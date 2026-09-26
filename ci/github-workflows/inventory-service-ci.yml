@@ -1,0 +1,16 @@
+name: ci-inventory-service
+
+on:
+  push:
+    branches: [main]
+    paths: ["services/inventory/**", "pkg/**", ".github/workflows/inventory-service-ci.yml"]
+  pull_request:
+    paths: ["services/inventory/**", "pkg/**"]
+
+jobs:
+  ci:
+    uses: ./.github/workflows/_service-ci.yml
+    with:
+      module: services/inventory
+      image: inventory-service
+    secrets: inherit

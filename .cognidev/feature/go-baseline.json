@@ -1,0 +1,14 @@
+{
+  "baseline": true,
+  "build_failed": [],
+  "command": "go build ./...",
+  "ok": true,
+  "sdk": "go1.26.4",
+  "targets": [
+    "."
+  ],
+  "tests": {
+    "by_project": {}
+  },
+  "tool": "go-verify"
+}

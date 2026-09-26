@@ -1,0 +1,39 @@
+{
+  "elapsedMs": 837,
+  "finishedAt": 1790392781,
+  "inputs": [],
+  "kind": "tool-loop",
+  "outputs": [
+    {
+      "exists": true,
+      "kind": null,
+      "name": "plan",
+      "optional": false,
+      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/.cognidev/feature/plan.json"
+    },
+    {
+      "exists": true,
+      "kind": null,
+      "name": "decomposition-steps",
+      "optional": false,
+      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/.cognidev/feature/decomposition-steps.json"
+    },
+    {
+      "exists": true,
+      "kind": null,
+      "name": "decomposition",
+      "optional": false,
+      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/.cognidev/feature/decomposition.yaml"
+    },
+    {
+      "exists": true,
+      "kind": null,
+      "name": "decompose",
+      "optional": false,
+      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/.cognidev/feature/decompose"
+    }
+  ],
+  "status": "Ok",
+  "step": "plan-decomposition",
+  "summary": "5 services · 1 saga · decided by Jev: 6 requests (0 cached), 16763 in / 1054 out tokens, 0 model calls · 1 need a decision"
+}
