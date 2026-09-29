@@ -1,0 +1,612 @@
+{
+ "pkg/httpx/server.go": {
+  "sha": "9d5a330d17f7f1826e06a82c45d798d3b4c69c04221e19293932c4ee148bc81d",
+  "pv": 1,
+  "tag": {
+   "role": "wiring",
+   "one_liner": "Shared HTTP chassis: health/readiness endpoints, a JSON writer, and a server runner with graceful shutdown.",
+   "teaches": [
+    "liveness vs readiness probes",
+    "graceful shutdown with context",
+    "shared service chassis in pkg/"
+   ],
+   "read_before": [],
+   "centrality": 5
+  }
+ },
+ "pkg/outbox/outbox.go": {
+  "sha": "88ffcf8514c821319ff28f88bd2d36e2dca664b10614f88f641cf4ae7d24a592",
+  "pv": 1,
+  "tag": {
+   "role": "util",
+   "one_liner": "Transactional outbox: writes events in the same DB transaction as state changes, and a relay polls and publishes them to the event bus.",
+   "teaches": [
+    "transactional outbox pattern",
+    "polling relay with FOR UPDATE SKIP LOCKED",
+    "idempotent consumer table (processed_messages)",
+    "avoiding dual writes"
+   ],
+   "read_before": [],
+   "centrality": 4
+  }
+ },
+ "pkg/events/envelope.go": {
+  "sha": "580d58fb449932bfd6ebf790cfc18c2b62a92c5a4aa9fc54ae2f8c0364c89af9",
+  "pv": 1,
+  "tag": {
+   "role": "data",
+   "one_liner": "Defines the shared event Envelope (id, type, source, time, traceparent, raw JSON data) plus helpers to build, decode, and ID events.",
+   "teaches": [
+    "Event envelope wire format",
+    "Raw JSON payload decoded by consumers",
+    "Random 128-bit hex event IDs",
+    "Broker hidden behind a shared package"
+   ],
+   "read_before": [],
+   "centrality": 5
+  }
+ },
+ "services/catalog/internal/catalog/service.go": {
+  "sha": "7e396655e3d7ab2b96521e79f72b66813623cb03898f33b93f80d72d81561ac7",
+  "pv": 1,
+  "tag": {
+   "role": "service",
+   "one_liner": "Catalog service: lists and creates products via GORM, and serves product prices through a per-replica in-memory cache with a 30s TTL.",
+   "teaches": [
+    "Service struct wrapping a *gorm.DB",
+    "Process-local TTL price cache guarded by RWMutex",
+    "Basic validation (positive price) before persisting"
+   ],
+   "read_before": [],
+   "centrality": 4
+  }
+ },
+ "pkg/httpx/internal.go": {
+  "sha": "a574dae31dbdf615ac6d88662b100235908649ff93268c8adebc0a573d94c795",
+  "pv": 1,
+  "tag": {
+   "role": "wiring",
+   "one_liner": "Shared HTTP helpers that let services call each other with an internal caller header and token, bypassing the per-user auth check.",
+   "teaches": [
+    "service-to-service trust via headers and a shared token",
+    "middleware that skips user auth for internal calls",
+    "RoundTripper that stamps outgoing requests",
+    "constant-time secret comparison"
+   ],
+   "read_before": [],
+   "centrality": 3
+  }
+ },
+ "pkg/otelx/otelx.go": {
+  "sha": "6314780a11b2b33556d8dc001ab226d885dc0d1b10c9798f88269b6da41ac6ab",
+  "pv": 1,
+  "tag": {
+   "role": "util",
+   "one_liner": "Sets up OpenTelemetry tracing over OTLP/HTTP with a global tracer provider and W3C propagators, shared by services.",
+   "teaches": [
+    "OpenTelemetry tracer provider setup",
+    "OTLP/HTTP exporter via standard env var",
+    "W3C trace context and baggage propagation",
+    "Returning a shutdown func for flushing"
+   ],
+   "read_before": [],
+   "centrality": 3
+  }
+ },
+ "services/inventory/internal/inventory/service.go": {
+  "sha": "4833343c65fe71634bc2c3c4a2188988062a3560f310e63c2347240b08f07704",
+  "pv": 1,
+  "tag": {
+   "role": "service",
+   "one_liner": "Inventory service: reserves stock for orders, logs order-placed events, and runs a background job that restocks low items.",
+   "teaches": [
+    "Stock reservation via gorm transaction",
+    "Read-check-then-write race (oversell risk)",
+    "Event handler reacting to another context",
+    "Ticker-based background job with context cancel"
+   ],
+   "read_before": [],
+   "centrality": 4
+  }
+ },
+ "services/payments/internal/payments/gateway.go": {
+  "sha": "c2f9226d80e83a9adf0637be5b2509765c0c196348c829e0490053911c7d887a",
+  "pv": 1,
+  "tag": {
+   "role": "service",
+   "one_liner": "HTTP client that asks the external payment provider to charge an order amount via POST /v1/charges with a 5s timeout.",
+   "teaches": [
+    "Wrapping an external provider in a client struct",
+    "Mapping non-2xx responses to errors",
+    "HTTP client timeouts"
+   ],
+   "read_before": [],
+   "centrality": 3
+  }
+ },
+ "services/customers/internal/customers/service.go": {
+  "sha": "808eeb394346cfcc4302aff641b5c790b74db49956647ac1044ebb9d376016a2",
+  "pv": 1,
+  "tag": {
+   "role": "service",
+   "one_liner": "Customer service: wraps a GORM DB to fetch a customer, register a new one, and check whether a customer is active.",
+   "teaches": [
+    "Service struct wrapping a *gorm.DB",
+    "Simple CRUD via GORM First/Create",
+    "Active-customer check used for order eligibility"
+   ],
+   "read_before": [],
+   "centrality": 3
+  }
+ },
+ "gateway/internal/proxy/proxy.go": {
+  "sha": "09dfe0c74d490ddfa86be38a4a0e4001495343974a46d50410159ae025e50291",
+  "pv": 1,
+  "tag": {
+   "role": "wiring",
+   "one_liner": "Reverse-proxy handler for the gateway: routes path prefixes to upstream services, falls back to the monolith, and strips internal auth headers.",
+   "teaches": [
+    "longest-prefix routing",
+    "strangler-fig fallback to legacy monolith",
+    "env-var upstream overrides",
+    "stripping spoofable internal headers"
+   ],
+   "read_before": [],
+   "centrality": 4
+  }
+ },
+ "pkg/events/bus.go": {
+  "sha": "4a1833b43bc9adff377165ddbdad1e87f51b144b2d2658f6bf3957a4acf85efb",
+  "pv": 1,
+  "tag": {
+   "role": "wiring",
+   "one_liner": "Defines the event Bus interface and an in-process Memory implementation for publishing and subscribing to dotted-subject events.",
+   "teaches": [
+    "Pub/sub Bus abstraction",
+    "At-least-once delivery requiring idempotent handlers",
+    "In-memory bus for tests / no-broker mode",
+    "RWMutex-guarded subscriber registry"
+   ],
+   "read_before": [],
+   "centrality": 4
+  }
+ },
+ "pkg/httpx/client.go": {
+  "sha": "6e96e75e5a11d4706e9eeca10a4dfb150d189d49571ad8962110bbe68a303685",
+  "pv": 1,
+  "tag": {
+   "role": "util",
+   "one_liner": "Builds the shared HTTP client for service-to-service calls with a 5s timeout, OpenTelemetry tracing and internal-caller headers.",
+   "teaches": [
+    "Service-to-service HTTP calls",
+    "Trace propagation with otelhttp",
+    "Bounded client timeouts",
+    "Wrapping http.RoundTripper transports"
+   ],
+   "read_before": [],
+   "centrality": 3
+  }
+ },
+ "pkg/saga/saga.go": {
+  "sha": "27eb854b7da3e5faca3c3395ec4f829c057f31632908df2c2417b90bac63be07",
+  "pv": 1,
+  "tag": {
+   "role": "util",
+   "one_liner": "Small saga runner: executes ordered steps and, on failure, compensates completed steps in reverse, returning a StepError.",
+   "teaches": [
+    "Orchestration saga pattern",
+    "Reverse-order compensation on failure",
+    "Error wrapping that preserves the step's own message",
+    "Putting hardest-to-undo step last"
+   ],
+   "read_before": [],
+   "centrality": 4
+  }
+ },
+ "services/customers/internal/customers/handlers.go": {
+  "sha": "cce632c4262e3586026da769400924ab7a06b76447b187ce12a3e01835a5c89c",
+  "pv": 1,
+  "tag": {
+   "role": "api",
+   "one_liner": "HTTP handlers for the customers service: GET a customer by id and POST to register a new one, using Gin.",
+   "teaches": [
+    "Gin route registration on a RouterGroup",
+    "Mapping service errors to HTTP status codes",
+    "JSON binding of a domain model from request body"
+   ],
+   "read_before": [
+    "services/customers/internal/customers/service.go"
+   ],
+   "centrality": 3
+  }
+ },
+ "services/payments/internal/payments/service.go": {
+  "sha": "dbda912078cb2344a725658f795f1f019c31be307af7bf145771417abd149446",
+  "pv": 1,
+  "tag": {
+   "role": "service",
+   "one_liner": "Payments Service: charges an order through the gateway, then records a captured Payment row inside the caller's DB transaction.",
+   "teaches": [
+    "Service wrapping a gateway plus gorm DB",
+    "Charging inside a caller-supplied transaction",
+    "Charge-then-persist ordering (no record on failure)"
+   ],
+   "read_before": [
+    "services/payments/internal/payments/gateway.go"
+   ],
+   "centrality": 4
+  }
+ },
+ "pkg/events/connect.go": {
+  "sha": "2eae3737b8bf26c24efe764041e3a99b9280ed6c9c579bb6757a055d8f339700",
+  "pv": 1,
+  "tag": {
+   "role": "wiring",
+   "one_liner": "Factory that returns a NATS event bus for a URL, or an in-memory bus when the URL is empty or starts with memory://.",
+   "teaches": [
+    "Choosing a bus implementation from a connection URL",
+    "In-memory bus for tests and local runs",
+    "Bus interface hides the NATS backend"
+   ],
+   "read_before": [
+    "pkg/events/bus.go",
+    "pkg/events/nats.go"
+   ],
+   "centrality": 4
+  }
+ },
+ "pkg/events/idempotent.go": {
+  "sha": "2cf8eeafd43dfbee7dc217a75cd443e14fb03c4d9b452a51f8a89b70554b22ff",
+  "pv": 1,
+  "tag": {
+   "role": "util",
+   "one_liner": "Idempotent event-handler wrapper with in-memory and SQL stores that record handled event ids, so redelivered events are skipped.",
+   "teaches": [
+    "idempotent consumers",
+    "dedup via processed_messages table",
+    "handler middleware wrapping",
+    "INSERT ON CONFLICT DO NOTHING"
+   ],
+   "read_before": [],
+   "centrality": 3
+  }
+ },
+ "services/orders/internal/clients/payments/client.go": {
+  "sha": "dd8d36a89fd321735a93572e8372660b9330eaf350130985b1f79c1f5793c8de",
+  "pv": 1,
+  "tag": {
+   "role": "service",
+   "one_liner": "Orders' generated HTTP client for payments-service; its Charge method posts to /v1/payments/charge and turns error replies into Go errors.",
+   "teaches": [
+    "Monolith call replaced by a remote HTTP call",
+    "Service base URL read from an env var",
+    "Unwrapping the remote JSON error body",
+    "Non-idempotent charge is never retried"
+   ],
+   "read_before": [
+    "pkg/httpx/client.go"
+   ],
+   "centrality": 3
+  }
+ },
+ "services/orders/internal/orders/handlers.go": {
+  "sha": "c8f5f583104b697a4e94ff7af586bffbb6059ac398988e80be739cf800e9fb73",
+  "pv": 1,
+  "tag": {
+   "role": "api",
+   "one_liner": "Gin HTTP handlers for the orders service: place an order (POST /orders) and list the caller's orders (GET /orders/mine).",
+   "teaches": [
+    "Registering routes on a gin RouterGroup",
+    "Thin handlers delegating to a Service",
+    "Reading the authenticated user ID from request context",
+    "Mapping service errors to HTTP status codes"
+   ],
+   "read_before": [
+    "services/orders/internal/orders/service.go",
+    "services/orders/internal/platform/auth.go"
+   ],
+   "centrality": 4
+  }
+ },
+ "services/orders/internal/orders/service.go": {
+  "sha": "b32d885d0ecfa2fdb41cc1f6bc88f122307dfb212a2c9c0fc6800cf1a12c83bb",
+  "pv": 1,
+  "tag": {
+   "role": "service",
+   "one_liner": "Orders service that runs the CreateOrder saga: checks the customer, reserves stock, charges payment, then commits the order.",
+   "teaches": [
+    "Saga orchestration with compensating steps",
+    "Local DB transaction wrapping cross-service calls",
+    "Reserve-first, charge-last ordering",
+    "Publishing an order.placed event"
+   ],
+   "read_before": [
+    "services/orders/internal/saga/create_order.go",
+    "pkg/saga/saga.go",
+    "services/orders/internal/clients/inventory/client.go"
+   ],
+   "centrality": 5
+  }
+ },
+ "services/payments/internal/app/routes.go": {
+  "sha": "3f8bd0f63213ffd8fb5b5cec16f3421dfed7ce59d64b6910ff5ca87096b8dc9b",
+  "pv": 1,
+  "tag": {
+   "role": "wiring",
+   "one_liner": "Builds the payments service's Gin router, mounts the monolith's wire() routes, then any extra route mounts registered via init funcs.",
+   "teaches": [
+    "Gin router construction with Recovery middleware",
+    "Init-time route registration via a mounts slice",
+    "Extending wiring without editing wire.go",
+    "Deps-based handler setup"
+   ],
+   "read_before": [
+    "services/payments/internal/app/wire.go"
+   ],
+   "centrality": 4
+  }
+ },
+ "services/catalog/internal/app/app.go": {
+  "sha": "8cdc654c7019fb9b5e36f8e44964142bb2a03c38ae0d6af44e542af05bdcc223",
+  "pv": 1,
+  "tag": {
+   "role": "wiring",
+   "one_liner": "Builds the catalog service's shared dependencies: opens its Postgres DB, runs migrations and the outbox schema, and connects the event bus.",
+   "teaches": [
+    "Per-service database ownership",
+    "Startup migration via GORM AutoMigrate and idempotent schema statements",
+    "Event bus and transactional outbox setup",
+    "Deps struct as the dependency container"
+   ],
+   "read_before": [
+    "pkg/events/connect.go",
+    "services/catalog/internal/app/models.go"
+   ],
+   "centrality": 4
+  }
+ },
+ "services/catalog/internal/catalog/handlers.go": {
+  "sha": "89070cf0bc7120c99e4d8c91f7977acfc8ff50d076e07bdad205eff6a9470671",
+  "pv": 1,
+  "tag": {
+   "role": "api",
+   "one_liner": "Gin HTTP handlers for the catalog service: list products (GET) and create a product (POST) on /products.",
+   "teaches": [
+    "Registering Gin routes on a RouterGroup",
+    "Thin handlers delegating to a Service",
+    "Mapping errors to HTTP status codes (400/422/500)"
+   ],
+   "read_before": [
+    "services/catalog/internal/catalog/service.go"
+   ],
+   "centrality": 3
+  }
+ },
+ "services/customers/internal/app/app.go": {
+  "sha": "4abc43468e7b4577a289a5eb66301f01b11a7b2a55f7b6617d3e3377c5e450f5",
+  "pv": 1,
+  "tag": {
+   "role": "wiring",
+   "one_liner": "Builds the customers service's dependencies: opens its Postgres DB, creates outbox and schema tables, auto-migrates models, and connects the event bus.",
+   "teaches": [
+    "Per-service database ownership",
+    "Startup migration via AutoMigrate and idempotent schema statements",
+    "Outbox table setup for event publishing",
+    "Deps struct as shared wiring"
+   ],
+   "read_before": [
+    "pkg/events/connect.go",
+    "services/customers/internal/app/models.go"
+   ],
+   "centrality": 4
+  }
+ },
+ "services/inventory/internal/app/app.go": {
+  "sha": "5ba296c9be22b55bea459c46ca1c54cda3aa043ca6644273716b02f56415a631",
+  "pv": 1,
+  "tag": {
+   "role": "wiring",
+   "one_liner": "Builds the inventory service's dependencies: opens its Postgres DB, runs migrations and outbox schema, and connects the event bus.",
+   "teaches": [
+    "Per-service database ownership",
+    "Startup schema and migration sequence",
+    "Deps struct as shared wiring",
+    "Transactional outbox and event bus setup"
+   ],
+   "read_before": [
+    "pkg/events/connect.go",
+    "services/inventory/internal/app/models.go"
+   ],
+   "centrality": 4
+  }
+ },
+ "services/inventory/internal/httpapi/stock_item_handlers.go": {
+  "sha": "70c169b5af494ca2ccef05d9ab5a9a732770c4d47767da54aa196ddae165f861",
+  "pv": 1,
+  "tag": {
+   "role": "api",
+   "one_liner": "Gin HTTP handler exposing GET /v1/stockitem/:product_id, reading a StockItem via GORM and returning it in legacy shape; errors as problem+json.",
+   "teaches": [
+    "Gin route registration",
+    "RFC 9457 problem+json errors",
+    "Anti-corruption layer mapping to legacy response",
+    "GORM lookup with not-found handling"
+   ],
+   "read_before": [
+    "services/inventory/internal/acl/legacy.go"
+   ],
+   "centrality": 3
+  }
+ },
+ "services/orders/internal/app/app.go": {
+  "sha": "0a8fd336da6d896031bcae9e4b74ee7919a4b8fbefc37c7a55b67f8ea4699d81",
+  "pv": 1,
+  "tag": {
+   "role": "wiring",
+   "one_liner": "Builds the orders service's shared dependencies: opens its Postgres DB, runs schema and migrations, connects the event bus.",
+   "teaches": [
+    "Per-service database ownership",
+    "Startup migration and outbox schema setup",
+    "Deps struct as dependency container",
+    "Graceful readiness and shutdown"
+   ],
+   "read_before": [
+    "pkg/events/connect.go",
+    "services/orders/internal/app/models.go"
+   ],
+   "centrality": 4
+  }
+ },
+ "services/orders/internal/clients/catalog/client.go": {
+  "sha": "79b4d4f320fa00a18c9241c783ad4f3bcf997e4e0cb04f2ede7991e1d483e83d",
+  "pv": 1,
+  "tag": {
+   "role": "service",
+   "one_liner": "Generated HTTP client that lets the orders service call catalog-service remotely, with retrying POSTs and error unwrapping.",
+   "teaches": [
+    "Remote client replacing an in-process call",
+    "Retry with exponential backoff on 5xx",
+    "Mapping remote errors to plain Go errors",
+    "CW-SEAM stubs left for manual implementation"
+   ],
+   "read_before": [
+    "pkg/httpx/client.go"
+   ],
+   "centrality": 3
+  }
+ },
+ "services/orders/internal/clients/customers/client.go": {
+  "sha": "b370612d6792578940f92371c95aaebad5063c39b7f053bf4a6d6afb731c11cc",
+  "pv": 1,
+  "tag": {
+   "role": "service",
+   "one_liner": "Generated HTTP client through which the orders service calls customers-service remotely, with retry/backoff and unwrapped remote error messages.",
+   "teaches": [
+    "Replacing in-process calls with remote HTTP calls",
+    "Retry with exponential backoff on 5xx/transport errors",
+    "Mapping remote error bodies to plain Go errors",
+    "Env-var based service discovery"
+   ],
+   "read_before": [
+    "pkg/httpx/client.go"
+   ],
+   "centrality": 3
+  }
+ },
+ "services/orders/internal/clients/inventory/client.go": {
+  "sha": "765bf9417e57a346857066819545ce5b4dc0f77e61c4d4282fcc80b202a01054",
+  "pv": 1,
+  "tag": {
+   "role": "api",
+   "one_liner": "Generated HTTP client that lets the orders service call inventory-service's reserve endpoint, replacing the old in-process call.",
+   "teaches": [
+    "Remote-call replacement of in-process service",
+    "Error unwrapping from JSON error bodies",
+    "Non-idempotent calls are never retried",
+    "Env-configured service base URL"
+   ],
+   "read_before": [
+    "pkg/httpx/client.go"
+   ],
+   "centrality": 3
+  }
+ },
+ "services/orders/internal/platform/auth.go": {
+  "sha": "ef59cd035cb0b858e8636a037e6b5d288b59d90bffe63cd79720dc8ff16ff828",
+  "pv": 1,
+  "tag": {
+   "role": "wiring",
+   "one_liner": "Gin middleware for the orders service that reads the X-User-ID header, rejects bad requests with 401, and exposes the user id via context.",
+   "teaches": [
+    "Gin middleware pattern",
+    "Passing identity through request context",
+    "Header-based auth with typed context keys"
+   ],
+   "read_before": [],
+   "centrality": 3
+  }
+ },
+ "services/payments/internal/app/app.go": {
+  "sha": "de5df246fbd544ee8082f090ec5364a19ce6630e5eeac76c40ae21f6e0b384a7",
+  "pv": 1,
+  "tag": {
+   "role": "wiring",
+   "one_liner": "Composes the payments service's dependencies: opens its own Postgres DB, runs migrations and outbox schema, and connects the event bus.",
+   "teaches": [
+    "Per-service database ownership",
+    "Startup schema/migration sequence with outbox",
+    "Deps struct as dependency container",
+    "Graceful readiness and shutdown"
+   ],
+   "read_before": [
+    "pkg/events/connect.go",
+    "services/payments/internal/app/models.go"
+   ],
+   "centrality": 4
+  }
+ },
+ "services/catalog/internal/app/routes.go": {
+  "sha": "3f8bd0f63213ffd8fb5b5cec16f3421dfed7ce59d64b6910ff5ca87096b8dc9b",
+  "pv": 1,
+  "tag": {
+   "role": "wiring",
+   "one_liner": "Builds the catalog service's Gin router, mounts endpoints via wire, then applies extra route mounts registered by other files in the package.",
+   "teaches": [
+    "Gin router construction with Recovery middleware",
+    "Init-time route registration via a mounts slice",
+    "Extending wiring without editing the monolith's wire"
+   ],
+   "read_before": [
+    "services/catalog/internal/app/wire.go"
+   ],
+   "centrality": 4
+  }
+ },
+ "services/catalog/internal/config/config.go": {
+  "sha": "d28395011c54b2960a543c6ec832e3240afabd2d0ffb5626aba2159abea64e8e",
+  "pv": 1,
+  "tag": {
+   "role": "config",
+   "one_liner": "Loads the catalog service's settings (port, database URL, broker URL, pool size, peer URLs) from environment variables with local defaults.",
+   "teaches": [
+    "Environment-based configuration with defaults",
+    "Config struct shared by service startup",
+    "Peer service URL map for cross-context calls"
+   ],
+   "read_before": [],
+   "centrality": 3
+  }
+ },
+ "services/customers/internal/app/routes.go": {
+  "sha": "3f8bd0f63213ffd8fb5b5cec16f3421dfed7ce59d64b6910ff5ca87096b8dc9b",
+  "pv": 1,
+  "tag": {
+   "role": "wiring",
+   "one_liner": "Builds the customers service's Gin router, mounts the endpoints from wire, then applies extra routes that other files register.",
+   "teaches": [
+    "Gin router construction with Recovery middleware",
+    "Extension by init-time route mounts",
+    "Wire as the monolith's own endpoint wiring"
+   ],
+   "read_before": [
+    "services/customers/internal/app/wire.go"
+   ],
+   "centrality": 4
+  }
+ },
+ "services/customers/internal/config/config.go": {
+  "sha": "cde60f02ac730742c7ab8c71d37bd2618efea5889d92f42e235b9447e132bcb9",
+  "pv": 1,
+  "tag": {
+   "role": "config",
+   "one_liner": "Reads the customers service's settings (port, database URL, broker URL, DB pool size, peer URLs) from environment variables with local defaults.",
+   "teaches": [
+    "Environment-based configuration with defaults",
+    "Config struct passed through the service",
+    "Empty peers map: customers calls no other service"
+   ],
+   "read_before": [],
+   "centrality": 3
+  }
+ }
+}

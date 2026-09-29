@@ -1,10 +1,10 @@
 {
-  "elapsedMs": 2220110,
-  "finishedAt": 1790395034,
+  "elapsedMs": 679120,
+  "finishedAt": 1790652632,
   "inputs": [],
   "kind": "tool-loop",
   "outputs": [],
   "status": "Ok",
   "step": "develop",
-  "summary": "23 of 23 tasks signed off — a commit per green task on the work branch; integration: 9 met, 0 missing, 21 unverified (see integration-report.md)"
+  "summary": "23 of 23 tasks signed off — a commit per green task on the work branch; integration: 8 met, 0 missing, 18 unverified (see integration-report.md)"
 }

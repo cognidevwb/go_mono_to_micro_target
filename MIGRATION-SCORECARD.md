@@ -13,13 +13,13 @@ reported that way rather than counted as clean.
 | Services independent of the monolith | yes | all | PASS |
 | Seams still to fill | 0 | 0 | PASS |
 | Tests preserved | not measured | no loss | — |
-| Gates not evaluated | 2 of 25 | 0 | WATCH |
+| Gates not evaluated | 0 of 25 | 0 | PASS |
 | Categories failing | 0 of 12 | 0 | PASS |
 
 - **Build** — verify.json: build_ok
 - **Services in go.work** — all 5 planned service(s) are modules in go.work
 - **Services independent of the monolith** — none of 5 service module(s) depend on anything outside the generated tree
-- **Seams still to fill** — no marker left across 184 generated file(s)
+- **Seams still to fill** — no marker left across 191 generated file(s)
 - **Tests preserved** — the before-state or the verify step recorded no test count
 - **Gates not evaluated** — gates.json: a gate that could not read its input is counted here, never as a pass
 - **Categories failing** — 0 category/categories had nothing to measure
@@ -39,20 +39,20 @@ reported that way rather than counted as clean.
 | Runtime readiness | PASS | PASS | PASS |
 | Events and contracts | PASS | PASS | — |
 | Tests | PASS | PASS | — |
-| Dependencies and diagnostics | — | — | PASS |
+| Dependencies and diagnostics | PASS | PASS | PASS |
 
 ### Service boundaries
 
 - **Completeness** (PASS) — all 5 planned service(s) are modules in go.work
 - **Correctness** (PASS) — all 5 service name(s) describe a domain
-- **Restraint** (WATCH) — 8 of 627 changed file(s) were not proposed by the plan (619 were): .dockerignore, .editorconfig, .githooks/pre-commit, contracts/events/envelope.schema.json, contracts/events/order.placed.schema.json
+- **Restraint** (WATCH) — 8 of 622 changed file(s) were not proposed by the plan (614 were): .dockerignore, .editorconfig, .githooks/pre-commit, contracts/events/envelope.schema.json, contracts/events/order.placed.schema.json
 
 A boundary go.work does not build is a directory. A boundary named after a source folder is the monolith's tree with a prefix.
 
 ### Service independence
 
 - **Completeness** (PASS) — none of 5 service module(s) depend on anything outside the generated tree
-- **Correctness** (PASS) — none of 116 service file(s) or 5 go.mod(s) reach into another service
+- **Correctness** (PASS) — none of 122 service file(s) or 5 go.mod(s) reach into another service
 - **Restraint** (—) — independence is a property of the result, not of the diff
 
 The decisive row. A service whose go.mod still requires the monolith cannot be built, versioned or deployed without it.
@@ -60,7 +60,7 @@ The decisive row. A service whose go.mod still requires the monolith cannot be b
 ### Code movement
 
 - **Completeness** (PASS) — 46 file(s) written across 5 service(s); 0 construct(s) were deferred rather than guessed at
-- **Correctness** (PASS) — 97% of the moved lines were placed verbatim or generated; 12 seam point(s) were left for the develop loop
+- **Correctness** (PASS) — 98% of the moved lines were placed verbatim or generated; 12 seam point(s) were left for the develop loop
 - **Restraint** (—) — the port writes only into the generated tree
 
 ### Cross-service calls
@@ -74,14 +74,14 @@ A call that crossed a package boundary in the monolith is an HTTP call now, or i
 ### Transactions
 
 - **Completeness** (PASS) — all 1 declared saga(s) have an orchestrator that references every participant
-- **Correctness** (PASS) — all 2 remote saga step(s) have a compensation naming their service
+- **Correctness** (PASS) — all 2 remote saga step(s) have a compensation that calls their service
 - **Restraint** (—) — a saga is written, not edited
 
 One db.Transaction across four packages is not one transaction across four services. A saga that cannot undo a step commits halfway.
 
 ### Data ownership
 
-- **Completeness** (PASS) — each of 5 data-owning service(s) opens its own database; 9 table(s), one owner each
+- **Completeness** (PASS) — each of 5 data-owning service(s) opens its own database; 11 table(s), one owner each
 - **Correctness** (PASS) — 2 piece(s) of carried state, each in its one listed owner
 - **Restraint** (—) — ownership is a property of the result, not of the diff
 
@@ -89,7 +89,7 @@ Tables and package-level state both have exactly one owner after the cut, or the
 
 ### Seams finished
 
-- **Completeness** (PASS) — no marker left across 184 generated file(s)
+- **Completeness** (PASS) — no marker left across 191 generated file(s)
 - **Correctness** (PASS) — all 2 cross-context call edge(s) resolve to a client that performs an HTTP call
 - **Restraint** (—) — a seam is filled in place
 
@@ -120,20 +120,20 @@ An in-process bus never lost a message between commit and publish; a broker does
 ### Tests
 
 - **Completeness** (PASS) — all 5 service(s) on disk have a test function
-- **Correctness** (PASS) — the tests of all 5 service(s) ran and passed (59 test(s))
+- **Correctness** (PASS) — the tests of all 5 service(s) ran and passed (56 test(s))
 - **Restraint** (—) — tests are added, not rewritten, by this playbook
 
 ### Dependencies and diagnostics
 
-- **Completeness** (—) — not evaluated — the advisory scan did not complete: the advisory database was not queried — this run is offline by default; enable the registry lookup to scan
-- **Correctness** (—) — not evaluated — the advisory scan did not complete: the advisory database was not queried — this run is offline by default; enable the registry lookup to scan
-- **Restraint** (PASS) — no wholesale suppression across 184 generated file(s)
+- **Completeness** (PASS) — no advisory is called or critical across 4 finding(s); 4 other advisory/advisories are in the graph but not called
+- **Correctness** (PASS) — no advisory is called or critical across 4 finding(s); 4 other advisory/advisories are in the graph but not called
+- **Restraint** (PASS) — no wholesale suppression across 191 generated file(s)
 
 A //nolint added to make the port pass is a restraint failure, not a correctness one: it changed a setting the migration never required.
 
 ## Restraint — what changed outside the new services
 
-Diffed against `source`: 627 file(s) changed, +79642 −28 lines. 619 were named by the plan or are the run's own output; 8 were not.
+Diffed against `source`: 622 file(s) changed, +63994 −3692 lines. 614 were named by the plan or are the run's own output; 8 were not.
 
 Changed without being proposed:
 

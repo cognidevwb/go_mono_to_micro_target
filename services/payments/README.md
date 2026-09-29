@@ -1,6 +1,6 @@
 # payments-service
 
-The payments service captures charges against orders: it calls out to the external payment provider through `internal/payments/gateway.go` (`Gateway.Charge`) and, on success, records the resulting `Payment` (order, amount, status) in its own table via `internal/payments/service.go` (`Service.Charge`). It owns the `Payment` aggregate exclusively and exposes it over `/api/payments`, acting as the hardest-to-reverse participant in the orders placement saga.
+The payments service captures money for an order and records the result as a `Payment` row (order id, amount, status `captured`). It wraps the payment gateway behind `Service.Charge`, which only persists the payment once the gateway charge succeeds. It is the last, hardest-to-reverse step of the order saga, so it also exposes a compensating operation for a failed order.
 
 | | |
 |---|---|

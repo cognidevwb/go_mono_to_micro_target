@@ -1,6 +1,6 @@
 # catalog-service
 
-The catalog service owns product and category data for the shop: it stores each product's SKU, name, price and category assignment, and each category's name and products. It exposes `GET /api/products` to list the catalog and `POST /api/products` to create a new product with basic validation (required SKU/name, positive price). It has no outbound calls to other services — it is a leaf context that other services (e.g. orders) read via the catalog client.
+The catalog service owns the product and category data: it lists products, creates new ones (rejecting non-positive prices), and serves `/api/products` for both. It also answers price lookups for other contexts through `PriceOf`, backed by a per-replica price cache whose entries expire after 30 seconds so replicas converge.
 
 | | |
 |---|---|

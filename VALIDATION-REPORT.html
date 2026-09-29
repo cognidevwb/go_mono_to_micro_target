@@ -79,16 +79,16 @@ footer { margin-top:3rem; padding-top:1rem; border-top:1px solid var(--rule);
 <main>
 <h1>Monolith decomposition — sign-off</h1>
 <div class="docbar"><a href="index.html">← the documentation</a></div><p class="sub">Verification record. Each item states the condition examined, the record consulted, and the result.</p>
-<div class="banner unverified">
-<p class="verdict">INCOMPLETE</p>
-<p>One or more conditions could not be examined, because the records they rely on were absent or unreadable. Those conditions are neither satisfied nor unsatisfied, and are listed below.</p>
-<p class="tally">78 MET &middot; 0 NOT MET &middot; <a href="#not-verified">2 NOT VERIFIED</a> &middot; 80 conditions examined</p>
+<div class="banner pass">
+<p class="verdict">SIGNED OFF</p>
+<p>All conditions in the schedule below were examined and satisfied.</p>
+<p class="tally">80 MET &middot; 0 NOT MET &middot; 0 NOT VERIFIED &middot; 80 conditions examined</p>
 <dl class="facts">
 <dt>Playbook</dt><dd>modernization-go-monolith</dd>
-<dt>Repository</dt><dd>monolith-shop-jev</dd>
-<dt>Project path</dt><dd>/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev</dd>
-<dt>Commit</dt><dd>4ff9068a1570490835b148a9712388644e778b31</dd>
-<dt>Generated (UTC)</dt><dd>2026-09-26T03:58:48Z</dd>
+<dt>Repository</dt><dd>monolith-rt7</dd>
+<dt>Project path</dt><dd>.</dd>
+<dt>Commit</dt><dd>3a527a46e7830bb44127d0e585be698915134447</dd>
+<dt>Generated (UTC)</dt><dd>2026-09-29T03:35:44Z</dd>
 </dl>
 </div>
 <h2>Scope</h2>
@@ -147,7 +147,7 @@ footer { margin-top:3rem; padding-top:1rem; border-top:1px solid var(--rule);
 <tbody>
 <tr id="c-si-present">
 <td>The structural pass read this repository.</td>
-<td class="evidence">.cognidev/understand/index.json · 24693 bytes</td>
+<td class="evidence">.cognidev/understand/index.json · 25020 bytes</td>
 <td class="verdict-cell pass">MET</td>
 </tr>
 <tr id="c-si-graph-parses">
@@ -175,7 +175,7 @@ footer { margin-top:3rem; padding-top:1rem; border-top:1px solid var(--rule);
 </tr>
 <tr id="c-env-recorded">
 <td>The build mode the whole run uses was written down, so develop and verify build the same way.</td>
-<td class="evidence">.cognidev/env.json · 226 bytes</td>
+<td class="evidence">.cognidev/env.json · 277 bytes</td>
 <td class="verdict-cell pass">MET</td>
 </tr>
 </tbody>
@@ -188,7 +188,7 @@ footer { margin-top:3rem; padding-top:1rem; border-top:1px solid var(--rule);
 <tbody>
 <tr id="c-runtime-target-chosen">
 <td>A target Go version was settled on and written down, so the scaffolder, the build and the version gate all mean the same thing by it. `setup-environment` records the version it actually proved a toolchain for — the highest go/toolchain directive in the tree or the `go_version` answer.</td>
-<td class="evidence">.cognidev/env.json · 226 bytes · `go_version` present</td>
+<td class="evidence">.cognidev/env.json · 277 bytes · `go_version` present</td>
 <td class="verdict-cell pass">MET</td>
 </tr>
 <tr id="c-feasibility-recorded">
@@ -198,7 +198,7 @@ footer { margin-top:3rem; padding-top:1rem; border-top:1px solid var(--rule);
 </tr>
 <tr id="c-knowledge-indexed">
 <td>The failure signatures this playbook knows about were indexed against the chosen Go version, so a build error that has been seen before is matched rather than re-diagnosed.</td>
-<td class="evidence">.cognidev/feature/knowledge.json · 10627 bytes</td>
+<td class="evidence">.cognidev/feature/knowledge.json · 10624 bytes</td>
 <td class="verdict-cell pass">MET</td>
 </tr>
 </tbody>
@@ -230,8 +230,8 @@ footer { margin-top:3rem; padding-top:1rem; border-top:1px solid var(--rule);
 <td class="verdict-cell pass">MET</td>
 </tr>
 <tr id="c-plan-files">
-<td>The expanded plan names the files to be written — a plan with no files would generate nothing while reporting success.<span class="detail">71 file(s) planned</span></td>
-<td class="evidence">.cognidev/feature/plan.json · /files → 71</td>
+<td>The expanded plan names the files to be written — a plan with no files would generate nothing while reporting success.<span class="detail">79 file(s) planned</span></td>
+<td class="evidence">.cognidev/feature/plan.json · /files → 79</td>
 <td class="verdict-cell pass">MET</td>
 </tr>
 </tbody>
@@ -302,7 +302,7 @@ footer { margin-top:3rem; padding-top:1rem; border-top:1px solid var(--rule);
 </tr>
 <tr id="c-briefing-what-changes">
 <td>The mapping document — what moves where, and every call that becomes a network hop — is on disk.</td>
-<td class="evidence">cognidev/docs/what-changes.md · 2035 bytes</td>
+<td class="evidence">cognidev/docs/what-changes.md · 1691 bytes</td>
 <td class="verdict-cell pass">MET</td>
 </tr>
 <tr id="c-briefing-the-plan">
@@ -317,7 +317,7 @@ footer { margin-top:3rem; padding-top:1rem; border-top:1px solid var(--rule);
 </tr>
 <tr id="c-briefing-choices">
 <td>What the run was told and what it decided on the user&#39;s behalf were both written down.</td>
-<td class="evidence">cognidev/docs/your-choices.yaml · 1344 bytes</td>
+<td class="evidence">cognidev/docs/your-choices.yaml · 1343 bytes</td>
 <td class="verdict-cell pass">MET</td>
 </tr>
 <tr id="c-plan-reviewed">
@@ -350,7 +350,7 @@ footer { margin-top:3rem; padding-top:1rem; border-top:1px solid var(--rule);
 </tr>
 <tr id="c-workspace-exists">
 <td>The go.work workspace that builds every service module together was generated.</td>
-<td class="evidence">go.work · 139 bytes</td>
+<td class="evidence">go.work · 141 bytes</td>
 <td class="verdict-cell pass">MET</td>
 </tr>
 </tbody>
@@ -419,7 +419,7 @@ footer { margin-top:3rem; padding-top:1rem; border-top:1px solid var(--rule);
 </tr>
 <tr id="c-migration-log">
 <td>What moved out of the monolith was written down in the order it moved, as a committable log. Built from the same per-task outcomes as the records above, so the two cannot disagree; a task the loop never reached has no entry, and the gap between the plan&#39;s count and the log&#39;s is the report that it did not run.</td>
-<td class="evidence">MIGRATION-LOG.md · 2306 bytes</td>
+<td class="evidence">MIGRATION-LOG.md · 2307 bytes</td>
 <td class="verdict-cell pass">MET</td>
 </tr>
 </tbody>
@@ -547,9 +547,9 @@ footer { margin-top:3rem; padding-top:1rem; border-top:1px solid var(--rule);
 <td class="verdict-cell pass">MET</td>
 </tr>
 <tr id="c-no-test-switched-off">
-<td>No test that came over from the monolith was switched off during the run — none gained an unconditional t.Skip, a new skip call or a build constraint, and none was deleted — compared, file by file, with the monolith&#39;s version on the frozen `source` branch.<span class="detail">(not recorded) ported test(s) switched off during the run</span></td>
-<td class="evidence">.cognidev/feature/gates.json · /scalars/no_test_newly_disabled<span class="reason">the pointer resolves to nothing</span></td>
-<td class="verdict-cell unverified">NOT VERIFIED</td>
+<td>No test that came over from the monolith was switched off during the run — none gained an unconditional t.Skip, a new skip call or a build constraint, and none was deleted — compared, file by file, with the monolith&#39;s version on the frozen `source` branch.<span class="detail">0 ported test(s) switched off during the run</span></td>
+<td class="evidence">.cognidev/feature/gates.json · /scalars/no_test_newly_disabled → 0</td>
+<td class="verdict-cell pass">MET</td>
 </tr>
 <tr id="c-sagas-compensate">
 <td>Every saga step that writes has a compensation that undoes it, run in reverse. A saga with no compensation is a distributed transaction that cannot roll back.<span class="detail">0 saga step(s) with no compensation</span></td>
@@ -615,13 +615,13 @@ footer { margin-top:3rem; padding-top:1rem; border-top:1px solid var(--rule);
 <td class="verdict-cell pass">MET</td>
 </tr>
 <tr id="c-no-called-or-critical-advisory">
-<td>No advisory the services&#39; code calls, and no critical advisory whose reachability is unproven, is in the resolved module graph. This is claimed only when the scan actually ran; an offline run publishes no count and this reads NOT VERIFIED.<span class="detail">(not recorded) called or critical advisory/advisories</span></td>
-<td class="evidence">.cognidev/feature/gates.json · /scalars/known_vulnerable_dependencies<span class="reason">the pointer resolves to nothing</span></td>
-<td class="verdict-cell unverified">NOT VERIFIED</td>
+<td>No advisory the services&#39; code calls, and no critical advisory whose reachability is unproven, is in the resolved module graph. This is claimed only when the scan actually ran; an offline run publishes no count and this reads NOT VERIFIED.<span class="detail">0 called or critical advisory/advisories</span></td>
+<td class="evidence">.cognidev/feature/gates.json · /scalars/known_vulnerable_dependencies → 0</td>
+<td class="verdict-cell pass">MET</td>
 </tr>
 <tr id="c-advisories-in-graph-stated">
-<td>Every advisory the scan found in the resolved module graph — called or not — is counted here from cve.json and listed there by module, severity and reachability; none is hidden by the filter above.<span class="detail">0 advisory/advisories in the resolved module graph (cve.json)</span></td>
-<td class="evidence">.cognidev/feature/cve.json · /findings → 0</td>
+<td>Every advisory the scan found in the resolved module graph — called or not — is counted here from cve.json and listed there by module, severity and reachability; none is hidden by the filter above.<span class="detail">4 advisory/advisories in the resolved module graph (cve.json)</span></td>
+<td class="evidence">.cognidev/feature/cve.json · /findings → 4</td>
 <td class="verdict-cell pass">MET</td>
 </tr>
 </tbody>
@@ -634,7 +634,7 @@ footer { margin-top:3rem; padding-top:1rem; border-top:1px solid var(--rule);
 <tbody>
 <tr id="c-scorecard-written">
 <td>Each stage of the cut was graded on completeness, correctness and restraint. An axis nothing measured reads as unmeasured; it never counts as clean.</td>
-<td class="evidence">MIGRATION-SCORECARD.md · 7189 bytes</td>
+<td class="evidence">MIGRATION-SCORECARD.md · 7103 bytes</td>
 <td class="verdict-cell pass">MET</td>
 </tr>
 <tr id="c-scorecard-shard">
@@ -668,12 +668,6 @@ footer { margin-top:3rem; padding-top:1rem; border-top:1px solid var(--rule);
 </tbody>
 </table>
 </div>
-<h2 id="not-verified">Conditions not verified</h2>
-<p>Neither confirmed nor contradicted, because the record each relies on was absent or unreadable. These are not satisfied conditions and must not be read as such.</p>
-<ul class="plain">
-<li><strong><a href="#c-no-test-switched-off">no-test-switched-off</a></strong> — No test that came over from the monolith was switched off during the run — none gained an unconditional t.Skip, a new skip call or a build constraint, and none was deleted — compared, file by file, with the monolith&#39;s version on the frozen `source` branch. <code>.cognidev/feature/gates.json · /scalars/no_test_newly_disabled</code> — the pointer resolves to nothing</li>
-<li><strong><a href="#c-no-called-or-critical-advisory">no-called-or-critical-advisory</a></strong> — No advisory the services&#39; code calls, and no critical advisory whose reachability is unproven, is in the resolved module graph. This is claimed only when the scan actually ran; an offline run publishes no count and this reads NOT VERIFIED. <code>.cognidev/feature/gates.json · /scalars/known_vulnerable_dependencies</code> — the pointer resolves to nothing</li>
-</ul>
 <h2>Basis and limitations</h2>
 <p><strong>Basis.</strong> Each condition is evaluated by reading a record produced by this run — a file, a count, an exit status — and comparing it with the condition as stated. No result is entered by hand, and no condition passes because it was not examined: where the record is missing, the result is recorded as not verified.</p>
 <p><strong>Confidence.</strong> A satisfied condition establishes that the stated property held for this run, on this input, at the time the record was written. It is evidence about what was examined and nothing more. It does not establish that the schedule is complete, that the output is fit for a particular purpose, or that properties nobody listed are sound.</p>
@@ -681,9 +675,9 @@ footer { margin-top:3rem; padding-top:1rem; border-top:1px solid var(--rule);
 <h2>Reproduction</h2>
 <p>The invocation was not recorded. The following is the equivalent command for the playbook and project this record was written against:</p>
 <pre>playbook_test \
-  --playbook /Users/rajasekharkarawalla/dev/2026/cognidev/.cw-worktrees/pb-go-jev-mono/playbooks-v2/modernization-go-monolith \
-  --project  /Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev</pre>
-<footer>signoff-report 0.1.0, 2026-09-26T03:58:48Z (UTC).</footer>
+  --playbook ~/dev/2026/cognidev/.cw-worktrees/pb-cpp-rust/playbooks-v2/modernization-go-monolith \
+  --project  .</pre>
+<footer>signoff-report 0.1.0, 2026-09-29T03:35:44Z (UTC).</footer>
 </main>
 </body>
 </html>

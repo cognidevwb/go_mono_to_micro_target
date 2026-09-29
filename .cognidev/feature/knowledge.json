@@ -354,7 +354,7 @@
     }
   ],
   "required_build_properties": [],
-  "store": "/Users/rajasekharkarawalla/dev/2026/cognidev/.cw-worktrees/pb-go-jev-mono/playbooks-v2/modernization-go-monolith/knowledge",
+  "store": "~/dev/2026/cognidev/.cw-worktrees/pb-cpp-rust/playbooks-v2/modernization-go-monolith/knowledge",
   "target": 26,
   "target_from": "intent go_version",
   "target_go": "1.26",

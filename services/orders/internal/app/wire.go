@@ -5,6 +5,7 @@ package app
 import (
 	"os"
 
+	"github.com/acme/shop/pkg/httpx"
 	"github.com/acme/shop/services/orders/internal/clients/catalog"
 	"github.com/acme/shop/services/orders/internal/clients/customers"
 	"github.com/acme/shop/services/orders/internal/clients/inventory"
@@ -23,7 +24,16 @@ func wire(r *gin.Engine, d *Deps) error {
 	inventorySvc := inventory.NewService(db)
 	paymentSvc := payments.NewService(db, payments.NewGateway(os.Getenv("PAYMENTS_URL")))
 	orderSvc := orders.NewService(db, catalogSvc, customerSvc, inventorySvc, paymentSvc, bus)
-	r.Use(platform.AuthMiddleware())
+	auth := platform.AuthMiddleware()
+	// A call from another service of this platform (pkg/httpx internal.go) skips the
+	// monolith's user check, as the in-process call it replaces did.
+	r.Use(func(c *gin.Context) {
+		if httpx.IsInternal(c.Request) {
+			c.Next()
+			return
+		}
+		auth(c)
+	})
 	api := r.Group("/api")
 	orders.RegisterRoutes(api, orderSvc)
 	return nil

@@ -1,6 +1,6 @@
 {
-  "elapsedMs": 9084,
-  "finishedAt": 1790392814,
+  "elapsedMs": 12543,
+  "finishedAt": 1790651952,
   "inputs": [],
   "kind": "rust-binary",
   "outputs": [
@@ -9,14 +9,14 @@
       "kind": null,
       "name": "services",
       "optional": false,
-      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/services/"
+      "path": "./services/"
     },
     {
       "exists": true,
       "kind": null,
       "name": "port-report",
       "optional": false,
-      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/.cognidev/feature/port-report.json"
+      "path": "./.cognidev/feature/port-report.json"
     }
   ],
   "status": "Ok",

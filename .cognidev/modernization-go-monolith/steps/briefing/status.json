@@ -1,6 +1,6 @@
 {
-  "elapsedMs": 124,
-  "finishedAt": 1790392783,
+  "elapsedMs": 122,
+  "finishedAt": 1790651911,
   "inputs": [],
   "kind": "rust-binary",
   "outputs": [
@@ -9,14 +9,14 @@
       "kind": null,
       "name": "briefing",
       "optional": false,
-      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/.cognidev/feature/briefing.json"
+      "path": "./.cognidev/feature/briefing.json"
     },
     {
       "exists": true,
       "kind": null,
       "name": "steps",
       "optional": false,
-      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/.cognidev/feature/steps.json"
+      "path": "./.cognidev/feature/steps.json"
     }
   ],
   "status": "Ok",

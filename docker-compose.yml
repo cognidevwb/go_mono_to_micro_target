@@ -80,6 +80,7 @@ services:
       DATABASE_URL: postgres://catalog_app:catalog_app@catalog-db:5432/catalogdb?sslmode=disable
       BROKER_URL: nats://nats:4222
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
+      INTERNAL_TOKEN: ${INTERNAL_TOKEN:-}
     depends_on:
       catalog-db: { condition: service_healthy }
       nats: { condition: service_started }
@@ -91,6 +92,7 @@ services:
       DATABASE_URL: postgres://customers_app:customers_app@customers-db:5432/customersdb?sslmode=disable
       BROKER_URL: nats://nats:4222
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
+      INTERNAL_TOKEN: ${INTERNAL_TOKEN:-}
     depends_on:
       customers-db: { condition: service_healthy }
       nats: { condition: service_started }
@@ -102,6 +104,7 @@ services:
       DATABASE_URL: postgres://inventory_app:inventory_app@inventory-db:5432/inventorydb?sslmode=disable
       BROKER_URL: nats://nats:4222
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
+      INTERNAL_TOKEN: ${INTERNAL_TOKEN:-}
     depends_on:
       inventory-db: { condition: service_healthy }
       nats: { condition: service_started }
@@ -113,6 +116,8 @@ services:
       DATABASE_URL: postgres://payments_app:payments_app@payments-db:5432/paymentsdb?sslmode=disable
       BROKER_URL: nats://nats:4222
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
+      PAYMENTS_URL: ${PAYMENTS_URL:-}
+      INTERNAL_TOKEN: ${INTERNAL_TOKEN:-}
     depends_on:
       payments-db: { condition: service_healthy }
       nats: { condition: service_started }
@@ -126,6 +131,9 @@ services:
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
       CATALOG_SERVICE_URL: http://catalog-service:8080
       CUSTOMERS_SERVICE_URL: http://customers-service:8080
+      INVENTORY_SERVICE_URL: http://inventory-service:8080
+      PAYMENTS_SERVICE_URL: http://payments-service:8080
+      INTERNAL_TOKEN: ${INTERNAL_TOKEN:-}
     depends_on:
       orders-db: { condition: service_healthy }
       nats: { condition: service_started }

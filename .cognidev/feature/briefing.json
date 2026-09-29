@@ -21,7 +21,7 @@
   "measured": {
     "cross_service_calls": 2,
     "files_not_owned_by_one_service": 1,
-    "files_planned": 74,
+    "files_planned": 82,
     "owned_tables": 7,
     "sagas": 1,
     "services": 5
@@ -558,7 +558,7 @@
       "catalog-service",
       "Category, Product",
       "—",
-      "12",
+      "13",
       "leaf — nothing to wait for"
     ],
     [
@@ -566,7 +566,7 @@
       "customers-service",
       "Customer",
       "—",
-      "12",
+      "13",
       "leaf — nothing to wait for"
     ],
     [
@@ -574,7 +574,7 @@
       "inventory-service",
       "StockItem",
       "—",
-      "14",
+      "17",
       "leaf — nothing to wait for"
     ],
     [
@@ -582,7 +582,7 @@
       "payments-service",
       "Payment",
       "—",
-      "13",
+      "16",
       "leaf — nothing to wait for"
     ]
   ],
@@ -625,7 +625,7 @@
         "Category"
       ],
       "calls": [],
-      "files_planned": 12,
+      "files_planned": 13,
       "moved_from": [
         "internal/catalog/handlers.go",
         "internal/catalog/model.go",
@@ -644,7 +644,7 @@
         "Customer"
       ],
       "calls": [],
-      "files_planned": 12,
+      "files_planned": 13,
       "moved_from": [
         "internal/customers/handlers.go",
         "internal/customers/model.go",
@@ -662,7 +662,7 @@
         "StockItem"
       ],
       "calls": [],
-      "files_planned": 14,
+      "files_planned": 17,
       "moved_from": [
         "internal/inventory/model.go",
         "internal/inventory/service.go"
@@ -679,7 +679,7 @@
         "Payment"
       ],
       "calls": [],
-      "files_planned": 13,
+      "files_planned": 16,
       "moved_from": [
         "internal/payments/gateway.go",
         "internal/payments/model.go",

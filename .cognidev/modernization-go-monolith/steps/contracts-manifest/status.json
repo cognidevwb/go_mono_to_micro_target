@@ -1,6 +1,6 @@
 {
   "elapsedMs": 124,
-  "finishedAt": 1790392814,
+  "finishedAt": 1790651953,
   "inputs": [],
   "kind": "rust-binary",
   "outputs": [
@@ -9,14 +9,14 @@
       "kind": null,
       "name": "contracts.lock",
       "optional": false,
-      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/.cognidev/feature/contracts.lock.json"
+      "path": "./.cognidev/feature/contracts.lock.json"
     },
     {
       "exists": true,
       "kind": null,
       "name": "contracts.lock",
       "optional": false,
-      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/contracts.lock.json"
+      "path": "./contracts.lock.json"
     }
   ],
   "status": "Ok",

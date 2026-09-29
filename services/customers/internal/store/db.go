@@ -1,6 +1,4 @@
-// Package store opens customers's own *gorm.DB from its own DSN and migrates
-// only the table this service owns — Customer. The monolith's shared
-// platform.Open and its global AutoMigrate do not come over.
+// Package store opens customers's own database and migrates only its own tables.
 package store
 
 import (
@@ -10,7 +8,7 @@ import (
 	"github.com/acme/shop/services/customers/internal/customers"
 )
 
-// Open connects customers's own database and migrates its owned model.
+// Open connects customers's database from its own DSN and migrates Customer.
 func Open(dsn string) (*gorm.DB, error) {
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {

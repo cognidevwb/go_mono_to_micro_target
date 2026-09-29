@@ -6,7 +6,9 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 
@@ -22,13 +24,29 @@ func baseURL() string {
 	return "http://payments-service:8080"
 }
 
+// remoteError is the error the in-process call returned, as payments-service
+// answered it: the message in its JSON body ({"error": …}, or a problem's
+// detail/title), unwrapped, so a caller shows exactly what the monolith showed.
+// Use it for every answer of 400 or above, 404 included.
+func remoteError(resp *http.Response) error {
+	body, _ := io.ReadAll(io.LimitReader(resp.Body, 64<<10))
+	var e struct {
+		Error  string `json:"error"`
+		Detail string `json:"detail"`
+		Title  string `json:"title"`
+	}
+	if json.Unmarshal(body, &e) == nil {
+		for _, m := range []string{e.Error, e.Detail, e.Title} {
+			if m != "" {
+				return errors.New(m)
+			}
+		}
+	}
+	return fmt.Errorf("payments-service: status %d", resp.StatusCode)
+}
+
 // The provider's contract types and constants, as orders holds them.
 type Gateway = contract.Gateway
-
-type chargeRequest struct {
-	OrderID uint    `json:"order_id"`
-	Amount  float64 `json:"amount"`
-}
 
 // Service is payments-service's Service, seen from orders: every method is a remote call.
 type Service struct {
@@ -40,26 +58,26 @@ func newService() *Service {
 	return &Service{baseURL: baseURL(), client: httpx.NewClient()}
 }
 
-// Charge calls payments-service's POST /v1/payment/charge. tx is kept in the
-// signature to mirror the provider's API, but the charge now happens
-// remotely: it is no longer part of this transaction.
+// Charge posts to payments-service's POST /v1/payments/charge. The remote
+// service owns the payment rows, so the caller's tx is not used. Charging is
+// not idempotent, so the call is never retried.
 func (c *Service) Charge(tx *gorm.DB, orderID uint, amount float64) error {
-	body, err := json.Marshal(chargeRequest{OrderID: orderID, Amount: amount})
+	payload, err := json.Marshal(map[string]any{"orderId": orderID, "amount": amount})
 	if err != nil {
 		return err
 	}
-	req, err := http.NewRequestWithContext(context.Background(), http.MethodPost, c.baseURL+"/v1/payment/charge", bytes.NewReader(body))
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodPost, c.baseURL+"/v1/payments/charge", bytes.NewReader(payload))
 	if err != nil {
 		return err
 	}
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := c.client.Do(req)
 	if err != nil {
-		return fmt.Errorf("payments: charge: %w", err)
+		return err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
-		return fmt.Errorf("payments: charge: unexpected status %d", resp.StatusCode)
+	if resp.StatusCode >= 400 {
+		return remoteError(resp)
 	}
 	return nil
 }

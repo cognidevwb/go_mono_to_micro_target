@@ -1,6 +1,6 @@
 {
-  "elapsedMs": 124,
-  "finishedAt": 1790395035,
+  "elapsedMs": 123,
+  "finishedAt": 1790652633,
   "inputs": [],
   "kind": "rust-binary",
   "outputs": [
@@ -9,14 +9,14 @@
       "kind": null,
       "name": "contracts-drift",
       "optional": false,
-      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/.cognidev/feature/contracts-drift.json"
+      "path": "./.cognidev/feature/contracts-drift.json"
     },
     {
       "exists": false,
       "kind": null,
       "name": "contracts-drift",
       "optional": true,
-      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/contracts-drift.md"
+      "path": "./contracts-drift.md"
     }
   ],
   "status": "Ok",

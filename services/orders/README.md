@@ -1,6 +1,6 @@
 # orders-service
 
-Orders owns the customer's order placement and history: it validates that a customer is active, prices each requested line from catalog, and records the order and its lines in its own database. Because reserving stock and charging payment now live in separate services, placing an order runs the `CreateOrder` saga, which reserves inventory then charges payment — the harder-to-reverse step last — and compensates completed steps if a later one fails. Once the order is placed it is saved and an `order.placed` event is published through the transactional outbox for other services to consume.
+orders-service owns the `Order` and `OrderLine` records and exposes order placement (`POST /api/orders`) and a customer's own order history (`GET /api/orders/mine`). Placing an order looks up the customer and product prices through the customers and catalog clients, then runs the `CreateOrder` saga: stock is reserved in inventory first and payment is charged last, with compensations run in reverse on failure. The order and its lines are written only in the final local commit, together with an outbox row, so a failed saga leaves no order behind.
 
 | | |
 |---|---|

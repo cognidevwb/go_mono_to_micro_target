@@ -59,6 +59,18 @@
     },
     {
       "depends_on": [
+        "services/catalog/internal/catalog/handlers.go",
+        "services/catalog/internal/catalog/model.go",
+        "services/catalog/internal/catalog/service.go"
+      ],
+      "group": "catalog",
+      "layer": "routing",
+      "path": "services/catalog/internal/app/remote_operations.go",
+      "purpose": "serve the ported methods other services call on catalog: `PriceOf` (called by orders) at POST /v1/catalog/price_of. For each: bind the arguments as JSON, call the ported method unchanged, answer its results as JSON; an error answers {\"error\": err.Error()} with the status the monolith's own handlers use for it, so the caller sees the monolith's message. Mounted from this file's init by appending to the package's `mounts` (routes.go) — wire.go is not edited (catalog-service)",
+      "sources": []
+    },
+    {
+      "depends_on": [
         "services/catalog/internal/catalog/handlers.go"
       ],
       "group": "catalog",
@@ -179,6 +191,18 @@
       "layer": "data",
       "path": "services/customers/internal/store/db.go",
       "purpose": "open customers's OWN *gorm.DB (gorm.io/driver/postgres) from its own DSN — models registered here are ONLY Customer; the monolith's shared platform.Open and global AutoMigrate do not come over (customers-service)",
+      "sources": []
+    },
+    {
+      "depends_on": [
+        "services/customers/internal/customers/handlers.go",
+        "services/customers/internal/customers/model.go",
+        "services/customers/internal/customers/service.go"
+      ],
+      "group": "customers",
+      "layer": "routing",
+      "path": "services/customers/internal/app/remote_operations.go",
+      "purpose": "serve the ported methods other services call on customers: `IsActive` (called by orders) at POST /v1/customers/is_active. For each: bind the arguments as JSON, call the ported method unchanged, answer its results as JSON; an error answers {\"error\": err.Error()} with the status the monolith's own handlers use for it, so the caller sees the monolith's message. Mounted from this file's init by appending to the package's `mounts` (routes.go) — wire.go is not edited (customers-service)",
       "sources": []
     },
     {
@@ -304,7 +328,17 @@
       "group": "inventory",
       "layer": "routing",
       "path": "services/inventory/internal/httpapi/stock_item_handlers.go",
-      "purpose": "HTTP handlers for StockItem on the monolith's own router, kept (gin) under /v1/stockitem: bind + validate the request → call the ported service → JSON response, errors as RFC 9457 problem+json. context.Context flows from the request into every call. Routes carry the /v1 segment. (inventory-service)",
+      "purpose": "HTTP handlers for StockItem on the monolith's own router, kept (gin) under /v1/stockitem: bind + validate the request → call the ported service → JSON response, errors as RFC 9457 problem+json. context.Context flows from the request into every call. The package exports `RegisterRoutes(r gin.IRouter, db *gorm.DB, svc …)`, which internal/app/wire.go calls. Routes carry the /v1 segment. (inventory-service)",
+      "sources": []
+    },
+    {
+      "depends_on": [
+        "services/inventory/internal/httpapi/stock_item_handlers.go"
+      ],
+      "group": "inventory",
+      "layer": "routing",
+      "path": "services/inventory/internal/app/wire.go",
+      "purpose": "mount the new HTTP handlers: the handlers package (internal/httpapi) exports ONE entry point, `RegisterRoutes(r gin.IRouter, db *gorm.DB, svc <the ported service type>)`, and wire() calls it once after the auth middleware, with the service value wire already constructs. Keep every other line of wire as port-monolith-go wrote it. Without this call no route of inventory is served (inventory-service)",
       "sources": []
     },
     {
@@ -315,7 +349,7 @@
       "group": "inventory",
       "layer": "services",
       "path": "services/inventory/internal/events/order_placed_consumer.go",
-      "purpose": "consume `order.placed` (raised by orders) over NATS JetStream (github.com/nats-io/nats.go/jetstream: a durable consumer per subscriber, Nats-Msg-Id header for publish de-duplication, explicit Ack after the local commit): an idempotent handler keyed on the message id (processed-message table), acking only after the local commit — replaces the in-process bus Subscribe (inventory-service)",
+      "purpose": "consume `order.placed` (raised by orders) over NATS JetStream (github.com/nats-io/nats.go/jetstream: a durable consumer per subscriber, Nats-Msg-Id header for publish de-duplication, explicit Ack after the local commit): an idempotent handler keyed on the message id (processed-message table), acking only after the local commit — replaces the in-process bus Subscribe. Durable consumer name `inventory-service-order_placed` — letters, digits, `-` and `_` only: JetStream rejects a `.` in a durable and the service would not start (inventory-service)",
       "sources": []
     },
     {
@@ -327,6 +361,17 @@
       "layer": "services",
       "path": "services/inventory/internal/jobs/scheduler.go",
       "purpose": "the scheduled work inventory inherits (StartRestockJob): run it exactly once across replicas — a single-replica worker, a Postgres advisory-lock lease, or a Kubernetes CronJob — started from cmd/inventory with the service's context so SIGTERM stops it (inventory-service)",
+      "sources": []
+    },
+    {
+      "depends_on": [
+        "services/inventory/internal/inventory/model.go",
+        "services/inventory/internal/inventory/service.go"
+      ],
+      "group": "inventory",
+      "layer": "routing",
+      "path": "services/inventory/internal/app/remote_operations.go",
+      "purpose": "serve the ported methods other services call on inventory: `Reserve` (called by orders, a write inside a saga) at POST /v1/inventory/reserve. For each: bind the arguments as JSON, call the ported method unchanged, answer its results as JSON; an error answers {\"error\": err.Error()} with the status the monolith's own handlers use for it, so the caller sees the monolith's message. Mounted from this file's init by appending to the package's `mounts` (routes.go) — wire.go is not edited (inventory-service)",
       "sources": []
     },
     {
@@ -348,6 +393,19 @@
       "path": "services/inventory/internal/inventory/inventory_test.go",
       "purpose": "table-driven tests for inventory (StockItem): the happy path per aggregate, validation → 400, not-found → 404, and the concurrency / out-of-stock guard; database via testcontainers-go Postgres, skipped with t.Skip when no container runtime is present (inventory-service)",
       "sources": []
+    },
+    {
+      "depends_on": [
+        "services/inventory/internal/store/db.go"
+      ],
+      "group": "inventory",
+      "layer": "services",
+      "path": "services/inventory/internal/app/create_order_compensation.go",
+      "purpose": "the compensating operation inventory offers the CreateOrder saga: undo exactly what inventory's step did (a stock reservation is released, a charge is voided) in inventory's own transaction, a no-op when repeated. Served as POST /v1/inventory/create_order/compensate, mounted from this file's init func by appending to the package's `mounts` (routes.go) — wire.go is not edited. A record it keeps to stay idempotent (a ledger of undone steps) is a `CREATE TABLE IF NOT EXISTS` appended to the package's `schemas` from init — app.go creates it at startup; a table nothing creates fails the first compensation. The orchestrator's Compensate for inventory calls it through its typed client — a log line is not a compensation (inventory-service)",
+      "sources": [
+        "internal/inventory/model.go",
+        "internal/inventory/service.go"
+      ]
     },
     {
       "depends_on": [
@@ -461,7 +519,29 @@
       "group": "payments",
       "layer": "routing",
       "path": "services/payments/internal/httpapi/payment_handlers.go",
-      "purpose": "HTTP handlers for Payment on the monolith's own router, kept (gin) under /v1/payment: bind + validate the request → call the ported service → JSON response, errors as RFC 9457 problem+json. context.Context flows from the request into every call. Routes carry the /v1 segment. (payments-service)",
+      "purpose": "HTTP handlers for Payment on the monolith's own router, kept (gin) under /v1/payment: bind + validate the request → call the ported service → JSON response, errors as RFC 9457 problem+json. context.Context flows from the request into every call. The package exports `RegisterRoutes(r gin.IRouter, db *gorm.DB, svc …)`, which internal/app/wire.go calls. Routes carry the /v1 segment. (payments-service)",
+      "sources": []
+    },
+    {
+      "depends_on": [
+        "services/payments/internal/httpapi/payment_handlers.go"
+      ],
+      "group": "payments",
+      "layer": "routing",
+      "path": "services/payments/internal/app/wire.go",
+      "purpose": "mount the new HTTP handlers: the handlers package (internal/httpapi) exports ONE entry point, `RegisterRoutes(r gin.IRouter, db *gorm.DB, svc <the ported service type>)`, and wire() calls it once after the auth middleware, with the service value wire already constructs. Keep every other line of wire as port-monolith-go wrote it. Without this call no route of payments is served (payments-service)",
+      "sources": []
+    },
+    {
+      "depends_on": [
+        "services/payments/internal/payments/gateway.go",
+        "services/payments/internal/payments/model.go",
+        "services/payments/internal/payments/service.go"
+      ],
+      "group": "payments",
+      "layer": "routing",
+      "path": "services/payments/internal/app/remote_operations.go",
+      "purpose": "serve the ported methods other services call on payments: `Charge` (called by orders, a write inside a saga) at POST /v1/payments/charge. For each: bind the arguments as JSON, call the ported method unchanged, answer its results as JSON; an error answers {\"error\": err.Error()} with the status the monolith's own handlers use for it, so the caller sees the monolith's message. Mounted from this file's init by appending to the package's `mounts` (routes.go) — wire.go is not edited (payments-service)",
       "sources": []
     },
     {
@@ -483,6 +563,20 @@
       "path": "services/payments/internal/payments/payments_test.go",
       "purpose": "table-driven tests for payments (Payment): the happy path per aggregate, validation → 400, not-found → 404, and the concurrency / out-of-stock guard; database via testcontainers-go Postgres, skipped with t.Skip when no container runtime is present (payments-service)",
       "sources": []
+    },
+    {
+      "depends_on": [
+        "services/payments/internal/store/db.go"
+      ],
+      "group": "payments",
+      "layer": "services",
+      "path": "services/payments/internal/app/create_order_compensation.go",
+      "purpose": "the compensating operation payments offers the CreateOrder saga: undo exactly what payments's step did (a stock reservation is released, a charge is voided) in payments's own transaction, a no-op when repeated. Served as POST /v1/payments/create_order/compensate, mounted from this file's init func by appending to the package's `mounts` (routes.go) — wire.go is not edited. A record it keeps to stay idempotent (a ledger of undone steps) is a `CREATE TABLE IF NOT EXISTS` appended to the package's `schemas` from init — app.go creates it at startup; a table nothing creates fails the first compensation. The orchestrator's Compensate for payments calls it through its typed client — a log line is not a compensation (payments-service)",
+      "sources": [
+        "internal/payments/gateway.go",
+        "internal/payments/model.go",
+        "internal/payments/service.go"
+      ]
     },
     {
       "depends_on": [
@@ -557,7 +651,7 @@
       "group": "orders",
       "layer": "services",
       "path": "services/orders/internal/orders/service.go",
-      "purpose": "service.go ported VERBATIM from the monolith's internal/orders/service.go by port-monolith-go — package clause kept, import paths rewritten to this module. Do not rewrite it: fill only its `// CW-SEAM[...]` markers (orders-service)",
+      "purpose": "service.go ported VERBATIM from the monolith's internal/orders/service.go by port-monolith-go — package clause kept, import paths rewritten to this module. Do not rewrite it: fill only its `// CW-SEAM[...]` markers (orders-service) ALSO, in this file — the one change beyond its markers: replace the cross-service unit of work in PlaceOrder with the CreateOrder saga (outbox + compensations) — writes in inventory, orders, payments. Callers see what the monolith's single transaction showed them: the monolith rolled a failed order back, so it never existed — when the saga fails, after its compensations ran, delete the records this call created (the order and its lines) in this service's own transaction, so no list or get ever returns them; each compensation calls the participant's compensating endpoint, never only a log line.",
       "sources": [
         "internal/orders/service.go"
       ]
@@ -638,7 +732,7 @@
       "group": "orders",
       "layer": "services",
       "path": "services/orders/internal/saga/create_order.go",
-      "purpose": "the CreateOrder ORCHESTRATED saga replacing the monolith's single db.Transaction across inventory → orders → payments: persist saga state in orders's database, send each step as a command over NATS JetStream (github.com/nats-io/nats.go/jetstream: a durable consumer per subscriber, Nats-Msg-Id header for publish de-duplication, explicit Ack after the local commit), the hardest-to-reverse step (the payment charge) LAST as the pivot, compensations in reverse (release stock, void payment). State change + outgoing message commit together through the outbox. Run(ctx, cmd) executes the steps in order and returns the final Outcome (Completed or Compensated) — the test calls Run and asserts the Outcome and the persisted saga state; it never waits for a published event. // CW-SEAM[kind=saga] (orders-service)",
+      "purpose": "the CreateOrder ORCHESTRATED saga replacing the monolith's single db.Transaction across inventory → orders → payments: persist saga state in orders's database, send each step as a command over NATS JetStream (github.com/nats-io/nats.go/jetstream: a durable consumer per subscriber, Nats-Msg-Id header for publish de-duplication, explicit Ack after the local commit), the hardest-to-reverse step (the payment charge) LAST as the pivot, compensations in reverse (release stock, void payment) — each participant's Compensate calls that participant's POST /v1/<ctx>/create_order/compensate through a method you add to its typed client under internal/clients/<ctx>; a Compensate that only logs leaves the step committed. A step that makes one call per line item undoes the items it already did before returning its error — the monolith's transaction rolled those back too. State change + outgoing message commit together through the outbox. A failed saga leaves no business row the monolith's rollback would not have left: the rows the transaction created (the order and its lines) are written only in the final local commit, after the pivot succeeds — never saved first as pending and then marked cancelled or failed, which every read and list would show. Saga progress lives in the saga's own state table, not in the business row's status. Run(ctx, cmd) executes the steps in order and returns the final Outcome (Completed or Compensated) — the test calls Run and asserts the Outcome and the persisted saga state; it never waits for a published event. // CW-SEAM[kind=saga] (orders-service)",
       "sources": [
         "internal/orders/handlers.go",
         "internal/orders/model.go",
@@ -652,7 +746,7 @@
       "group": "orders",
       "layer": "services",
       "path": "services/orders/internal/saga/create_order_test.go",
-      "purpose": "CreateOrder saga test with fake participants: the happy path completes across inventory → orders → payments; a failure at the pivot runs the compensations in reverse. Run(ctx, cmd) executes the steps in order and returns the final Outcome (Completed or Compensated) — the test calls Run and asserts the Outcome and the persisted saga state; it never waits for a published event (orders-service)",
+      "purpose": "CreateOrder saga test with fake participants: the happy path completes across inventory → orders → payments; a failure at the pivot runs the compensations in reverse and leaves no order row behind. Run(ctx, cmd) executes the steps in order and returns the final Outcome (Completed or Compensated) — the test calls Run and asserts the Outcome and the persisted saga state; it never waits for a published event (orders-service)",
       "sources": []
     },
     {
@@ -749,16 +843,7 @@
     "services/inventory",
     "services/payments"
   ],
-  "modify": [
-    {
-      "depends_on": [],
-      "group": "modify",
-      "layer": "services",
-      "path": "internal/orders/service.go",
-      "purpose": "replace the cross-service unit of work in PlaceOrder with the CreateOrder saga (outbox + compensations) — writes in inventory, orders, payments",
-      "sources": []
-    }
-  ],
+  "modify": [],
   "order": [
     "orders-service",
     "catalog-service",
@@ -779,7 +864,7 @@
       "steps": [
         {
           "action": "s.inventory.Reserve",
-          "compensation": "compensable (Jev p=0.88): undo `s.inventory.Reserve` in inventory",
+          "compensation": "compensable (Jev p=0.89): undo `s.inventory.Reserve` in inventory",
           "context": "inventory"
         },
         {

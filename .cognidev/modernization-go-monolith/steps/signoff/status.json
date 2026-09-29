@@ -1,6 +1,6 @@
 {
-  "elapsedMs": 125,
-  "finishedAt": 1790395128,
+  "elapsedMs": 124,
+  "finishedAt": 1790652944,
   "inputs": [],
   "kind": "rust-binary",
   "outputs": [
@@ -9,14 +9,14 @@
       "kind": "report",
       "name": "VALIDATION-REPORT",
       "optional": false,
-      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/VALIDATION-REPORT.html"
+      "path": "./VALIDATION-REPORT.html"
     },
     {
       "exists": true,
       "kind": "report",
       "name": "signoff",
       "optional": false,
-      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/.cognidev/run/signoff.json"
+      "path": "./.cognidev/run/signoff.json"
     }
   ],
   "status": "Ok",

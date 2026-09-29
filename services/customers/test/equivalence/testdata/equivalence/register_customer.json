@@ -1,6 +1,0 @@
-{
-  "method": "POST",
-  "path": "/api/customers",
-  "body": {"email": "eq-customer@example.com", "name": "Equivalence Customer", "active": true},
-  "expected": {"email": "eq-customer@example.com", "name": "Equivalence Customer", "active": true}
-}

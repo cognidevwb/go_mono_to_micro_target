@@ -1,6 +1,6 @@
 playbook_id: modernization-go-monolith
-captured_at: 2026-09-26T03:19:43Z
-workdir: /Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev
+captured_at: 2026-09-29T03:18:31Z
+workdir: .
 answers:
   api_versioning: url-segment
   auth: jwt-keycloak
@@ -33,7 +33,7 @@ answers:
   read_write_model: crud
   run_tests: true
   scope: ''
-  search_registry: false
+  search_registry: true
   service_internal_structure: flat-package
   service_size: small
   web_framework: keep

@@ -13,8 +13,10 @@ import (
 var CreateOrderOrder = []string{"inventory", "payments"}
 
 // CreateOrder builds the saga from one step per participant, in CreateOrderOrder.
-// Callers supply each participant's Do/Compensate bound to its typed client;
-// a participant with no step bound fails immediately via notBound.
+// The caller binds each step's Do/Compensate to its typed client (see
+// orders.Service.PlaceOrder); payments is last because a charge is the hardest
+// step to undo. A participant with no step bound fails the saga with an
+// UnboundError instead of being skipped.
 func CreateOrder(steps map[string]pkgsaga.Step) pkgsaga.Saga {
 	s := pkgsaga.Saga{Name: "CreateOrder"}
 	for _, p := range CreateOrderOrder {

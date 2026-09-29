@@ -1,7 +1,7 @@
 {
   "measured": {
     "cross_service_calls": 2,
-    "files_planned": 74,
+    "files_planned": 82,
     "owned_tables": 7,
     "sagas": 1,
     "services": 5

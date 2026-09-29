@@ -30,10 +30,10 @@ li ul { margin:.2rem 0; }
 <p>Each service owns its tables outright. No other service may read them — that constraint is what makes an independent deploy possible, and it is also the whole cost of the cut.</p>
 <div class="scroll"><table><thead><tr><th>Service</th><th>Owns</th><th>Aggregate roots</th><th>Calls</th><th>Files planned</th></tr></thead><tbody>
 <tr><td><code>orders-service</code></td><td><code>Order</code>, <code>OrderLine</code></td><td><code>Order</code></td><td><code>catalog-service</code>, <code>customers-service</code></td><td>22</td></tr>
-<tr><td><code>catalog-service</code></td><td><code>Category</code>, <code>Product</code></td><td><code>Category</code></td><td>nothing</td><td>12</td></tr>
-<tr><td><code>customers-service</code></td><td><code>Customer</code></td><td><code>Customer</code></td><td>nothing</td><td>12</td></tr>
-<tr><td><code>inventory-service</code></td><td><code>StockItem</code></td><td><code>StockItem</code></td><td>nothing</td><td>14</td></tr>
-<tr><td><code>payments-service</code></td><td><code>Payment</code></td><td><code>Payment</code></td><td>nothing</td><td>13</td></tr>
+<tr><td><code>catalog-service</code></td><td><code>Category</code>, <code>Product</code></td><td><code>Category</code></td><td>nothing</td><td>13</td></tr>
+<tr><td><code>customers-service</code></td><td><code>Customer</code></td><td><code>Customer</code></td><td>nothing</td><td>13</td></tr>
+<tr><td><code>inventory-service</code></td><td><code>StockItem</code></td><td><code>StockItem</code></td><td>nothing</td><td>17</td></tr>
+<tr><td><code>payments-service</code></td><td><code>Payment</code></td><td><code>Payment</code></td><td>nothing</td><td>16</td></tr>
 </tbody></table></div>
 <h2>What becomes a network call</h2>
 <p>2 calls that cannot fail today become ones that can. Each one gets a typed, resilient HttpClient with a timeout, a retry and a circuit breaker.</p>
@@ -49,11 +49,6 @@ li ul { margin:.2rem 0; }
 <h2>Files that belong to the fleet, not to one service</h2>
 <div class="scroll"><table><thead><tr><th>File</th><th>Purpose</th></tr></thead><tbody>
 <tr><td><code>ARCHITECTURE.md</code></td><td>Docs: fill the &lt;!-- CW-SEAM[kind=decomposition-rationale] --&gt; in ARCHITECTURE.md — WHY these bounded contexts were drawn this way (which candidates merged/split, which coupling was accepted vs redesigned)</td></tr>
-</tbody></table></div>
-<h2>Monolith files this rewrites</h2>
-<p>Everything else is MOVED verbatim. These are the files where the old shape cannot survive the cut.</p>
-<div class="scroll"><table><thead><tr><th>File</th><th>Why</th></tr></thead><tbody>
-<tr><td><code>internal/orders/service.go</code></td><td>replace the cross-service unit of work in PlaceOrder with the CreateOrder saga (outbox + compensations) — writes in inventory, orders, payments</td></tr>
 </tbody></table></div>
 <p class="foot">Written by the Go decomposition planner. The same content is in <code>what-changes.md</code> beside this file.</p>
 </main>

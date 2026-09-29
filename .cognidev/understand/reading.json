@@ -1,0 +1,749 @@
+{
+ "version": 1,
+ "prompt_version": 1,
+ "generated_from_merkle": "5ca5c3120db67b5dbc2fcb4ec113403ff3d51db72f73c0e29895c941712bbae3",
+ "chapters": [
+  {
+   "id": "orientation",
+   "label": "Get oriented",
+   "steps": [
+    1,
+    2,
+    3
+   ]
+  },
+  {
+   "id": "entry",
+   "label": "Where execution starts",
+   "steps": [
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17
+   ]
+  },
+  {
+   "id": "data",
+   "label": "The data model",
+   "steps": [
+    18
+   ]
+  },
+  {
+   "id": "logic",
+   "label": "The core logic",
+   "steps": [
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27
+   ]
+  },
+  {
+   "id": "api",
+   "label": "The API surface",
+   "steps": [
+    28,
+    29,
+    30,
+    31,
+    32
+   ]
+  },
+  {
+   "id": "supporting",
+   "label": "Supporting cast",
+   "steps": [
+    33,
+    34,
+    35,
+    36,
+    37
+   ]
+  }
+ ],
+ "steps": [
+  {
+   "n": 1,
+   "path": "README.md",
+   "chapter": "orientation",
+   "role": "config",
+   "one_liner": "The project's own introduction \u2014 what it is and how to run it.",
+   "teaches": [
+    "what the project does",
+    "how to run it locally"
+   ],
+   "why_now": "Always start with what the authors wanted you to know.",
+   "depends_on": [],
+   "imported_by": 0,
+   "loc": 0
+  },
+  {
+   "n": 2,
+   "path": "services/catalog/internal/config/config.go",
+   "chapter": "orientation",
+   "role": "config",
+   "one_liner": "Loads the catalog service's settings (port, database URL, broker URL, pool size, peer URLs) from environment variables with local defaults.",
+   "teaches": [
+    "Environment-based configuration with defaults",
+    "Config struct shared by service startup",
+    "Peer service URL map for cross-context calls"
+   ],
+   "why_now": "Read this first \u2014 it sets the project's ground rules before any code.",
+   "depends_on": [],
+   "imported_by": 3,
+   "loc": 46
+  },
+  {
+   "n": 3,
+   "path": "services/customers/internal/config/config.go",
+   "chapter": "orientation",
+   "role": "config",
+   "one_liner": "Reads the customers service's settings (port, database URL, broker URL, DB pool size, peer URLs) from environment variables with local defaults.",
+   "teaches": [
+    "Environment-based configuration with defaults",
+    "Config struct passed through the service",
+    "Empty peers map: customers calls no other service"
+   ],
+   "why_now": "Read this first \u2014 it sets the project's ground rules before any code.",
+   "depends_on": [],
+   "imported_by": 3,
+   "loc": 46
+  },
+  {
+   "n": 4,
+   "path": "pkg/httpx/server.go",
+   "chapter": "entry",
+   "role": "wiring",
+   "one_liner": "Shared HTTP chassis: health/readiness endpoints, a JSON writer, and a server runner with graceful shutdown.",
+   "teaches": [
+    "liveness vs readiness probes",
+    "graceful shutdown with context",
+    "shared service chassis in pkg/"
+   ],
+   "why_now": "A load-bearing file \u2014 20 files import it.",
+   "depends_on": [],
+   "imported_by": 20,
+   "loc": 89
+  },
+  {
+   "n": 5,
+   "path": "gateway/internal/proxy/proxy.go",
+   "chapter": "entry",
+   "role": "wiring",
+   "one_liner": "Reverse-proxy handler for the gateway: routes path prefixes to upstream services, falls back to the monolith, and strips internal auth headers.",
+   "teaches": [
+    "longest-prefix routing",
+    "strangler-fig fallback to legacy monolith",
+    "env-var upstream overrides",
+    "stripping spoofable internal headers"
+   ],
+   "why_now": "A load-bearing file \u2014 4 files import it.",
+   "depends_on": [],
+   "imported_by": 4,
+   "loc": 82
+  },
+  {
+   "n": 6,
+   "path": "pkg/events/bus.go",
+   "chapter": "entry",
+   "role": "wiring",
+   "one_liner": "Defines the event Bus interface and an in-process Memory implementation for publishing and subscribing to dotted-subject events.",
+   "teaches": [
+    "Pub/sub Bus abstraction",
+    "At-least-once delivery requiring idempotent handlers",
+    "In-memory bus for tests / no-broker mode",
+    "RWMutex-guarded subscriber registry"
+   ],
+   "why_now": "A load-bearing file \u2014 4 files import it.",
+   "depends_on": [],
+   "imported_by": 4,
+   "loc": 51
+  },
+  {
+   "n": 7,
+   "path": "pkg/events/connect.go",
+   "chapter": "entry",
+   "role": "wiring",
+   "one_liner": "Factory that returns a NATS event bus for a URL, or an in-memory bus when the URL is empty or starts with memory://.",
+   "teaches": [
+    "Choosing a bus implementation from a connection URL",
+    "In-memory bus for tests and local runs",
+    "Bus interface hides the NATS backend"
+   ],
+   "why_now": "Builds directly on what you just read \u2014 its dependencies are behind you now.",
+   "depends_on": [
+    "pkg/events/bus.go",
+    "pkg/events/nats.go"
+   ],
+   "imported_by": 5,
+   "loc": 12
+  },
+  {
+   "n": 8,
+   "path": "services/catalog/internal/app/app.go",
+   "chapter": "entry",
+   "role": "wiring",
+   "one_liner": "Builds the catalog service's shared dependencies: opens its Postgres DB, runs migrations and the outbox schema, and connects the event bus.",
+   "teaches": [
+    "Per-service database ownership",
+    "Startup migration via GORM AutoMigrate and idempotent schema statements",
+    "Event bus and transactional outbox setup",
+    "Deps struct as the dependency container"
+   ],
+   "why_now": "Builds directly on what you just read \u2014 its dependencies are behind you now.",
+   "depends_on": [
+    "pkg/events/connect.go",
+    "services/catalog/internal/app/models.go"
+   ],
+   "imported_by": 2,
+   "loc": 76
+  },
+  {
+   "n": 9,
+   "path": "services/catalog/internal/app/routes.go",
+   "chapter": "entry",
+   "role": "wiring",
+   "one_liner": "Builds the catalog service's Gin router, mounts endpoints via wire, then applies extra route mounts registered by other files in the package.",
+   "teaches": [
+    "Gin router construction with Recovery middleware",
+    "Init-time route registration via a mounts slice",
+    "Extending wiring without editing the monolith's wire"
+   ],
+   "why_now": "Builds directly on what you just read \u2014 its dependencies are behind you now.",
+   "depends_on": [
+    "services/catalog/internal/app/wire.go"
+   ],
+   "imported_by": 2,
+   "loc": 25
+  },
+  {
+   "n": 10,
+   "path": "services/customers/internal/app/app.go",
+   "chapter": "entry",
+   "role": "wiring",
+   "one_liner": "Builds the customers service's dependencies: opens its Postgres DB, creates outbox and schema tables, auto-migrates models, and connects the event bus.",
+   "teaches": [
+    "Per-service database ownership",
+    "Startup migration via AutoMigrate and idempotent schema statements",
+    "Outbox table setup for event publishing",
+    "Deps struct as shared wiring"
+   ],
+   "why_now": "Builds directly on what you just read \u2014 its dependencies are behind you now.",
+   "depends_on": [
+    "pkg/events/connect.go",
+    "services/customers/internal/app/models.go"
+   ],
+   "imported_by": 2,
+   "loc": 76
+  },
+  {
+   "n": 11,
+   "path": "services/customers/internal/app/routes.go",
+   "chapter": "entry",
+   "role": "wiring",
+   "one_liner": "Builds the customers service's Gin router, mounts the endpoints from wire, then applies extra routes that other files register.",
+   "teaches": [
+    "Gin router construction with Recovery middleware",
+    "Extension by init-time route mounts",
+    "Wire as the monolith's own endpoint wiring"
+   ],
+   "why_now": "Builds directly on what you just read \u2014 its dependencies are behind you now.",
+   "depends_on": [
+    "services/customers/internal/app/wire.go"
+   ],
+   "imported_by": 2,
+   "loc": 25
+  },
+  {
+   "n": 12,
+   "path": "services/inventory/internal/app/app.go",
+   "chapter": "entry",
+   "role": "wiring",
+   "one_liner": "Builds the inventory service's dependencies: opens its Postgres DB, runs migrations and outbox schema, and connects the event bus.",
+   "teaches": [
+    "Per-service database ownership",
+    "Startup schema and migration sequence",
+    "Deps struct as shared wiring",
+    "Transactional outbox and event bus setup"
+   ],
+   "why_now": "Builds directly on what you just read \u2014 its dependencies are behind you now.",
+   "depends_on": [
+    "pkg/events/connect.go",
+    "services/inventory/internal/app/models.go"
+   ],
+   "imported_by": 2,
+   "loc": 76
+  },
+  {
+   "n": 13,
+   "path": "services/orders/internal/app/app.go",
+   "chapter": "entry",
+   "role": "wiring",
+   "one_liner": "Builds the orders service's shared dependencies: opens its Postgres DB, runs schema and migrations, connects the event bus.",
+   "teaches": [
+    "Per-service database ownership",
+    "Startup migration and outbox schema setup",
+    "Deps struct as dependency container",
+    "Graceful readiness and shutdown"
+   ],
+   "why_now": "Builds directly on what you just read \u2014 its dependencies are behind you now.",
+   "depends_on": [
+    "pkg/events/connect.go",
+    "services/orders/internal/app/models.go"
+   ],
+   "imported_by": 2,
+   "loc": 76
+  },
+  {
+   "n": 14,
+   "path": "services/payments/internal/app/app.go",
+   "chapter": "entry",
+   "role": "wiring",
+   "one_liner": "Composes the payments service's dependencies: opens its own Postgres DB, runs migrations and outbox schema, and connects the event bus.",
+   "teaches": [
+    "Per-service database ownership",
+    "Startup schema/migration sequence with outbox",
+    "Deps struct as dependency container",
+    "Graceful readiness and shutdown"
+   ],
+   "why_now": "Builds directly on what you just read \u2014 its dependencies are behind you now.",
+   "depends_on": [
+    "pkg/events/connect.go",
+    "services/payments/internal/app/models.go"
+   ],
+   "imported_by": 2,
+   "loc": 76
+  },
+  {
+   "n": 15,
+   "path": "services/payments/internal/app/routes.go",
+   "chapter": "entry",
+   "role": "wiring",
+   "one_liner": "Builds the payments service's Gin router, mounts the monolith's wire() routes, then any extra route mounts registered via init funcs.",
+   "teaches": [
+    "Gin router construction with Recovery middleware",
+    "Init-time route registration via a mounts slice",
+    "Extending wiring without editing wire.go",
+    "Deps-based handler setup"
+   ],
+   "why_now": "Builds directly on what you just read \u2014 its dependencies are behind you now.",
+   "depends_on": [
+    "services/payments/internal/app/wire.go"
+   ],
+   "imported_by": 3,
+   "loc": 25
+  },
+  {
+   "n": 16,
+   "path": "pkg/httpx/internal.go",
+   "chapter": "entry",
+   "role": "wiring",
+   "one_liner": "Shared HTTP helpers that let services call each other with an internal caller header and token, bypassing the per-user auth check.",
+   "teaches": [
+    "service-to-service trust via headers and a shared token",
+    "middleware that skips user auth for internal calls",
+    "RoundTripper that stamps outgoing requests",
+    "constant-time secret comparison"
+   ],
+   "why_now": "Next in this chapter's dependency order.",
+   "depends_on": [],
+   "imported_by": 6,
+   "loc": 66
+  },
+  {
+   "n": 17,
+   "path": "services/orders/internal/platform/auth.go",
+   "chapter": "entry",
+   "role": "wiring",
+   "one_liner": "Gin middleware for the orders service that reads the X-User-ID header, rejects bad requests with 401, and exposes the user id via context.",
+   "teaches": [
+    "Gin middleware pattern",
+    "Passing identity through request context",
+    "Header-based auth with typed context keys"
+   ],
+   "why_now": "Next in this chapter's dependency order.",
+   "depends_on": [],
+   "imported_by": 2,
+   "loc": 35
+  },
+  {
+   "n": 18,
+   "path": "pkg/events/envelope.go",
+   "chapter": "data",
+   "role": "data",
+   "one_liner": "Defines the shared event Envelope (id, type, source, time, traceparent, raw JSON data) plus helpers to build, decode, and ID events.",
+   "teaches": [
+    "Event envelope wire format",
+    "Raw JSON payload decoded by consumers",
+    "Random 128-bit hex event IDs",
+    "Broker hidden behind a shared package"
+   ],
+   "why_now": "A load-bearing file \u2014 10 files import it.",
+   "depends_on": [],
+   "imported_by": 10,
+   "loc": 45
+  },
+  {
+   "n": 19,
+   "path": "services/catalog/internal/catalog/service.go",
+   "chapter": "logic",
+   "role": "service",
+   "one_liner": "Catalog service: lists and creates products via GORM, and serves product prices through a per-replica in-memory cache with a 30s TTL.",
+   "teaches": [
+    "Service struct wrapping a *gorm.DB",
+    "Process-local TTL price cache guarded by RWMutex",
+    "Basic validation (positive price) before persisting"
+   ],
+   "why_now": "A load-bearing file \u2014 10 files import it.",
+   "depends_on": [],
+   "imported_by": 10,
+   "loc": 64
+  },
+  {
+   "n": 20,
+   "path": "services/inventory/internal/inventory/service.go",
+   "chapter": "logic",
+   "role": "service",
+   "one_liner": "Inventory service: reserves stock for orders, logs order-placed events, and runs a background job that restocks low items.",
+   "teaches": [
+    "Stock reservation via gorm transaction",
+    "Read-check-then-write race (oversell risk)",
+    "Event handler reacting to another context",
+    "Ticker-based background job with context cancel"
+   ],
+   "why_now": "A load-bearing file \u2014 6 files import it.",
+   "depends_on": [],
+   "imported_by": 6,
+   "loc": 57
+  },
+  {
+   "n": 21,
+   "path": "services/customers/internal/customers/service.go",
+   "chapter": "logic",
+   "role": "service",
+   "one_liner": "Customer service: wraps a GORM DB to fetch a customer, register a new one, and check whether a customer is active.",
+   "teaches": [
+    "Service struct wrapping a *gorm.DB",
+    "Simple CRUD via GORM First/Create",
+    "Active-customer check used for order eligibility"
+   ],
+   "why_now": "Next in this chapter's dependency order.",
+   "depends_on": [],
+   "imported_by": 8,
+   "loc": 30
+  },
+  {
+   "n": 22,
+   "path": "services/orders/internal/clients/catalog/client.go",
+   "chapter": "logic",
+   "role": "service",
+   "one_liner": "Generated HTTP client that lets the orders service call catalog-service remotely, with retrying POSTs and error unwrapping.",
+   "teaches": [
+    "Remote client replacing an in-process call",
+    "Retry with exponential backoff on 5xx",
+    "Mapping remote errors to plain Go errors",
+    "CW-SEAM stubs left for manual implementation"
+   ],
+   "why_now": "Builds directly on what you just read \u2014 its dependencies are behind you now.",
+   "depends_on": [
+    "pkg/httpx/client.go"
+   ],
+   "imported_by": 2,
+   "loc": 135
+  },
+  {
+   "n": 23,
+   "path": "services/orders/internal/clients/customers/client.go",
+   "chapter": "logic",
+   "role": "service",
+   "one_liner": "Generated HTTP client through which the orders service calls customers-service remotely, with retry/backoff and unwrapped remote error messages.",
+   "teaches": [
+    "Replacing in-process calls with remote HTTP calls",
+    "Retry with exponential backoff on 5xx/transport errors",
+    "Mapping remote error bodies to plain Go errors",
+    "Env-var based service discovery"
+   ],
+   "why_now": "Builds directly on what you just read \u2014 its dependencies are behind you now.",
+   "depends_on": [
+    "pkg/httpx/client.go"
+   ],
+   "imported_by": 2,
+   "loc": 113
+  },
+  {
+   "n": 24,
+   "path": "services/orders/internal/clients/payments/client.go",
+   "chapter": "logic",
+   "role": "service",
+   "one_liner": "Orders' generated HTTP client for payments-service; its Charge method posts to /v1/payments/charge and turns error replies into Go errors.",
+   "teaches": [
+    "Monolith call replaced by a remote HTTP call",
+    "Service base URL read from an env var",
+    "Unwrapping the remote JSON error body",
+    "Non-idempotent charge is never retried"
+   ],
+   "why_now": "Builds directly on what you just read \u2014 its dependencies are behind you now.",
+   "depends_on": [
+    "pkg/httpx/client.go"
+   ],
+   "imported_by": 3,
+   "loc": 91
+  },
+  {
+   "n": 25,
+   "path": "services/orders/internal/orders/service.go",
+   "chapter": "logic",
+   "role": "service",
+   "one_liner": "Orders service that runs the CreateOrder saga: checks the customer, reserves stock, charges payment, then commits the order.",
+   "teaches": [
+    "Saga orchestration with compensating steps",
+    "Local DB transaction wrapping cross-service calls",
+    "Reserve-first, charge-last ordering",
+    "Publishing an order.placed event"
+   ],
+   "why_now": "Builds directly on what you just read \u2014 its dependencies are behind you now.",
+   "depends_on": [
+    "services/orders/internal/saga/create_order.go",
+    "pkg/saga/saga.go",
+    "services/orders/internal/clients/inventory/client.go"
+   ],
+   "imported_by": 3,
+   "loc": 161
+  },
+  {
+   "n": 26,
+   "path": "services/payments/internal/payments/gateway.go",
+   "chapter": "logic",
+   "role": "service",
+   "one_liner": "HTTP client that asks the external payment provider to charge an order amount via POST /v1/charges with a 5s timeout.",
+   "teaches": [
+    "Wrapping an external provider in a client struct",
+    "Mapping non-2xx responses to errors",
+    "HTTP client timeouts"
+   ],
+   "why_now": "Next in this chapter's dependency order.",
+   "depends_on": [],
+   "imported_by": 6,
+   "loc": 34
+  },
+  {
+   "n": 27,
+   "path": "services/payments/internal/payments/service.go",
+   "chapter": "logic",
+   "role": "service",
+   "one_liner": "Payments Service: charges an order through the gateway, then records a captured Payment row inside the caller's DB transaction.",
+   "teaches": [
+    "Service wrapping a gateway plus gorm DB",
+    "Charging inside a caller-supplied transaction",
+    "Charge-then-persist ordering (no record on failure)"
+   ],
+   "why_now": "Builds directly on what you just read \u2014 its dependencies are behind you now.",
+   "depends_on": [
+    "services/payments/internal/payments/gateway.go"
+   ],
+   "imported_by": 6,
+   "loc": 20
+  },
+  {
+   "n": 28,
+   "path": "services/orders/internal/orders/handlers.go",
+   "chapter": "api",
+   "role": "api",
+   "one_liner": "Gin HTTP handlers for the orders service: place an order (POST /orders) and list the caller's orders (GET /orders/mine).",
+   "teaches": [
+    "Registering routes on a gin RouterGroup",
+    "Thin handlers delegating to a Service",
+    "Reading the authenticated user ID from request context",
+    "Mapping service errors to HTTP status codes"
+   ],
+   "why_now": "Builds directly on what you just read \u2014 its dependencies are behind you now.",
+   "depends_on": [
+    "services/orders/internal/orders/service.go",
+    "services/orders/internal/platform/auth.go"
+   ],
+   "imported_by": 3,
+   "loc": 41
+  },
+  {
+   "n": 29,
+   "path": "services/catalog/internal/catalog/handlers.go",
+   "chapter": "api",
+   "role": "api",
+   "one_liner": "Gin HTTP handlers for the catalog service: list products (GET) and create a product (POST) on /products.",
+   "teaches": [
+    "Registering Gin routes on a RouterGroup",
+    "Thin handlers delegating to a Service",
+    "Mapping errors to HTTP status codes (400/422/500)"
+   ],
+   "why_now": "Builds directly on what you just read \u2014 its dependencies are behind you now.",
+   "depends_on": [
+    "services/catalog/internal/catalog/service.go"
+   ],
+   "imported_by": 2,
+   "loc": 37
+  },
+  {
+   "n": 30,
+   "path": "services/customers/internal/customers/handlers.go",
+   "chapter": "api",
+   "role": "api",
+   "one_liner": "HTTP handlers for the customers service: GET a customer by id and POST to register a new one, using Gin.",
+   "teaches": [
+    "Gin route registration on a RouterGroup",
+    "Mapping service errors to HTTP status codes",
+    "JSON binding of a domain model from request body"
+   ],
+   "why_now": "Builds directly on what you just read \u2014 its dependencies are behind you now.",
+   "depends_on": [
+    "services/customers/internal/customers/service.go"
+   ],
+   "imported_by": 4,
+   "loc": 41
+  },
+  {
+   "n": 31,
+   "path": "services/inventory/internal/httpapi/stock_item_handlers.go",
+   "chapter": "api",
+   "role": "api",
+   "one_liner": "Gin HTTP handler exposing GET /v1/stockitem/:product_id, reading a StockItem via GORM and returning it in legacy shape; errors as problem+json.",
+   "teaches": [
+    "Gin route registration",
+    "RFC 9457 problem+json errors",
+    "Anti-corruption layer mapping to legacy response",
+    "GORM lookup with not-found handling"
+   ],
+   "why_now": "Builds directly on what you just read \u2014 its dependencies are behind you now.",
+   "depends_on": [
+    "services/inventory/internal/acl/legacy.go"
+   ],
+   "imported_by": 2,
+   "loc": 53
+  },
+  {
+   "n": 32,
+   "path": "services/orders/internal/clients/inventory/client.go",
+   "chapter": "api",
+   "role": "api",
+   "one_liner": "Generated HTTP client that lets the orders service call inventory-service's reserve endpoint, replacing the old in-process call.",
+   "teaches": [
+    "Remote-call replacement of in-process service",
+    "Error unwrapping from JSON error bodies",
+    "Non-idempotent calls are never retried",
+    "Env-configured service base URL"
+   ],
+   "why_now": "Builds directly on what you just read \u2014 its dependencies are behind you now.",
+   "depends_on": [
+    "pkg/httpx/client.go"
+   ],
+   "imported_by": 2,
+   "loc": 89
+  },
+  {
+   "n": 33,
+   "path": "pkg/outbox/outbox.go",
+   "chapter": "supporting",
+   "role": "util",
+   "one_liner": "Transactional outbox: writes events in the same DB transaction as state changes, and a relay polls and publishes them to the event bus.",
+   "teaches": [
+    "transactional outbox pattern",
+    "polling relay with FOR UPDATE SKIP LOCKED",
+    "idempotent consumer table (processed_messages)",
+    "avoiding dual writes"
+   ],
+   "why_now": "A load-bearing file \u2014 11 files import it.",
+   "depends_on": [],
+   "imported_by": 11,
+   "loc": 125
+  },
+  {
+   "n": 34,
+   "path": "pkg/saga/saga.go",
+   "chapter": "supporting",
+   "role": "util",
+   "one_liner": "Small saga runner: executes ordered steps and, on failure, compensates completed steps in reverse, returning a StepError.",
+   "teaches": [
+    "Orchestration saga pattern",
+    "Reverse-order compensation on failure",
+    "Error wrapping that preserves the step's own message",
+    "Putting hardest-to-undo step last"
+   ],
+   "why_now": "A load-bearing file \u2014 4 files import it.",
+   "depends_on": [],
+   "imported_by": 4,
+   "loc": 70
+  },
+  {
+   "n": 35,
+   "path": "pkg/events/idempotent.go",
+   "chapter": "supporting",
+   "role": "util",
+   "one_liner": "Idempotent event-handler wrapper with in-memory and SQL stores that record handled event ids, so redelivered events are skipped.",
+   "teaches": [
+    "idempotent consumers",
+    "dedup via processed_messages table",
+    "handler middleware wrapping",
+    "INSERT ON CONFLICT DO NOTHING"
+   ],
+   "why_now": "Next in this chapter's dependency order.",
+   "depends_on": [],
+   "imported_by": 3,
+   "loc": 64
+  },
+  {
+   "n": 36,
+   "path": "pkg/httpx/client.go",
+   "chapter": "supporting",
+   "role": "util",
+   "one_liner": "Builds the shared HTTP client for service-to-service calls with a 5s timeout, OpenTelemetry tracing and internal-caller headers.",
+   "teaches": [
+    "Service-to-service HTTP calls",
+    "Trace propagation with otelhttp",
+    "Bounded client timeouts",
+    "Wrapping http.RoundTripper transports"
+   ],
+   "why_now": "Next in this chapter's dependency order.",
+   "depends_on": [],
+   "imported_by": 6,
+   "loc": 18
+  },
+  {
+   "n": 37,
+   "path": "pkg/otelx/otelx.go",
+   "chapter": "supporting",
+   "role": "util",
+   "one_liner": "Sets up OpenTelemetry tracing over OTLP/HTTP with a global tracer provider and W3C propagators, shared by services.",
+   "teaches": [
+    "OpenTelemetry tracer provider setup",
+    "OTLP/HTTP exporter via standard env var",
+    "W3C trace context and baggage propagation",
+    "Returning a shutdown func for flushing"
+   ],
+   "why_now": "Next in this chapter's dependency order.",
+   "depends_on": [],
+   "imported_by": 6,
+   "loc": 35
+  }
+ ],
+ "stats": {
+  "candidates": 36,
+  "llm_calls": 36,
+  "cache_hits": 0,
+  "fallbacks": 0
+ }
+}

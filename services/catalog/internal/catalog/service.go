@@ -8,18 +8,17 @@ import (
 	"gorm.io/gorm"
 )
 
-// priceCacheTTL bounds how long a replica may serve a stale price before
-// re-reading catalog's own database; the cache is invalidated on write too.
+// priceCacheTTL bounds how long a replica may serve a cached price.
 const priceCacheTTL = 30 * time.Second
 
+// priceCacheEntry is a cached price with its expiry.
 type priceCacheEntry struct {
 	price     float64
 	expiresAt time.Time
 }
 
-// priceCache is per-replica, TTL-bound and invalidated on write. catalog is
-// the owner of this data, so a short-lived cache here (not a copy held by
-// another service) is an accepted tradeoff rather than shared mutable state.
+// priceCache is per-replica: catalog is its only owner, and each entry expires
+// after priceCacheTTL so replicas converge.
 var (
 	priceMu    sync.RWMutex
 	priceCache = map[uint]priceCacheEntry{}
@@ -43,14 +42,10 @@ func (s *Service) Create(p *Product) error {
 	if p.Price <= 0 {
 		return errors.New("price must be positive")
 	}
-	if err := s.db.Create(p).Error; err != nil {
-		return err
-	}
-	invalidatePrice(p.ID)
-	return nil
+	return s.db.Create(p).Error
 }
 
-// PriceOf returns a product's price, cached in-process with a TTL.
+// PriceOf returns a product's price, cached in-process.
 func (s *Service) PriceOf(productID uint) (float64, error) {
 	priceMu.RLock()
 	entry, ok := priceCache[productID]
@@ -66,11 +61,4 @@ func (s *Service) PriceOf(productID uint) (float64, error) {
 	priceCache[productID] = priceCacheEntry{price: p.Price, expiresAt: time.Now().Add(priceCacheTTL)}
 	priceMu.Unlock()
 	return p.Price, nil
-}
-
-// invalidatePrice drops productID from the cache so the next read is fresh.
-func invalidatePrice(productID uint) {
-	priceMu.Lock()
-	delete(priceCache, productID)
-	priceMu.Unlock()
 }

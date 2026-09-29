@@ -26,6 +26,12 @@ type Deps struct {
 
 // New opens the service database, migrates the service's own models and the
 // outbox tables, and connects the event bus.
+// schemas are the tables a file of this package keeps beyond the owned
+// models (a saga compensation's idempotency ledger, say), as idempotent
+// `CREATE TABLE IF NOT EXISTS` statements appended from an init func. New
+// runs them at startup, so no table is used that nothing created.
+var schemas []string
+
 func New(ctx context.Context, cfg config.Config) (*Deps, error) {
 	db, err := gorm.Open(postgres.Open(cfg.DatabaseURL), &gorm.Config{})
 	if err != nil {
@@ -38,6 +44,11 @@ func New(ctx context.Context, cfg config.Config) (*Deps, error) {
 	sqlDB.SetMaxOpenConns(cfg.MaxConns)
 	if _, err := sqlDB.ExecContext(ctx, outbox.Schema); err != nil {
 		return nil, fmt.Errorf("outbox schema: %w", err)
+	}
+	for _, s := range schemas {
+		if _, err := sqlDB.ExecContext(ctx, s); err != nil {
+			return nil, fmt.Errorf("schema: %w", err)
+		}
 	}
 	if ms := models(); len(ms) > 0 {
 		if err := db.WithContext(ctx).AutoMigrate(ms...); err != nil {

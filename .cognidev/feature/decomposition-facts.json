@@ -105,7 +105,7 @@
       }
     ],
     "applied": true,
-    "bank_revision": "2026-09-24.1",
+    "bank_revision": "2026-09-25.1",
     "event_contracts": [
       {
         "evidence": [
@@ -163,7 +163,7 @@
         "evidence": [
           {
             "category": "messaging",
-            "p": 0.95,
+            "p": 0.94,
             "source": "jev"
           }
         ],
@@ -178,10 +178,12 @@
     "moved_as_knock_on": [],
     "moved_by_category": [],
     "needs_review": [
-      "internal/orders/service.go#Service.PlaceOrder",
       "internal/platform/bus.go#Bus",
+      "internal/platform/bus.go#Bus.Publish",
       "internal/platform/bus.go#Bus.Subscribe",
-      "internal/platform/db.go#Open"
+      "internal/platform/bus.go#NewBus",
+      "internal/platform/db.go#Open",
+      "internal/platform/db.go#Register"
     ],
     "platform_files": [
       "cmd/shop/main.go",

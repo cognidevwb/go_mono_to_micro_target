@@ -1,6 +1,6 @@
 {
-  "elapsedMs": 122,
-  "finishedAt": 1790395127,
+  "elapsedMs": 27452,
+  "finishedAt": 1790652941,
   "inputs": [],
   "kind": "rust-binary",
   "outputs": [
@@ -9,14 +9,14 @@
       "kind": null,
       "name": "cve",
       "optional": false,
-      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/.cognidev/feature/cve.json"
+      "path": "./.cognidev/feature/cve.json"
     },
     {
       "exists": true,
       "kind": null,
       "name": "cve-findings",
       "optional": false,
-      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/.cognidev/feature/cve-findings.json"
+      "path": "./.cognidev/feature/cve-findings.json"
     }
   ],
   "status": "Ok",

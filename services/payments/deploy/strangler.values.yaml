@@ -1,5 +1,5 @@
 # Strangler-fig traffic for payments-service. The gateway sends `weight` percent of
 # the listed legacy paths here; the rest still reach the monolith.
-weight: 25
+weight: 10
 legacyPaths:
   - /api/payments

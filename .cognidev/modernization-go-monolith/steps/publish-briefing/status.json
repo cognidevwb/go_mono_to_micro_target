@@ -1,6 +1,6 @@
 {
-  "elapsedMs": 123,
-  "finishedAt": 1790392784,
+  "elapsedMs": 122,
+  "finishedAt": 1790651913,
   "inputs": [],
   "kind": "rust-binary",
   "outputs": [
@@ -9,14 +9,14 @@
       "kind": "report",
       "name": "DECOMPOSITION-BRIEFING",
       "optional": true,
-      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/DECOMPOSITION-BRIEFING.html"
+      "path": "./DECOMPOSITION-BRIEFING.html"
     },
     {
       "exists": true,
       "kind": "docs",
       "name": "docs",
       "optional": true,
-      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/cognidev/docs/"
+      "path": "./cognidev/docs/"
     }
   ],
   "status": "Ok",

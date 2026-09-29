@@ -1,10 +1,10 @@
 {
   "churn": {
     "base": "source",
-    "changed": 627,
-    "lines_added": 79642,
-    "lines_removed": 28,
-    "planned": 619,
+    "changed": 622,
+    "lines_added": 63994,
+    "lines_removed": 3692,
+    "planned": 614,
     "unplanned": [
       ".dockerignore",
       ".editorconfig",
@@ -45,7 +45,7 @@
       "value": "yes"
     },
     {
-      "basis": "no marker left across 184 generated file(s)",
+      "basis": "no marker left across 191 generated file(s)",
       "grade": "green",
       "name": "Seams still to fill",
       "target": "0",
@@ -60,10 +60,10 @@
     },
     {
       "basis": "gates.json: a gate that could not read its input is counted here, never as a pass",
-      "grade": "amber",
+      "grade": "green",
       "name": "Gates not evaluated",
       "target": "0",
-      "value": "2 of 25"
+      "value": "0 of 25"
     },
     {
       "basis": "0 category/categories had nothing to measure",
@@ -87,7 +87,7 @@
       "name": "Service boundaries",
       "notes": "A boundary go.work does not build is a directory. A boundary named after a source folder is the monolith's tree with a prefix.",
       "restraint": {
-        "detail": "8 of 627 changed file(s) were not proposed by the plan (619 were): .dockerignore, .editorconfig, .githooks/pre-commit, contracts/events/envelope.schema.json, contracts/events/order.placed.schema.json",
+        "detail": "8 of 622 changed file(s) were not proposed by the plan (614 were): .dockerignore, .editorconfig, .githooks/pre-commit, contracts/events/envelope.schema.json, contracts/events/order.placed.schema.json",
         "grade": "amber"
       },
       "worst": "amber"
@@ -98,7 +98,7 @@
         "grade": "green"
       },
       "correctness": {
-        "detail": "none of 116 service file(s) or 5 go.mod(s) reach into another service",
+        "detail": "none of 122 service file(s) or 5 go.mod(s) reach into another service",
         "grade": "green"
       },
       "id": "independence",
@@ -116,7 +116,7 @@
         "grade": "green"
       },
       "correctness": {
-        "detail": "97% of the moved lines were placed verbatim or generated; 12 seam point(s) were left for the develop loop",
+        "detail": "98% of the moved lines were placed verbatim or generated; 12 seam point(s) were left for the develop loop",
         "grade": "green"
       },
       "id": "code_movement",
@@ -152,7 +152,7 @@
         "grade": "green"
       },
       "correctness": {
-        "detail": "all 2 remote saga step(s) have a compensation naming their service",
+        "detail": "all 2 remote saga step(s) have a compensation that calls their service",
         "grade": "green"
       },
       "id": "transactions",
@@ -166,7 +166,7 @@
     },
     {
       "completeness": {
-        "detail": "each of 5 data-owning service(s) opens its own database; 9 table(s), one owner each",
+        "detail": "each of 5 data-owning service(s) opens its own database; 11 table(s), one owner each",
         "grade": "green"
       },
       "correctness": {
@@ -184,7 +184,7 @@
     },
     {
       "completeness": {
-        "detail": "no marker left across 184 generated file(s)",
+        "detail": "no marker left across 191 generated file(s)",
         "grade": "green"
       },
       "correctness": {
@@ -260,7 +260,7 @@
         "grade": "green"
       },
       "correctness": {
-        "detail": "the tests of all 5 service(s) ran and passed (59 test(s))",
+        "detail": "the tests of all 5 service(s) ran and passed (56 test(s))",
         "grade": "green"
       },
       "id": "tests",
@@ -274,18 +274,18 @@
     },
     {
       "completeness": {
-        "detail": "not evaluated — the advisory scan did not complete: the advisory database was not queried — this run is offline by default; enable the registry lookup to scan",
-        "grade": "n/a"
+        "detail": "no advisory is called or critical across 4 finding(s); 4 other advisory/advisories are in the graph but not called",
+        "grade": "green"
       },
       "correctness": {
-        "detail": "not evaluated — the advisory scan did not complete: the advisory database was not queried — this run is offline by default; enable the registry lookup to scan",
-        "grade": "n/a"
+        "detail": "no advisory is called or critical across 4 finding(s); 4 other advisory/advisories are in the graph but not called",
+        "grade": "green"
       },
       "id": "dependencies",
       "name": "Dependencies and diagnostics",
       "notes": "A //nolint added to make the port pass is a restraint failure, not a correctness one: it changed a setting the migration never required.",
       "restraint": {
-        "detail": "no wholesale suppression across 184 generated file(s)",
+        "detail": "no wholesale suppression across 191 generated file(s)",
         "grade": "green"
       },
       "worst": "green"

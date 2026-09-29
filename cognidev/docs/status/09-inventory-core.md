@@ -2,11 +2,13 @@
 
 **COMPLETED**
 
-Edited services/inventory/internal/acl/legacy.go (10 files); compiled in the end-of-run pass.
+Edited services/inventory/internal/acl/legacy.go (11 files); compiled in the end-of-run pass.
 
 ## Files this task owned
 
 - `services/inventory/internal/acl/legacy.go` — Inventory Service
+- `services/inventory/internal/app/create_order_compensation.go` — Inventory Service
+- `services/inventory/internal/app/remote_operations.go` — Inventory Service
 - `services/inventory/internal/app/wire.go` — Inventory Service
 - `services/inventory/internal/events/order_placed_consumer.go` — Inventory Service
 - `services/inventory/internal/httpapi/stock_item_handlers.go` — Inventory Service

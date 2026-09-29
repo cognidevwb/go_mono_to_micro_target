@@ -1,6 +1,6 @@
 {
   "elapsedMs": 123,
-  "finishedAt": 1790392782,
+  "finishedAt": 1790651911,
   "inputs": [],
   "kind": "rust-binary",
   "outputs": [
@@ -9,7 +9,7 @@
       "kind": null,
       "name": "patterns",
       "optional": false,
-      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/.cognidev/feature/patterns.json"
+      "path": "./.cognidev/feature/patterns.json"
     }
   ],
   "status": "Ok",

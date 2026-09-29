@@ -1,37 +1,21 @@
-// Package acl translates the monolith's on-the-wire shape for Customer into
-// customers's own model: legacy column names are remapped and invariants the
-// monolith let through are rejected at the boundary. Pure functions, no I/O.
+// Package acl translates the monolith's customer shapes into customers's model.
+// The customers context has no stringly-typed statuses or renamed legacy columns,
+// so the only translation is rejecting invalid customers at the boundary.
 package acl
 
 import (
 	"errors"
-
-	"github.com/acme/shop/services/customers/internal/customers"
+	"net/mail"
+	"strings"
 )
 
-// LegacyCustomer is the monolith's row shape for a customer, using its legacy
-// column names.
-type LegacyCustomer struct {
-	ID        uint   `json:"id"`
-	EmailAddr string `json:"email_address"`
-	FullName  string `json:"full_name"`
-	IsActive  bool   `json:"is_active"`
-}
-
-// TranslateCustomer maps a legacy customer row into customers's own model,
-// rejecting invariants (a blank email, a blank name) the monolith's storage
-// did not enforce.
-func TranslateCustomer(l LegacyCustomer) (customers.Customer, error) {
-	if l.EmailAddr == "" {
-		return customers.Customer{}, errors.New("email is required")
+// ValidateCustomer rejects a customer the service will not store.
+func ValidateCustomer(email, name string) error {
+	if strings.TrimSpace(name) == "" {
+		return errors.New("name is required")
 	}
-	if l.FullName == "" {
-		return customers.Customer{}, errors.New("name is required")
+	if _, err := mail.ParseAddress(email); err != nil {
+		return errors.New("email is invalid")
 	}
-	return customers.Customer{
-		ID:     l.ID,
-		Email:  l.EmailAddr,
-		Name:   l.FullName,
-		Active: l.IsActive,
-	}, nil
+	return nil
 }

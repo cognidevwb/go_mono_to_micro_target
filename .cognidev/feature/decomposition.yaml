@@ -60,7 +60,7 @@ sagas:
     steps:
       - context: "inventory"
         action: "s.inventory.Reserve"
-        compensation: "compensable (Jev p=0.88): undo `s.inventory.Reserve` in inventory"
+        compensation: "compensable (Jev p=0.89): undo `s.inventory.Reserve` in inventory"
       - context: "payments"
         action: "s.payments.Charge"
         compensation: "needs decision — Jev could not tell whether this step can be undone"
@@ -79,5 +79,5 @@ extraction_order: ["orders", "catalog", "customers", "inventory", "payments"]
 needs_decision:
   - question: "compensable"
     about: "PlaceOrder"
-    why: "P(yes)=0.52 stayed between 0.3 and 0.7 after the re-ask"
+    why: "P(yes)=0.56 stayed between 0.3 and 0.7 after the re-ask"
     stands: "no compensation designed for this step"

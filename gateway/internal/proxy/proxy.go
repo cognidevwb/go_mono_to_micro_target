@@ -67,6 +67,10 @@ func New(routes []Route, legacy string) (http.Handler, error) {
 		fallback = p
 	}
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Only a service may claim to be one: the headers a service-to-service
+		// call carries (pkg/httpx internal.go) never come in from outside.
+		r.Header.Del("X-Internal-Caller")
+		r.Header.Del("X-Internal-Token")
 		for _, t := range targets {
 			if r.URL.Path == t.prefix || strings.HasPrefix(r.URL.Path, strings.TrimSuffix(t.prefix, "/")+"/") {
 				t.proxy.ServeHTTP(w, r)

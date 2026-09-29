@@ -1,6 +1,6 @@
 {
-  "elapsedMs": 2114,
-  "finishedAt": 1790392779,
+  "elapsedMs": 1597,
+  "finishedAt": 1790651906,
   "inputs": [],
   "kind": "rust-binary",
   "outputs": [
@@ -9,14 +9,14 @@
       "kind": null,
       "name": "classification",
       "optional": false,
-      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/.cognidev/go-classify/classification.json"
+      "path": "./.cognidev/go-classify/classification.json"
     },
     {
       "exists": true,
       "kind": "report",
       "name": "CLASSIFICATION",
       "optional": false,
-      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/.cognidev/go-classify/CLASSIFICATION.md"
+      "path": "./.cognidev/go-classify/CLASSIFICATION.md"
     }
   ],
   "status": "Ok",

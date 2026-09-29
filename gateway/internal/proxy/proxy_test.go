@@ -40,3 +40,20 @@ func TestEveryRouteReachesItsService(t *testing.T) {
 		t.Fatalf("unmatched path reached %q, want legacy", rec.Body.String())
 	}
 }
+
+func TestNoOutsideCallerReachesAServiceClaimingToBeOne(t *testing.T) {
+	var seen http.Header
+	up := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, r *http.Request) { seen = r.Header.Clone() }))
+	defer up.Close()
+	h, err := New([]Route{{Prefix: "/api/x", Service: "x-service", Upstream: up.URL}}, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	req := httptest.NewRequest(http.MethodGet, "/api/x", nil)
+	req.Header.Set("X-Internal-Caller", "orders-service")
+	req.Header.Set("X-Internal-Token", "guess")
+	h.ServeHTTP(httptest.NewRecorder(), req)
+	if seen.Get("X-Internal-Caller") != "" || seen.Get("X-Internal-Token") != "" {
+		t.Fatalf("the gateway forwarded the internal-caller headers: %v", seen)
+	}
+}

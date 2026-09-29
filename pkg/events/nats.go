@@ -59,6 +59,20 @@ func (n *NATS) Publish(ctx context.Context, subject string, e Envelope) error {
 	return err
 }
 
+// DurableName makes name a legal JetStream consumer name. JetStream rejects
+// `.`, `*`, `>`, whitespace and path separators in a durable, so a name built
+// from a service and a subject (`inventory-service.order-placed`) would stop
+// the service at startup; each such character becomes `-`.
+func DurableName(name string) string {
+	return strings.Map(func(r rune) rune {
+		switch r {
+		case '.', '*', '>', ' ', '\t', '\n', '/', '\\':
+			return '-'
+		}
+		return r
+	}, name)
+}
+
 // Subscribe implements Bus with a durable pull consumer.
 func (n *NATS) Subscribe(ctx context.Context, subject, durable string, h Handler) error {
 	st, err := n.ensure(ctx, subject)
@@ -66,7 +80,7 @@ func (n *NATS) Subscribe(ctx context.Context, subject, durable string, h Handler
 		return err
 	}
 	cons, err := st.CreateOrUpdateConsumer(ctx, jetstream.ConsumerConfig{
-		Durable:       durable,
+		Durable:       DurableName(durable),
 		FilterSubject: subject,
 		AckPolicy:     jetstream.AckExplicitPolicy,
 	})

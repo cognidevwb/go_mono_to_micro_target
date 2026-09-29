@@ -1,6 +1,6 @@
 # customers-service
 
-The customers service owns customer identity and registration: it registers new customers with a unique, validated email and a display name, and serves lookups by customer ID. Each `Customer` record tracks an `Active` flag and creation timestamp, giving the rest of the platform a single source of truth for who a customer is without exposing the underlying storage.
+The customers service owns the customer record: it registers new customers (`POST /api/customers`) and looks them up by id (`GET /api/customers/:id`). It also answers whether a customer is active (`Service.IsActive`), the check other contexts such as orders rely on before accepting an order. It owns the `Customer` table and calls no other service.
 
 | | |
 |---|---|

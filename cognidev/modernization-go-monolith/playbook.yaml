@@ -944,6 +944,21 @@ lifecycle:
       - { path: VALIDATION-REPORT.html,     scope: workspace, kind: report }
       - { path: .cognidev/run/signoff.json, scope: workspace, kind: report }
 
+  # ── THE DOCUMENTATION: the delivered services as one cross-linked site ──
+  # The same generator the Understand tab's Documentation lens runs, over the
+  # shards `understand-delivered` wrote for the services: what the system does,
+  # how to read it, its architecture, domains, API, data, categories and word
+  # cloud, insights and inventory. After the sign-off, before finalize, so the
+  # git strategy commits the documentation with the code. No model.
+  - id: docs
+    name: "Generate the documentation"
+    description: "Writes the documentation site for the delivered services into docs/: what the system does, how to read it, its architecture, domains, types, sequences, API, data, categories and the words the code uses, insights and inventory. Deterministic; no model."
+    kind: docs
+    to: docs
+    optional: true
+    outputs:
+      - { path: docs, scope: workspace, kind: report }
+
   # ── FINALIZE: execute the chosen git strategy ──
   # Reads `git_strategy` (00-git-strategy.yaml): keep the monolith branch with the
   # microservices on a new branch, archive the monolith and adopt the services,

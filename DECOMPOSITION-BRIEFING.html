@@ -31,10 +31,10 @@ li ul { margin:.2rem 0; }
 <p>Each owns its tables outright, and no other service may read them. That constraint is what makes an independent deploy real, and it is also the entire cost of the cut.</p>
 <div class="scroll"><table><thead><tr><th>#</th><th>Service</th><th>Owns</th><th>Calls</th><th>Files planned</th></tr></thead><tbody>
 <tr><td>1</td><td><code>orders-service</code></td><td><code>Order</code>, <code>OrderLine</code></td><td><code>catalog-service</code>, <code>customers-service</code></td><td>19</td></tr>
-<tr><td>2</td><td><code>catalog-service</code></td><td><code>Category</code>, <code>Product</code></td><td><em>nothing</em></td><td>12</td></tr>
-<tr><td>3</td><td><code>customers-service</code></td><td><code>Customer</code></td><td><em>nothing</em></td><td>12</td></tr>
-<tr><td>4</td><td><code>inventory-service</code></td><td><code>StockItem</code></td><td><em>nothing</em></td><td>14</td></tr>
-<tr><td>5</td><td><code>payments-service</code></td><td><code>Payment</code></td><td><em>nothing</em></td><td>13</td></tr>
+<tr><td>2</td><td><code>catalog-service</code></td><td><code>Category</code>, <code>Product</code></td><td><em>nothing</em></td><td>13</td></tr>
+<tr><td>3</td><td><code>customers-service</code></td><td><code>Customer</code></td><td><em>nothing</em></td><td>13</td></tr>
+<tr><td>4</td><td><code>inventory-service</code></td><td><code>StockItem</code></td><td><em>nothing</em></td><td>17</td></tr>
+<tr><td>5</td><td><code>payments-service</code></td><td><code>Payment</code></td><td><em>nothing</em></td><td>16</td></tr>
 </tbody></table></div>
 <h2>What this costs you</h2>
 <p><strong>2 method calls that cannot fail today become network calls that can.</strong> Each gets a typed HttpClient with a timeout, a retry and a circuit breaker — which is a mitigation, not a removal. This is the honest price of the boundary.</p>
@@ -124,7 +124,7 @@ li ul { margin:.2rem 0; }
 </ul>
 <h2>What happens next</h2>
 <p>The platform is generated first and compiles before any domain code exists. Your own code is then <em>moved</em> in verbatim — package clauses, import paths and the shared *gorm.DB split mechanically, nothing rewritten. Only the marked seams are implemented by a model, and only inside the markers. Each task compiles and commits on its own.</p>
-<p>This run moved <strong>954</strong> lines verbatim and generated <strong>404</strong> deterministically, out of 1358 in total — 97% of the result before a model wrote anything. 12 seam points were left marked, across 5 client calls and 1 saga.</p>
+<p>This run moved <strong>954</strong> lines verbatim and generated <strong>579</strong> deterministically, out of 1533 in total — 98% of the result before a model wrote anything. 12 seam points were left marked, across 5 client calls and 1 saga.</p>
 <p>The map planned 2 cross-service calls and the porter marked 5. The difference is not an error on its own — a call can resolve inside one service once its code is together — but it is worth a look before you approve.</p>
 <p>When it finishes, the git strategy you chose is applied: <code>archive-and-adopt</code>. Local git only — nothing is pushed anywhere.</p>
 <p class="foot">The same content is in <code>cognidev/docs/</code> as markdown, one document per question, plus one per service under <code>tasks/</code>. After the run, <code>cognidev/docs/status/</code> holds what each task actually did.</p>

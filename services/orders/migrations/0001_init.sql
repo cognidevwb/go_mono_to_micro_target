@@ -1,24 +1,17 @@
--- Tables orders owns and nothing else: orders (Order), order_lines
--- (OrderLine), plus the outbox and processed_messages tables orders' own
--- code writes to publish order.placed. Replaces the monolith's shared
--- AutoMigrate; a column another service needs is served by orders's API,
--- never by a cross-schema join.
-
 CREATE TABLE IF NOT EXISTS orders (
     id          BIGSERIAL PRIMARY KEY,
-    customer_id BIGINT NOT NULL,
-    status      VARCHAR(20) NOT NULL,
-    total       DOUBLE PRECISION NOT NULL DEFAULT 0
+    customer_id BIGINT,
+    status      TEXT,
+    total       DOUBLE PRECISION
 );
-
 CREATE INDEX IF NOT EXISTS idx_orders_customer_id ON orders (customer_id);
 
 CREATE TABLE IF NOT EXISTS order_lines (
     id         BIGSERIAL PRIMARY KEY,
-    order_id   BIGINT NOT NULL REFERENCES orders(id),
-    product_id BIGINT NOT NULL,
-    quantity   INTEGER NOT NULL,
-    unit_price DOUBLE PRECISION NOT NULL
+    order_id   BIGINT,
+    product_id BIGINT,
+    quantity   BIGINT,
+    unit_price DOUBLE PRECISION
 );
 
 CREATE TABLE IF NOT EXISTS outbox (

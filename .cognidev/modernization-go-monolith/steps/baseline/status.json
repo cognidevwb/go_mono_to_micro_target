@@ -1,6 +1,6 @@
 {
-  "elapsedMs": 2217,
-  "finishedAt": 1790392786,
+  "elapsedMs": 2815,
+  "finishedAt": 1790651916,
   "inputs": [],
   "kind": "rust-binary",
   "outputs": [
@@ -9,7 +9,7 @@
       "kind": null,
       "name": "go-baseline",
       "optional": false,
-      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/.cognidev/feature/go-baseline.json"
+      "path": "./.cognidev/feature/go-baseline.json"
     }
   ],
   "status": "Ok",

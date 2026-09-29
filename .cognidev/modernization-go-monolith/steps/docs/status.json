@@ -1,0 +1,18 @@
+{
+  "elapsedMs": 55,
+  "finishedAt": 1790652945,
+  "inputs": [],
+  "kind": "docs",
+  "outputs": [
+    {
+      "exists": true,
+      "kind": "report",
+      "name": "docs",
+      "optional": false,
+      "path": "./docs"
+    }
+  ],
+  "status": "Ok",
+  "step": "docs",
+  "summary": "15 pages written to ./docs."
+}

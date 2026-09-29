@@ -33,7 +33,7 @@ answers:
   outbox: sql-outbox
   read_write_model: crud
   run_tests: true
-  search_registry: false
+  search_registry: true
   service_internal_structure: flat-package
   service_size: small
   web_framework: keep
@@ -43,7 +43,7 @@ measured:
   owned_tables: 7
   cross_service_calls: 2
   sagas: 1
-  files_planned: 74
+  files_planned: 82
   files_not_owned_by_one_service: 1
 
 extraction_order:

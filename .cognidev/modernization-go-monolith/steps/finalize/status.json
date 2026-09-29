@@ -1,0 +1,25 @@
+{
+  "elapsedMs": 1106,
+  "finishedAt": 1790652947,
+  "inputs": [],
+  "kind": "rust-binary",
+  "outputs": [
+    {
+      "exists": false,
+      "kind": null,
+      "name": "repos",
+      "optional": true,
+      "path": "./dist/repos/"
+    },
+    {
+      "exists": true,
+      "kind": null,
+      "name": "cutover",
+      "optional": true,
+      "path": "./.cognidev/feature/cutover.json"
+    }
+  ],
+  "status": "Ok",
+  "step": "finalize",
+  "summary": "Tool `../tools/cutover-go/target/release/cutover-go` completed."
+}

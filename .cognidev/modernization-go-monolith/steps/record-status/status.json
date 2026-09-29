@@ -1,6 +1,6 @@
 {
-  "elapsedMs": 124,
-  "finishedAt": 1790395036,
+  "elapsedMs": 122,
+  "finishedAt": 1790652853,
   "inputs": [],
   "kind": "rust-binary",
   "outputs": [
@@ -9,14 +9,14 @@
       "kind": "docs",
       "name": "status",
       "optional": true,
-      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/cognidev/docs/status/"
+      "path": "./cognidev/docs/status/"
     },
     {
       "exists": true,
       "kind": "report",
       "name": "MIGRATION-LOG",
       "optional": true,
-      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/MIGRATION-LOG.md"
+      "path": "./MIGRATION-LOG.md"
     }
   ],
   "status": "Ok",

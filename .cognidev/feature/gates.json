@@ -1,8 +1,8 @@
 {
   "counts": {
     "fail": 0,
-    "pass": 23,
-    "skipped": 2,
+    "pass": 25,
+    "skipped": 0,
     "total": 25
   },
   "failing_gates": [],
@@ -36,7 +36,7 @@
     },
     {
       "count": 0,
-      "detail": "all 2 remote saga step(s) have a compensation naming their service",
+      "detail": "all 2 remote saga step(s) have a compensation that calls their service",
       "evaluated": true,
       "id": "sagas_have_compensations",
       "offenders": [],
@@ -45,7 +45,7 @@
     },
     {
       "count": 0,
-      "detail": "no marker left across 184 generated file(s)",
+      "detail": "no marker left across 191 generated file(s)",
       "evaluated": true,
       "id": "no_residual_seam_markers",
       "offenders": [],
@@ -63,7 +63,7 @@
     },
     {
       "count": 0,
-      "detail": "none of 116 service file(s) or 5 go.mod(s) reach into another service",
+      "detail": "none of 122 service file(s) or 5 go.mod(s) reach into another service",
       "evaluated": true,
       "id": "no_cross_service_module_import",
       "offenders": [],
@@ -81,7 +81,7 @@
     },
     {
       "count": 0,
-      "detail": "each of 5 data-owning service(s) opens its own database; 9 table(s), one owner each",
+      "detail": "each of 5 data-owning service(s) opens its own database; 11 table(s), one owner each",
       "evaluated": true,
       "id": "every_service_owns_its_database",
       "offenders": [],
@@ -117,7 +117,7 @@
     },
     {
       "count": 0,
-      "detail": "no monolith import across 116 service file(s)",
+      "detail": "no monolith import across 122 service file(s)",
       "evaluated": true,
       "id": "no_monolith_import_left_in_services",
       "offenders": [],
@@ -126,7 +126,7 @@
     },
     {
       "count": 0,
-      "detail": "no wholesale suppression across 184 generated file(s)",
+      "detail": "no wholesale suppression across 191 generated file(s)",
       "evaluated": true,
       "id": "no_wholesale_warning_suppression",
       "offenders": [],
@@ -144,11 +144,11 @@
     },
     {
       "count": 0,
-      "detail": "the port moved no test file, so there is nothing to compare",
-      "evaluated": false,
+      "detail": "the monolith has no test file on `source`, so none could be switched off",
+      "evaluated": true,
       "id": "no_test_newly_disabled",
       "offenders": [],
-      "status": "skipped",
+      "status": "pass",
       "title": "No ported test was switched off"
     },
     {
@@ -162,7 +162,7 @@
     },
     {
       "count": 0,
-      "detail": "the tests of all 5 service(s) ran and passed (59 test(s))",
+      "detail": "the tests of all 5 service(s) ran and passed (56 test(s))",
       "evaluated": true,
       "id": "services_tests_pass",
       "offenders": [],
@@ -216,11 +216,11 @@
     },
     {
       "count": 0,
-      "detail": "the advisory scan did not complete: the advisory database was not queried — this run is offline by default; enable the registry lookup to scan",
-      "evaluated": false,
+      "detail": "no advisory is called or critical across 4 finding(s); 4 other advisory/advisories are in the graph but not called",
+      "evaluated": true,
       "id": "known_vulnerable_dependencies",
       "offenders": [],
-      "status": "skipped",
+      "status": "pass",
       "title": "No reachable or critical known advisory"
     },
     {
@@ -233,16 +233,7 @@
       "title": "The platform readiness gates the playbook declares"
     }
   ],
-  "not_evaluated": [
-    {
-      "id": "no_test_newly_disabled",
-      "why": "the port moved no test file, so there is nothing to compare"
-    },
-    {
-      "id": "known_vulnerable_dependencies",
-      "why": "the advisory scan did not complete: the advisory database was not queried — this run is offline by default; enable the registry lookup to scan"
-    }
-  ],
+  "not_evaluated": [],
   "planned_services": 5,
   "scalars": {
     "clients_wired_in_main": 0,
@@ -256,10 +247,12 @@
     "gateway_routes_cover_every_service": 0,
     "go_version_is_the_chosen_one": 0,
     "health_endpoints_present": 0,
+    "known_vulnerable_dependencies": 0,
     "no_cross_service_module_import": 0,
     "no_monolith_import_left_in_services": 0,
     "no_residual_seam_markers": 0,
     "no_service_references_the_monolith": 0,
+    "no_test_newly_disabled": 0,
     "no_wholesale_warning_suppression": 0,
     "sagas_at_commit_points": 0,
     "sagas_have_compensations": 0,
@@ -270,16 +263,7 @@
     "tests_came_over": 0
   },
   "services_on_disk": 5,
-  "skipped_gates": [
-    {
-      "id": "no_test_newly_disabled",
-      "why": "the port moved no test file, so there is nothing to compare"
-    },
-    {
-      "id": "known_vulnerable_dependencies",
-      "why": "the advisory scan did not complete: the advisory database was not queried — this run is offline by default; enable the registry lookup to scan"
-    }
-  ],
+  "skipped_gates": [],
   "subject": "Go 1.26",
   "subject_kind": "decomposition",
   "target_framework": "go1.26",

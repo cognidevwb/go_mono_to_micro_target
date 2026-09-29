@@ -1,23 +1,26 @@
-// Package store opens orders' own *gorm.DB from its own DSN and migrates
-// only the tables this service owns — Order and OrderLine. The monolith's
-// shared platform.Open and its global AutoMigrate do not come over.
+// Package store opens orders's own database. Only Order and OrderLine are
+// registered; the monolith's shared platform.Open and global AutoMigrate do not
+// come over.
 package store
 
 import (
+	"context"
+	"fmt"
+
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
 	"github.com/acme/shop/services/orders/internal/orders"
 )
 
-// Open connects orders' own database and migrates its owned models.
-func Open(dsn string) (*gorm.DB, error) {
+// Open connects to orders's own DSN and migrates the tables it owns.
+func Open(ctx context.Context, dsn string) (*gorm.DB, error) {
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("open database: %w", err)
 	}
-	if err := db.AutoMigrate(&orders.Order{}, &orders.OrderLine{}); err != nil {
-		return nil, err
+	if err := db.WithContext(ctx).AutoMigrate(&orders.Order{}, &orders.OrderLine{}); err != nil {
+		return nil, fmt.Errorf("migrate: %w", err)
 	}
 	return db, nil
 }

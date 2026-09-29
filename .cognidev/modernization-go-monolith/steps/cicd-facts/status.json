@@ -1,6 +1,6 @@
 {
-  "elapsedMs": 125,
-  "finishedAt": 1790392780,
+  "elapsedMs": 123,
+  "finishedAt": 1790651908,
   "inputs": [],
   "kind": "rust-binary",
   "outputs": [
@@ -9,7 +9,7 @@
       "kind": null,
       "name": "cicd-facts",
       "optional": false,
-      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/.cognidev/feature/cicd-facts.json"
+      "path": "./.cognidev/feature/cicd-facts.json"
     }
   ],
   "status": "Ok",

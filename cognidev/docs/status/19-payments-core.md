@@ -2,11 +2,13 @@
 
 **COMPLETED**
 
-Edited services/payments/internal/acl/legacy.go (7 files); compiled in the end-of-run pass.
+Edited services/payments/internal/acl/legacy.go (8 files); compiled in the end-of-run pass.
 
 ## Files this task owned
 
 - `services/payments/internal/acl/legacy.go` — Payments Service
+- `services/payments/internal/app/create_order_compensation.go` — Payments Service
+- `services/payments/internal/app/remote_operations.go` — Payments Service
 - `services/payments/internal/httpapi/payment_handlers.go` — Payments Service
 - `services/payments/internal/payments/payments_test.go` — Payments Service
 - `services/payments/internal/store/db.go` — Payments Service

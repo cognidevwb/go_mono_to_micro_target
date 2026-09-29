@@ -1,6 +1,6 @@
 {
-  "elapsedMs": 124,
-  "finishedAt": 1790395127,
+  "elapsedMs": 380,
+  "finishedAt": 1790652942,
   "inputs": [],
   "kind": "rust-binary",
   "outputs": [
@@ -9,7 +9,7 @@
       "kind": null,
       "name": "gates",
       "optional": false,
-      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/.cognidev/feature/gates.json"
+      "path": "./.cognidev/feature/gates.json"
     }
   ],
   "status": "Ok",

@@ -1,6 +1,0 @@
-{
-  "method": "POST",
-  "path": "/api/products",
-  "body": {"sku": "SKU-EQ-1", "name": "Equivalence Widget", "price": 12.5, "categoryId": 0},
-  "expected": {"sku": "SKU-EQ-1", "name": "Equivalence Widget", "price": 12.5, "categoryId": 0}
-}

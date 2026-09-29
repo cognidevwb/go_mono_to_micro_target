@@ -1,6 +1,6 @@
 {
-  "elapsedMs": 244,
-  "finishedAt": 1790395127,
+  "elapsedMs": 248,
+  "finishedAt": 1790652943,
   "inputs": [],
   "kind": "rust-binary",
   "outputs": [
@@ -9,14 +9,14 @@
       "kind": null,
       "name": "scorecard",
       "optional": false,
-      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/.cognidev/feature/scorecard.json"
+      "path": "./.cognidev/feature/scorecard.json"
     },
     {
       "exists": true,
       "kind": "report",
       "name": "MIGRATION-SCORECARD",
       "optional": false,
-      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/MIGRATION-SCORECARD.md"
+      "path": "./MIGRATION-SCORECARD.md"
     }
   ],
   "status": "Ok",

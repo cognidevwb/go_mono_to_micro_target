@@ -1,6 +1,6 @@
 {
-  "elapsedMs": 124,
-  "finishedAt": 1790392782,
+  "elapsedMs": 244,
+  "finishedAt": 1790651911,
   "inputs": [],
   "kind": "rust-binary",
   "outputs": [
@@ -9,14 +9,14 @@
       "kind": null,
       "name": "plan",
       "optional": false,
-      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/.cognidev/feature/plan.json"
+      "path": "./.cognidev/feature/plan.json"
     },
     {
       "exists": true,
       "kind": null,
       "name": "decomposition",
       "optional": false,
-      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/.cognidev/feature/decomposition.json"
+      "path": "./.cognidev/feature/decomposition.json"
     }
   ],
   "status": "Ok",

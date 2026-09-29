@@ -1,6 +1,6 @@
 {
-  "elapsedMs": 126,
-  "finishedAt": 1790392776,
+  "elapsedMs": 123,
+  "finishedAt": 1790651903,
   "inputs": [],
   "kind": "rust-binary",
   "outputs": [
@@ -9,7 +9,7 @@
       "kind": null,
       "name": "knowledge",
       "optional": false,
-      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/.cognidev/feature/knowledge.json"
+      "path": "./.cognidev/feature/knowledge.json"
     }
   ],
   "status": "Ok",

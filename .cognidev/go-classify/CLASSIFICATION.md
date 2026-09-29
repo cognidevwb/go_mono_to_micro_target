@@ -1,289 +1,1221 @@
 # Go classification
 
-Bank revision `2026-09-24.1` · model `jev-1.13.0` · Jev: `answered` · source consent: `yes`
+Bank revision `2026-09-25.1` · model `jev-1.13.0` · Jev: `answered` · source consent: `yes`
 
-- 59 units in 18 Go files, every one listed under **All units** below.
-- 36 units have at least one category settled by a fact (listed under **By category**, source `fact`).
-- 2 excluded entries (2 declarations), listed under **Excluded**.
-- 15 units need review, listed under **Needs review**.
-- 3 units have a kind code left open and Jev did not settle, listed under **Kind open**.
-- Requests: 73 sent, 0 from cache.
+- 300 units in 141 Go files, every one listed under **All units** below.
+- 145 units have at least one category settled by a fact (listed under **By category**, source `fact`).
+- 59 excluded entries (59 declarations), listed under **Excluded**.
+- 107 units need review, listed under **Needs review**.
+- 58 units have a kind code left open and Jev did not settle, listed under **Kind open**.
+- Requests: 390 sent, 0 from cache.
 
 ## By category
 
-### authentication (1)
+### authentication (7)
 
-- `internal/platform/auth.go`
-  - `AuthMiddleware` (middleware, cross-cutting) — internal/platform/auth.go:17 — fact: stores the caller's identity on the request context: writes user key platform.UserIDKey via context.WithValue (ambient-context, line 24)
+- `gateway/internal/proxy/auth.go`
+  - `Authenticate` (service, application) — gateway/internal/proxy/auth.go:16 — fact: references github.com/coreos/go-oidc/v3/oidc.NewProvider
+- `pkg/httpx/internal.go`
+  - `IsInternal` (handler, transport) — pkg/httpx/internal.go:26 — jev p=0.86
+- `services/catalog/internal/platform/auth.go`
+  - `AuthMiddleware` (middleware, cross-cutting) — services/catalog/internal/platform/auth.go:17 — fact: stores the caller's identity on the request context: writes user key platform.UserIDKey via context.WithValue (ambient-context, line 24)
+- `services/customers/internal/platform/auth.go`
+  - `AuthMiddleware` (middleware, cross-cutting) — services/customers/internal/platform/auth.go:17 — fact: stores the caller's identity on the request context: writes user key platform.UserIDKey via context.WithValue (ambient-context, line 24)
+- `services/inventory/internal/platform/auth.go`
+  - `AuthMiddleware` (middleware, cross-cutting) — services/inventory/internal/platform/auth.go:17 — fact: stores the caller's identity on the request context: writes user key platform.UserIDKey via context.WithValue (ambient-context, line 24)
+- `services/orders/internal/platform/auth.go`
+  - `AuthMiddleware` (middleware, cross-cutting) — services/orders/internal/platform/auth.go:17 — fact: stores the caller's identity on the request context: writes user key platform.UserIDKey via context.WithValue (ambient-context, line 24)
+- `services/payments/internal/platform/auth.go`
+  - `AuthMiddleware` (middleware, cross-cutting) — services/payments/internal/platform/auth.go:17 — fact: stores the caller's identity on the request context: writes user key platform.UserIDKey via context.WithValue (ambient-context, line 24)
 
 ### authorization (0)
 
 _none_
 
-### business_rules (6)
+### business_rules (8)
 
-- `internal/catalog/service.go`
-  - `Service.Create` (service, application) — internal/catalog/service.go:30 — jev p=0.83
-- `internal/customers/service.go`
-  - `Service.IsActive` (service, application) — internal/customers/service.go:24 — jev p=0.76
-- `internal/inventory/service.go`
-  - `Service.Reserve` (service, application) — internal/inventory/service.go:18 — jev p=0.97
-  - `Service.Restock` (service, application) — internal/inventory/service.go:36 — jev p=0.90
-- `internal/orders/service.go`
-  - `Service.PlaceOrder` (service, application) — internal/orders/service.go:36 — jev p=0.97
-- `internal/payments/service.go`
-  - `Service.Charge` (service, application) — internal/payments/service.go:15 — jev p=0.80
+- `services/catalog/internal/catalog/service.go`
+  - `Service.Create` (service, application) — services/catalog/internal/catalog/service.go:41 — jev p=0.87
+- `services/customers/internal/customers/service.go`
+  - `Service.IsActive` (service, application) — services/customers/internal/customers/service.go:24 — jev p=0.78
+- `services/inventory/internal/app/create_order_compensation.go`
+  - `compensateHandler` (handler, transport) — services/inventory/internal/app/create_order_compensation.go:34 — jev p=0.88
+- `services/inventory/internal/inventory/service.go`
+  - `Service.Reserve` (service, application) — services/inventory/internal/inventory/service.go:18 — jev p=0.97
+  - `Service.Restock` (service, application) — services/inventory/internal/inventory/service.go:36 — jev p=0.91
+- `services/orders/internal/orders/service.go`
+  - `Service.PlaceOrder` (service, application) — services/orders/internal/orders/service.go:51 — jev p=0.97
+- `services/payments/internal/app/create_order_compensation.go`
+  - `compensatePaymentHandler` (handler, transport) — services/payments/internal/app/create_order_compensation.go:35 — jev p=0.92
+- `services/payments/internal/payments/service.go`
+  - `Service.Charge` (service, application) — services/payments/internal/payments/service.go:15 — jev p=0.81
 
-### caching (1)
+### caching (2)
 
-- `internal/catalog/service.go`
-  - `Service.PriceOf` (service, application) — internal/catalog/service.go:38 — fact: read cache catalog.priceCache (priceCache), line 40
+- `pkg/events/idempotent.go`
+  - `MemorySeen.MarkSeen` (open: service|util, unresolved: kind unresolved) — pkg/events/idempotent.go:39 — jev p=0.71
+- `services/catalog/internal/catalog/service.go`
+  - `Service.PriceOf` (service, application) — services/catalog/internal/catalog/service.go:49 — fact: read cache catalog.priceCache (priceCache), line 51
 
-### concurrency (6)
+### concurrency (39)
 
-- `internal/catalog/service.go`
-  - `Service.PriceOf` (service, application) — internal/catalog/service.go:38 — fact: calls .Lock(), .RLock(), .Unlock(), .RUnlock()
-- `internal/inventory/service.go`
-  - `StartRestockJob` (job, application) — internal/inventory/service.go:42 — fact: 1 go statement(s)
-- `internal/platform/bus.go`
-  - `Bus` (open: model|service|util, unresolved: kind unresolved) — internal/platform/bus.go:10 — fact: uses type sync.RWMutex
-  - `Bus.Subscribe` (open: service|util, unresolved: kind unresolved) — internal/platform/bus.go:19 — fact: calls .Lock(), .Unlock()
-  - `Bus.Publish` (util, cross-cutting) — internal/platform/bus.go:26 — fact: calls .RLock(), .RUnlock()
-- `internal/platform/db.go`
-  - `Register` (util, cross-cutting) — internal/platform/db.go:12 — jev p=0.89
+- `pkg/events/bus.go`
+  - `Memory` (model, domain) — pkg/events/bus.go:21 — fact: uses type sync.RWMutex
+  - `Memory.Publish` (service, application) — pkg/events/bus.go:30 — fact: calls .RLock(), .RUnlock()
+  - `Memory.Subscribe` (open: service|util, unresolved: kind unresolved) — pkg/events/bus.go:43 — fact: calls .Lock(), .Unlock()
+- `pkg/events/idempotent.go`
+  - `MemorySeen` (model, domain) — pkg/events/idempotent.go:30 — fact: uses type sync.Mutex
+  - `MemorySeen.MarkSeen` (open: service|util, unresolved: kind unresolved) — pkg/events/idempotent.go:39 — fact: calls .Lock(), .Unlock()
+- `pkg/httpx/server.go`
+  - `Health` (model, domain) — pkg/httpx/server.go:19 — fact: uses type sync.RWMutex
+  - `Health.AddReadiness` (open: service|util, unresolved: kind unresolved) — pkg/httpx/server.go:28 — fact: calls .Lock(), .Unlock()
+  - `Health.Ready` (handler, transport) — pkg/httpx/server.go:46 — fact: calls .RLock(), .RUnlock()
+  - `Run` (service, application) — pkg/httpx/server.go:72 — fact: 1 go statement(s)
+- `pkg/outbox/outbox.go`
+  - `Relay.Run` (service, application) — pkg/outbox/outbox.go:57 — fact: 2 channel operation(s)
+- `services/catalog/cmd/catalog/main.go`
+  - `run` (wiring, infrastructure) — services/catalog/cmd/catalog/main.go:31 — fact: 1 go statement(s)
+- `services/catalog/internal/catalog/service.go`
+  - `Service.PriceOf` (service, application) — services/catalog/internal/catalog/service.go:49 — fact: calls .Lock(), .RLock(), .Unlock(), .RUnlock()
+- `services/catalog/internal/platform/bus.go`
+  - `Bus` (open: model|service|util, unresolved: kind unresolved) — services/catalog/internal/platform/bus.go:10 — fact: uses type sync.RWMutex
+  - `Bus.Subscribe` (open: service|util, unresolved: kind unresolved) — services/catalog/internal/platform/bus.go:19 — fact: calls .Lock(), .Unlock()
+  - `Bus.Publish` (open: service|util, unresolved: kind unresolved) — services/catalog/internal/platform/bus.go:26 — fact: calls .RLock(), .RUnlock()
+- `services/catalog/internal/platform/db.go`
+  - `Register` (util, cross-cutting) — services/catalog/internal/platform/db.go:12 — jev p=0.82
+- `services/customers/cmd/customers/main.go`
+  - `run` (wiring, infrastructure) — services/customers/cmd/customers/main.go:31 — fact: 1 go statement(s)
+- `services/customers/internal/platform/bus.go`
+  - `Bus` (open: model|service|util, unresolved: kind unresolved) — services/customers/internal/platform/bus.go:10 — fact: uses type sync.RWMutex
+  - `Bus.Subscribe` (open: service|util, unresolved: kind unresolved) — services/customers/internal/platform/bus.go:19 — fact: calls .Lock(), .Unlock()
+  - `Bus.Publish` (open: service|util, unresolved: kind unresolved) — services/customers/internal/platform/bus.go:26 — fact: calls .RLock(), .RUnlock()
+- `services/customers/internal/platform/db.go`
+  - `Register` (util, cross-cutting) — services/customers/internal/platform/db.go:12 — jev p=0.80
+- `services/inventory/cmd/inventory/main.go`
+  - `run` (wiring, infrastructure) — services/inventory/cmd/inventory/main.go:31 — fact: 1 go statement(s)
+- `services/inventory/internal/app/wire.go`
+  - `wire` (wiring, infrastructure) — services/inventory/internal/app/wire.go:23 — fact: 1 go statement(s)
+- `services/inventory/internal/inventory/service.go`
+  - `StartRestockJob` (job, application) — services/inventory/internal/inventory/service.go:42 — fact: 1 go statement(s)
+- `services/inventory/internal/jobs/scheduler.go`
+  - `Run` (service, application) — services/inventory/internal/jobs/scheduler.go:17 — fact: 2 channel operation(s)
+- `services/inventory/internal/platform/bus.go`
+  - `Bus` (open: model|service|util, unresolved: kind unresolved) — services/inventory/internal/platform/bus.go:10 — fact: uses type sync.RWMutex
+  - `Bus.Subscribe` (open: service|util, unresolved: kind unresolved) — services/inventory/internal/platform/bus.go:19 — fact: calls .Lock(), .Unlock()
+  - `Bus.Publish` (open: service|util, unresolved: kind unresolved) — services/inventory/internal/platform/bus.go:26 — fact: calls .RLock(), .RUnlock()
+- `services/inventory/internal/platform/db.go`
+  - `Register` (util, cross-cutting) — services/inventory/internal/platform/db.go:12 — jev p=0.79
+- `services/orders/cmd/orders/main.go`
+  - `run` (wiring, infrastructure) — services/orders/cmd/orders/main.go:31 — fact: 1 go statement(s)
+- `services/orders/internal/platform/bus.go`
+  - `Bus` (open: model|service|util, unresolved: kind unresolved) — services/orders/internal/platform/bus.go:10 — fact: uses type sync.RWMutex
+  - `Bus.Subscribe` (open: service|util, unresolved: kind unresolved) — services/orders/internal/platform/bus.go:19 — fact: calls .Lock(), .Unlock()
+  - `Bus.Publish` (open: service|util, unresolved: kind unresolved) — services/orders/internal/platform/bus.go:26 — fact: calls .RLock(), .RUnlock()
+- `services/orders/internal/platform/db.go`
+  - `Register` (util, cross-cutting) — services/orders/internal/platform/db.go:12 — jev p=0.80
+- `services/payments/cmd/payments/main.go`
+  - `run` (wiring, infrastructure) — services/payments/cmd/payments/main.go:31 — fact: 1 go statement(s)
+- `services/payments/internal/platform/bus.go`
+  - `Bus` (open: model|service|util, unresolved: kind unresolved) — services/payments/internal/platform/bus.go:10 — fact: uses type sync.RWMutex
+  - `Bus.Subscribe` (open: service|util, unresolved: kind unresolved) — services/payments/internal/platform/bus.go:19 — fact: calls .Lock(), .Unlock()
+  - `Bus.Publish` (open: service|util, unresolved: kind unresolved) — services/payments/internal/platform/bus.go:26 — fact: calls .RLock(), .RUnlock()
+- `services/payments/internal/platform/db.go`
+  - `Register` (util, cross-cutting) — services/payments/internal/platform/db.go:12 — jev p=0.80
 
-### configuration (1)
+### configuration (37)
 
-- `cmd/shop/main.go`
-  - `main` (wiring, infrastructure) — cmd/shop/main.go:18 — fact: references os.Getenv
+- `gateway/cmd/gateway/main.go`
+  - `run` (wiring, infrastructure) — gateway/cmd/gateway/main.go:29 — fact: references os.Getenv
+- `gateway/internal/proxy/proxy.go`
+  - `FromEnv` (open: service|util, unresolved: kind unresolved) — gateway/internal/proxy/proxy.go:24 — fact: references os.Getenv
+- `pkg/httpx/internal.go`
+  - `internalToken` (util, cross-cutting) — pkg/httpx/internal.go:22 — fact: references os.Getenv
+  - `internalCaller.RoundTrip` (handler, transport) — pkg/httpx/internal.go:55 — fact: references os.Getenv
+- `services/catalog/cmd/catalog/main.go`
+  - `run` (wiring, infrastructure) — services/catalog/cmd/catalog/main.go:31 — jev p=0.97
+- `services/catalog/internal/app/app.go`
+  - `New` (service, application) — services/catalog/internal/app/app.go:35 — jev p=0.77
+- `services/catalog/internal/config/config.go`
+  - `Load` (config, cross-cutting) — services/catalog/internal/config/config.go:22 — jev p=0.98
+  - `env` (config, cross-cutting) — services/catalog/internal/config/config.go:34 — fact: references os.LookupEnv
+  - `envInt` (config, cross-cutting) — services/catalog/internal/config/config.go:41 — fact: references os.Getenv
+- `services/customers/cmd/customers/main.go`
+  - `run` (wiring, infrastructure) — services/customers/cmd/customers/main.go:31 — jev p=0.97
+- `services/customers/internal/app/app.go`
+  - `New` (service, application) — services/customers/internal/app/app.go:35 — jev p=0.75
+- `services/customers/internal/config/config.go`
+  - `Load` (config, cross-cutting) — services/customers/internal/config/config.go:22 — jev p=0.98
+  - `env` (config, cross-cutting) — services/customers/internal/config/config.go:34 — fact: references os.LookupEnv
+  - `envInt` (config, cross-cutting) — services/customers/internal/config/config.go:41 — fact: references os.Getenv
+- `services/inventory/cmd/inventory/main.go`
+  - `run` (wiring, infrastructure) — services/inventory/cmd/inventory/main.go:31 — jev p=0.97
+- `services/inventory/internal/app/app.go`
+  - `New` (service, application) — services/inventory/internal/app/app.go:35 — jev p=0.79
+- `services/inventory/internal/config/config.go`
+  - `Load` (config, cross-cutting) — services/inventory/internal/config/config.go:22 — jev p=0.98
+  - `env` (config, cross-cutting) — services/inventory/internal/config/config.go:34 — fact: references os.LookupEnv
+  - `envInt` (config, cross-cutting) — services/inventory/internal/config/config.go:41 — fact: references os.Getenv
+- `services/orders/cmd/orders/main.go`
+  - `run` (wiring, infrastructure) — services/orders/cmd/orders/main.go:31 — jev p=0.97
+- `services/orders/internal/app/app.go`
+  - `New` (service, application) — services/orders/internal/app/app.go:35 — jev p=0.72
+- `services/orders/internal/app/wire.go`
+  - `wire` (wiring, infrastructure) — services/orders/internal/app/wire.go:19 — fact: references os.Getenv
+- `services/orders/internal/clients/catalog/client.go`
+  - `baseURL` (open: service|util, unresolved: kind unresolved) — services/orders/internal/clients/catalog/client.go:27 — fact: references os.Getenv
+- `services/orders/internal/clients/customers/client.go`
+  - `baseURL` (open: service|util, unresolved: kind unresolved) — services/orders/internal/clients/customers/client.go:26 — fact: references os.Getenv
+- `services/orders/internal/clients/inventory/client.go`
+  - `baseURL` (open: service|util, unresolved: kind unresolved) — services/orders/internal/clients/inventory/client.go:19 — fact: references os.Getenv
+- `services/orders/internal/clients/payments/client.go`
+  - `baseURL` (open: service|util, unresolved: kind unresolved) — services/orders/internal/clients/payments/client.go:20 — fact: references os.Getenv
+- `services/orders/internal/config/config.go`
+  - `Load` (config, cross-cutting) — services/orders/internal/config/config.go:22 — jev p=0.98
+  - `env` (config, cross-cutting) — services/orders/internal/config/config.go:36 — fact: references os.LookupEnv
+  - `envInt` (config, cross-cutting) — services/orders/internal/config/config.go:43 — fact: references os.Getenv
+- `services/orders/internal/orders/service.go`
+  - `Service.releaseStock` (service, application) — services/orders/internal/orders/service.go:131 — fact: references os.Getenv
+- `services/payments/cmd/payments/main.go`
+  - `run` (wiring, infrastructure) — services/payments/cmd/payments/main.go:31 — jev p=0.96
+- `services/payments/internal/app/app.go`
+  - `New` (service, application) — services/payments/internal/app/app.go:35 — jev p=0.75
+- `services/payments/internal/app/remote_operations.go`
+  - `chargeHandler` (handler, transport) — services/payments/internal/app/remote_operations.go:26 — fact: references os.Getenv
+- `services/payments/internal/app/wire.go`
+  - `wire` (wiring, infrastructure) — services/payments/internal/app/wire.go:15 — fact: references os.Getenv
+- `services/payments/internal/config/config.go`
+  - `Load` (config, cross-cutting) — services/payments/internal/config/config.go:22 — jev p=0.98
+  - `env` (config, cross-cutting) — services/payments/internal/config/config.go:34 — fact: references os.LookupEnv
+  - `envInt` (config, cross-cutting) — services/payments/internal/config/config.go:41 — fact: references os.Getenv
 
-### error_mapping (1)
+### error_mapping (3)
 
-- `internal/customers/handlers.go`
-  - `getCustomer` (handler, transport) — internal/customers/handlers.go:16 — jev p=0.73
+- `services/customers/internal/customers/handlers.go`
+  - `getCustomer` (handler, transport) — services/customers/internal/customers/handlers.go:16 — jev p=0.76
+- `services/inventory/internal/app/remote_operations.go`
+  - `reserveHandler` (handler, transport) — services/inventory/internal/app/remote_operations.go:28 — jev p=0.96
+- `services/inventory/internal/httpapi/stock_item_handlers.go`
+  - `getStockItem` (handler, transport) — services/inventory/internal/httpapi/stock_item_handlers.go:33 — jev p=0.96
 
-### external_integration (2)
+### external_integration (10)
 
-- `internal/payments/gateway.go`
-  - `Gateway.Charge` (client, infrastructure) — internal/payments/gateway.go:23 — fact: Post /v1/charges via g.client, line 25
-- `internal/payments/service.go`
-  - `Service.Charge` (service, application) — internal/payments/service.go:15 — jev p=0.84
+- `gateway/internal/proxy/auth.go`
+  - `Authenticate` (service, application) — gateway/internal/proxy/auth.go:16 — jev p=0.88
+- `services/orders/internal/clients/catalog/client.go`
+  - `Service.post` (service, application) — services/orders/internal/clients/catalog/client.go:78 — fact: references net/http.NewRequestWithContext
+  - `Service.PriceOf` (service, application) — services/orders/internal/clients/catalog/client.go:123 — jev p=0.91
+- `services/orders/internal/clients/customers/client.go`
+  - `Service.IsActive` (service, application) — services/orders/internal/clients/customers/client.go:71 — fact: references net/http.NewRequestWithContext
+- `services/orders/internal/clients/inventory/client.go`
+  - `Service.Reserve` (service, application) — services/orders/internal/clients/inventory/client.go:60 — fact: references net/http.NewRequestWithContext
+- `services/orders/internal/clients/payments/client.go`
+  - `Service.Charge` (service, application) — services/orders/internal/clients/payments/client.go:64 — fact: references net/http.NewRequestWithContext
+- `services/orders/internal/orders/service.go`
+  - `Service.releaseStock` (service, application) — services/orders/internal/orders/service.go:131 — fact: references net/http.NewRequestWithContext
+- `services/payments/internal/app/remote_operations.go`
+  - `chargeHandler` (handler, transport) — services/payments/internal/app/remote_operations.go:26 — jev p=0.80
+- `services/payments/internal/payments/gateway.go`
+  - `Gateway.Charge` (client, infrastructure) — services/payments/internal/payments/gateway.go:23 — fact: Post /v1/charges via g.client, line 25
+- `services/payments/internal/payments/service.go`
+  - `Service.Charge` (service, application) — services/payments/internal/payments/service.go:15 — jev p=0.87
 
 ### file_io (0)
 
 _none_
 
-### http_transport (10)
+### http_transport (49)
 
-- `internal/catalog/handlers.go`
-  - `RegisterRoutes` (wiring, infrastructure) — internal/catalog/handlers.go:11 — fact: registers GET /api/products (gin)
-  - `listProducts` (handler, transport) — internal/catalog/handlers.go:16 — fact: takes *github.com/gin-gonic/gin.Context
-  - `createProduct` (handler, transport) — internal/catalog/handlers.go:25 — fact: takes *github.com/gin-gonic/gin.Context
-- `internal/customers/handlers.go`
-  - `RegisterRoutes` (wiring, infrastructure) — internal/customers/handlers.go:11 — fact: registers POST /api/customers (gin)
-  - `getCustomer` (handler, transport) — internal/customers/handlers.go:16 — fact: takes *github.com/gin-gonic/gin.Context
-  - `registerCustomer` (handler, transport) — internal/customers/handlers.go:30 — fact: takes *github.com/gin-gonic/gin.Context
-- `internal/orders/handlers.go`
-  - `RegisterRoutes` (wiring, infrastructure) — internal/orders/handlers.go:13 — fact: registers POST /api/orders (gin)
-  - `placeOrder` (handler, transport) — internal/orders/handlers.go:18 — fact: takes *github.com/gin-gonic/gin.Context
-  - `myOrders` (handler, transport) — internal/orders/handlers.go:33 — fact: takes *github.com/gin-gonic/gin.Context
-- `internal/platform/auth.go`
-  - `AuthMiddleware` (middleware, cross-cutting) — internal/platform/auth.go:17 — fact: returns github.com/gin-gonic/gin.HandlerFunc
+- `gateway/cmd/gateway/main.go`
+  - `run` (wiring, infrastructure) — gateway/cmd/gateway/main.go:29 — fact: registers ANY / (net/http)
+- `gateway/internal/proxy/auth.go`
+  - `Authenticate` (service, application) — gateway/internal/proxy/auth.go:16 — jev p=0.98
+- `gateway/internal/proxy/proxy.go`
+  - `New` (middleware, cross-cutting) — gateway/internal/proxy/proxy.go:38 — fact: returns net/http.Handler
+- `pkg/httpx/internal.go`
+  - `IsInternal` (handler, transport) — pkg/httpx/internal.go:26 — fact: takes *net/http.Request
+  - `UnlessInternal` (util, cross-cutting) — pkg/httpx/internal.go:39 — jev p=0.86
+  - `internalCaller.RoundTrip` (handler, transport) — pkg/httpx/internal.go:55 — fact: takes *net/http.Request
+- `pkg/httpx/server.go`
+  - `Health.Mount` (wiring, infrastructure) — pkg/httpx/server.go:35 — fact: registers GET /healthz (net/http)
+  - `Health.Live` (handler, transport) — pkg/httpx/server.go:41 — fact: takes net/http.ResponseWriter
+  - `Health.Ready` (handler, transport) — pkg/httpx/server.go:46 — fact: takes net/http.ResponseWriter
+  - `WriteJSON` (handler, transport) — pkg/httpx/server.go:65 — fact: takes net/http.ResponseWriter
+- `services/catalog/cmd/catalog/main.go`
+  - `run` (wiring, infrastructure) — services/catalog/cmd/catalog/main.go:31 — fact: registers GET /healthz (net/http)
+- `services/catalog/internal/app/remote_operations.go`
+  - `init` (wiring, infrastructure) — services/catalog/internal/app/remote_operations.go:24 — fact: registers POST /v1/catalog/price_of (gin)
+- `services/catalog/internal/app/routes.go`
+  - `Routes` (middleware, cross-cutting) — services/catalog/internal/app/routes.go:15 — fact: returns net/http.Handler
+- `services/catalog/internal/catalog/handlers.go`
+  - `RegisterRoutes` (wiring, infrastructure) — services/catalog/internal/catalog/handlers.go:11 — fact: registers GET /api/products (gin)
+  - `listProducts` (handler, transport) — services/catalog/internal/catalog/handlers.go:16 — fact: takes *github.com/gin-gonic/gin.Context
+  - `createProduct` (handler, transport) — services/catalog/internal/catalog/handlers.go:25 — fact: takes *github.com/gin-gonic/gin.Context
+- `services/catalog/internal/platform/auth.go`
+  - `AuthMiddleware` (middleware, cross-cutting) — services/catalog/internal/platform/auth.go:17 — fact: returns github.com/gin-gonic/gin.HandlerFunc
+- `services/customers/cmd/customers/main.go`
+  - `run` (wiring, infrastructure) — services/customers/cmd/customers/main.go:31 — fact: registers GET /healthz (net/http)
+- `services/customers/internal/app/remote_operations.go`
+  - `init` (wiring, infrastructure) — services/customers/internal/app/remote_operations.go:24 — fact: registers POST /v1/customers/is_active (gin)
+- `services/customers/internal/app/routes.go`
+  - `Routes` (middleware, cross-cutting) — services/customers/internal/app/routes.go:15 — fact: returns net/http.Handler
+- `services/customers/internal/customers/handlers.go`
+  - `RegisterRoutes` (wiring, infrastructure) — services/customers/internal/customers/handlers.go:11 — fact: registers POST /api/customers (gin)
+  - `getCustomer` (handler, transport) — services/customers/internal/customers/handlers.go:16 — fact: takes *github.com/gin-gonic/gin.Context
+  - `registerCustomer` (handler, transport) — services/customers/internal/customers/handlers.go:30 — fact: takes *github.com/gin-gonic/gin.Context
+- `services/customers/internal/platform/auth.go`
+  - `AuthMiddleware` (middleware, cross-cutting) — services/customers/internal/platform/auth.go:17 — fact: returns github.com/gin-gonic/gin.HandlerFunc
+- `services/inventory/cmd/inventory/main.go`
+  - `run` (wiring, infrastructure) — services/inventory/cmd/inventory/main.go:31 — fact: registers GET /healthz (net/http)
+- `services/inventory/internal/app/create_order_compensation.go`
+  - `init` (wiring, infrastructure) — services/inventory/internal/app/create_order_compensation.go:25 — fact: registers POST /v1/inventory/create_order/compensate (gin)
+  - `compensateHandler` (handler, transport) — services/inventory/internal/app/create_order_compensation.go:34 — fact: returns github.com/gin-gonic/gin.HandlerFunc
+- `services/inventory/internal/app/remote_operations.go`
+  - `init` (wiring, infrastructure) — services/inventory/internal/app/remote_operations.go:19 — fact: registers POST /v1/inventory/reserve (gin)
+  - `reserveHandler` (handler, transport) — services/inventory/internal/app/remote_operations.go:28 — fact: returns github.com/gin-gonic/gin.HandlerFunc
+- `services/inventory/internal/app/routes.go`
+  - `Routes` (middleware, cross-cutting) — services/inventory/internal/app/routes.go:15 — fact: returns net/http.Handler
+- `services/inventory/internal/httpapi/stock_item_handlers.go`
+  - `RegisterRoutes` (wiring, infrastructure) — services/inventory/internal/httpapi/stock_item_handlers.go:18 — fact: registers GET /v1/stockitem/:product_id (gin)
+  - `problem` (handler, transport) — services/inventory/internal/httpapi/stock_item_handlers.go:23 — fact: takes *github.com/gin-gonic/gin.Context
+  - `getStockItem` (handler, transport) — services/inventory/internal/httpapi/stock_item_handlers.go:33 — fact: takes *github.com/gin-gonic/gin.Context
+- `services/inventory/internal/platform/auth.go`
+  - `AuthMiddleware` (middleware, cross-cutting) — services/inventory/internal/platform/auth.go:17 — fact: returns github.com/gin-gonic/gin.HandlerFunc
+- `services/orders/cmd/orders/main.go`
+  - `run` (wiring, infrastructure) — services/orders/cmd/orders/main.go:31 — fact: registers GET /healthz (net/http)
+- `services/orders/internal/app/routes.go`
+  - `Routes` (middleware, cross-cutting) — services/orders/internal/app/routes.go:15 — fact: returns net/http.Handler
+- `services/orders/internal/orders/handlers.go`
+  - `RegisterRoutes` (wiring, infrastructure) — services/orders/internal/orders/handlers.go:13 — fact: registers POST /api/orders (gin)
+  - `placeOrder` (handler, transport) — services/orders/internal/orders/handlers.go:18 — fact: takes *github.com/gin-gonic/gin.Context
+  - `myOrders` (handler, transport) — services/orders/internal/orders/handlers.go:33 — fact: takes *github.com/gin-gonic/gin.Context
+- `services/orders/internal/platform/auth.go`
+  - `AuthMiddleware` (middleware, cross-cutting) — services/orders/internal/platform/auth.go:17 — fact: returns github.com/gin-gonic/gin.HandlerFunc
+- `services/payments/cmd/payments/main.go`
+  - `run` (wiring, infrastructure) — services/payments/cmd/payments/main.go:31 — fact: registers GET /healthz (net/http)
+- `services/payments/internal/app/create_order_compensation.go`
+  - `init` (wiring, infrastructure) — services/payments/internal/app/create_order_compensation.go:26 — fact: registers POST /v1/payments/create_order/compensate (gin)
+  - `compensatePaymentHandler` (handler, transport) — services/payments/internal/app/create_order_compensation.go:35 — fact: returns github.com/gin-gonic/gin.HandlerFunc
+- `services/payments/internal/app/remote_operations.go`
+  - `init` (wiring, infrastructure) — services/payments/internal/app/remote_operations.go:15 — fact: registers POST /v1/payments/charge (gin)
+  - `chargeHandler` (handler, transport) — services/payments/internal/app/remote_operations.go:26 — fact: returns github.com/gin-gonic/gin.HandlerFunc
+- `services/payments/internal/app/routes.go`
+  - `Routes` (middleware, cross-cutting) — services/payments/internal/app/routes.go:15 — fact: returns net/http.Handler
+- `services/payments/internal/httpapi/payment_handlers.go`
+  - `problem` (handler, transport) — services/payments/internal/httpapi/payment_handlers.go:15 — fact: takes *github.com/gin-gonic/gin.Context
+  - `RegisterRoutes` (wiring, infrastructure) — services/payments/internal/httpapi/payment_handlers.go:25 — fact: registers GET /v1/payment/order/:orderId (gin)
+- `services/payments/internal/platform/auth.go`
+  - `AuthMiddleware` (middleware, cross-cutting) — services/payments/internal/platform/auth.go:17 — fact: returns github.com/gin-gonic/gin.HandlerFunc
 
-### input_validation (7)
+### input_validation (24)
 
-- `internal/catalog/model.go`
-  - `Product` (model, domain) — internal/catalog/model.go:13 — fact: struct tags `binding`/`validate` declare the rules
-- `internal/catalog/service.go`
-  - `Service.Create` (service, application) — internal/catalog/service.go:30 — jev p=0.83
-- `internal/customers/handlers.go`
-  - `getCustomer` (handler, transport) — internal/customers/handlers.go:16 — jev p=0.74
-- `internal/customers/model.go`
-  - `Customer` (model, domain) — internal/customers/model.go:10 — fact: struct tags `binding`/`validate` declare the rules
-- `internal/orders/model.go`
-  - `PlaceOrderRequest` (dto, transport) — internal/orders/model.go:24 — fact: struct tags `binding`/`validate` declare the rules
-  - `LineItem` (dto, transport) — internal/orders/model.go:30 — fact: struct tags `binding`/`validate` declare the rules
-- `internal/platform/auth.go`
-  - `AuthMiddleware` (middleware, cross-cutting) — internal/platform/auth.go:17 — jev p=0.74
+- `gateway/internal/proxy/auth.go`
+  - `Authenticate` (service, application) — gateway/internal/proxy/auth.go:16 — jev p=0.70
+- `gateway/internal/proxy/proxy.go`
+  - `New` (middleware, cross-cutting) — gateway/internal/proxy/proxy.go:38 — jev p=0.79
+- `services/catalog/internal/app/remote_operations.go`
+  - `priceOfRequest` (dto, transport) — services/catalog/internal/app/remote_operations.go:14 — fact: struct tags `binding`/`validate` declare the rules
+- `services/catalog/internal/catalog/model.go`
+  - `Product` (model, domain) — services/catalog/internal/catalog/model.go:13 — fact: struct tags `binding`/`validate` declare the rules
+- `services/catalog/internal/catalog/service.go`
+  - `Service.Create` (service, application) — services/catalog/internal/catalog/service.go:41 — jev p=0.89
+- `services/catalog/internal/platform/auth.go`
+  - `AuthMiddleware` (middleware, cross-cutting) — services/catalog/internal/platform/auth.go:17 — jev p=0.75
+- `services/customers/internal/acl/legacy.go`
+  - `ValidateCustomer` (util, cross-cutting) — services/customers/internal/acl/legacy.go:13 — jev p=0.97
+- `services/customers/internal/app/remote_operations.go`
+  - `isActiveRequest` (dto, transport) — services/customers/internal/app/remote_operations.go:14 — fact: struct tags `binding`/`validate` declare the rules
+- `services/customers/internal/customers/handlers.go`
+  - `getCustomer` (handler, transport) — services/customers/internal/customers/handlers.go:16 — jev p=0.75
+- `services/customers/internal/customers/model.go`
+  - `Customer` (model, domain) — services/customers/internal/customers/model.go:10 — fact: struct tags `binding`/`validate` declare the rules
+- `services/customers/internal/platform/auth.go`
+  - `AuthMiddleware` (middleware, cross-cutting) — services/customers/internal/platform/auth.go:17 — jev p=0.74
+- `services/inventory/internal/app/create_order_compensation.go`
+  - `compensateHandler` (handler, transport) — services/inventory/internal/app/create_order_compensation.go:34 — jev p=0.90
+- `services/inventory/internal/app/remote_operations.go`
+  - `reserveHandler` (handler, transport) — services/inventory/internal/app/remote_operations.go:28 — jev p=0.87
+- `services/inventory/internal/httpapi/stock_item_handlers.go`
+  - `getStockItem` (handler, transport) — services/inventory/internal/httpapi/stock_item_handlers.go:33 — jev p=0.89
+- `services/inventory/internal/platform/auth.go`
+  - `AuthMiddleware` (middleware, cross-cutting) — services/inventory/internal/platform/auth.go:17 — jev p=0.73
+- `services/orders/internal/contracts/catalog/contracts.go`
+  - `Product` (model, domain) — services/orders/internal/contracts/catalog/contracts.go:12 — fact: struct tags `binding`/`validate` declare the rules
+- `services/orders/internal/orders/model.go`
+  - `PlaceOrderRequest` (dto, transport) — services/orders/internal/orders/model.go:24 — fact: struct tags `binding`/`validate` declare the rules
+  - `LineItem` (dto, transport) — services/orders/internal/orders/model.go:30 — fact: struct tags `binding`/`validate` declare the rules
+- `services/orders/internal/platform/auth.go`
+  - `AuthMiddleware` (middleware, cross-cutting) — services/orders/internal/platform/auth.go:17 — jev p=0.73
+- `services/payments/internal/acl/legacy.go`
+  - `ParseStatus` (open: service|util, unresolved: kind unresolved) — services/payments/internal/acl/legacy.go:21 — jev p=0.77
+  - `ChargeRequest.Validate` (dto, transport) — services/payments/internal/acl/legacy.go:36 — jev p=0.98
+- `services/payments/internal/app/create_order_compensation.go`
+  - `compensatePaymentHandler` (handler, transport) — services/payments/internal/app/create_order_compensation.go:35 — jev p=0.79
+- `services/payments/internal/app/remote_operations.go`
+  - `chargeHandler` (handler, transport) — services/payments/internal/app/remote_operations.go:26 — jev p=0.93
+- `services/payments/internal/platform/auth.go`
+  - `AuthMiddleware` (middleware, cross-cutting) — services/payments/internal/platform/auth.go:17 — jev p=0.73
 
-### messaging (5)
+### messaging (29)
 
-- `cmd/shop/main.go`
-  - `main` (wiring, infrastructure) — cmd/shop/main.go:18 — fact: subscribes inventory.Service.OnOrderPlaced to order.placed
-- `internal/inventory/service.go`
-  - `Service.OnOrderPlaced` (service, application) — internal/inventory/service.go:31 — fact: handles event order.placed (subscribed at cmd/shop/main.go:32)
-- `internal/orders/service.go`
-  - `Service.PlaceOrder` (service, application) — internal/orders/service.go:36 — fact: publishes order.placed via s.bus.Publish, line 73
-- `internal/platform/bus.go`
-  - `Bus.Subscribe` (open: service|util, unresolved: kind unresolved) — internal/platform/bus.go:19 — jev p=0.95
-  - `Bus.Publish` (util, cross-cutting) — internal/platform/bus.go:26 — jev p=0.96
+- `pkg/events/bus.go`
+  - `Memory.Publish` (service, application) — pkg/events/bus.go:30 — jev p=0.96
+  - `Memory.Subscribe` (open: service|util, unresolved: kind unresolved) — pkg/events/bus.go:43 — jev p=0.96
+- `pkg/events/nats.go`
+  - `ConnectNATS` (open: service|util, unresolved: kind unresolved) — pkg/events/nats.go:23 — fact: references github.com/nats-io/nats.go.Connect
+  - `NATS.ensure` (service, application) — pkg/events/nats.go:41 — jev p=0.70
+  - `NATS.Publish` (service, application) — pkg/events/nats.go:50 — fact: references github.com/nats-io/nats.go/jetstream.WithMsgID
+  - `NATS.Subscribe` (service, application) — pkg/events/nats.go:77 — fact: references github.com/nats-io/nats.go/jetstream.AckExplicitPolicy
+- `pkg/outbox/outbox.go`
+  - `Relay.Run` (service, application) — pkg/outbox/outbox.go:57 — jev p=0.84
+  - `Relay.Flush` (service, application) — pkg/outbox/outbox.go:77 — fact: publishes  via r.Bus.Publish, line 116
+- `services/catalog/internal/events/events.go`
+  - `Publish` (service, application) — services/catalog/internal/events/events.go:16 — jev p=0.95
+- `services/catalog/internal/platform/bus.go`
+  - `Bus.Subscribe` (open: service|util, unresolved: kind unresolved) — services/catalog/internal/platform/bus.go:19 — jev p=0.94
+  - `Bus.Publish` (open: service|util, unresolved: kind unresolved) — services/catalog/internal/platform/bus.go:26 — jev p=0.95
+- `services/customers/internal/events/events.go`
+  - `Publish` (service, application) — services/customers/internal/events/events.go:16 — jev p=0.96
+- `services/customers/internal/platform/bus.go`
+  - `Bus.Subscribe` (open: service|util, unresolved: kind unresolved) — services/customers/internal/platform/bus.go:19 — jev p=0.94
+  - `Bus.Publish` (open: service|util, unresolved: kind unresolved) — services/customers/internal/platform/bus.go:26 — jev p=0.95
+- `services/inventory/internal/events/events.go`
+  - `Publish` (service, application) — services/inventory/internal/events/events.go:16 — jev p=0.96
+- `services/inventory/internal/events/order_placed_consumer.go`
+  - `SubscribeOrderPlaced` (service, application) — services/inventory/internal/events/order_placed_consumer.go:17 — fact: subscribes events.h to ctx
+- `services/inventory/internal/inventory/service.go`
+  - `Service.OnOrderPlaced` (service, application) — services/inventory/internal/inventory/service.go:31 — jev p=0.79
+- `services/inventory/internal/platform/bus.go`
+  - `Bus.Subscribe` (open: service|util, unresolved: kind unresolved) — services/inventory/internal/platform/bus.go:19 — jev p=0.95
+  - `Bus.Publish` (open: service|util, unresolved: kind unresolved) — services/inventory/internal/platform/bus.go:26 — jev p=0.96
+- `services/orders/internal/events/events.go`
+  - `Publish` (service, application) — services/orders/internal/events/events.go:16 — jev p=0.95
+- `services/orders/internal/events/order_placed.go`
+  - `PublishOrderPlaced` (service, application) — services/orders/internal/events/order_placed.go:20 — jev p=0.97
+- `services/orders/internal/orders/service.go`
+  - `Service.PlaceOrder` (service, application) — services/orders/internal/orders/service.go:51 — jev p=0.93
+- `services/orders/internal/outbox/outbox.go`
+  - `Relay` (service, application) — services/orders/internal/outbox/outbox.go:18 — jev p=0.91
+- `services/orders/internal/platform/bus.go`
+  - `Bus.Subscribe` (open: service|util, unresolved: kind unresolved) — services/orders/internal/platform/bus.go:19 — jev p=0.94
+  - `Bus.Publish` (open: service|util, unresolved: kind unresolved) — services/orders/internal/platform/bus.go:26 — jev p=0.95
+- `services/payments/internal/app/app.go`
+  - `New` (service, application) — services/payments/internal/app/app.go:35 — jev p=0.72
+- `services/payments/internal/events/events.go`
+  - `Publish` (service, application) — services/payments/internal/events/events.go:16 — jev p=0.96
+- `services/payments/internal/platform/bus.go`
+  - `Bus.Subscribe` (open: service|util, unresolved: kind unresolved) — services/payments/internal/platform/bus.go:19 — jev p=0.95
+  - `Bus.Publish` (open: service|util, unresolved: kind unresolved) — services/payments/internal/platform/bus.go:26 — jev p=0.95
 
-### observability (0)
+### observability (1)
 
-_none_
+- `pkg/otelx/otelx.go`
+  - `Setup` (open: service|util, unresolved: kind unresolved) — pkg/otelx/otelx.go:20 — fact: references go.opentelemetry.io/otel.SetTracerProvider
 
-### persistence (19)
+### persistence (54)
 
-- `internal/catalog/model.go`
-  - `Category` (model, domain) — internal/catalog/model.go:6 — fact: persisted entity (table:categories (convention))
-  - `Product` (model, domain) — internal/catalog/model.go:13 — fact: persisted entity (table:products (convention))
-- `internal/catalog/service.go`
-  - `Service.List` (service, application) — internal/catalog/service.go:23 — fact: reads Product via s.db (direct) (entity-access, line 25)
-  - `Service.Create` (service, application) — internal/catalog/service.go:30 — fact: writes Product via s.db (direct) (entity-access, line 34)
-  - `Service.PriceOf` (service, application) — internal/catalog/service.go:38 — fact: reads Product via s.db (direct) (entity-access, line 46)
-- `internal/customers/model.go`
-  - `Customer` (model, domain) — internal/customers/model.go:10 — fact: persisted entity (table:customers (convention))
-- `internal/customers/service.go`
-  - `Service.Get` (service, application) — internal/customers/service.go:12 — fact: reads Customer via s.db (direct) (entity-access, line 14)
-  - `Service.Register` (service, application) — internal/customers/service.go:21 — fact: writes Customer via s.db (direct) (entity-access, line 21)
-  - `Service.IsActive` (service, application) — internal/customers/service.go:24 — jev p=0.78
-- `internal/inventory/model.go`
-  - `StockItem` (model, domain) — internal/inventory/model.go:6 — fact: persisted entity (table:stock_items)
-- `internal/inventory/service.go`
-  - `Service.Reserve` (service, application) — internal/inventory/service.go:18 — fact: reads StockItem via tx (direct) (entity-access, line 20)
-  - `Service.Restock` (service, application) — internal/inventory/service.go:36 — fact: writes StockItem via s.db (direct) (entity-access, line 38)
-- `internal/orders/model.go`
-  - `Order` (model, domain) — internal/orders/model.go:6 — fact: persisted entity (table:orders (convention))
-  - `OrderLine` (model, domain) — internal/orders/model.go:15 — fact: persisted entity (table:order_lines (convention))
-- `internal/orders/service.go`
-  - `Service.PlaceOrder` (service, application) — internal/orders/service.go:36 — fact: writes Order via tx (direct) (entity-access, line 61)
-  - `Service.ForCustomer` (service, application) — internal/orders/service.go:78 — fact: reads Order via s.db (direct) (entity-access, line 80)
-- `internal/payments/model.go`
-  - `Payment` (model, domain) — internal/payments/model.go:6 — fact: persisted entity (table:payments (convention))
-- `internal/payments/service.go`
-  - `Service.Charge` (service, application) — internal/payments/service.go:15 — fact: writes Payment via tx (direct) (entity-access, line 19)
-- `internal/platform/db.go`
-  - `Open` (open: service|util, unresolved: kind unresolved) — internal/platform/db.go:15 — jev p=0.95
+- `pkg/events/idempotent.go`
+  - `SQLSeen` (repository, infrastructure) — pkg/events/idempotent.go:52 — fact: access (db.json, line 52)
+  - `SQLSeen.MarkSeen` (repository, infrastructure) — pkg/events/idempotent.go:55 — fact: writes processed_messages via s.DB (direct) (entity-access, line 56)
+- `pkg/outbox/outbox.go`
+  - `Enqueue` (service, application) — pkg/outbox/outbox.go:39 — jev p=0.94
+  - `Relay` (service, application) — pkg/outbox/outbox.go:49 — fact: access (db.json, line 50)
+  - `Relay.Flush` (service, application) — pkg/outbox/outbox.go:77 — fact: reads outbox via tx (direct) (entity-access, line 87)
+- `services/catalog/internal/app/app.go`
+  - `Deps` (open: repository|service, unresolved: kind unresolved) — services/catalog/internal/app/app.go:20 — fact: access (db.json, line 23)
+  - `New` (service, application) — services/catalog/internal/app/app.go:35 — jev p=0.96
+- `services/catalog/internal/catalog/model.go`
+  - `Category` (model, domain) — services/catalog/internal/catalog/model.go:6 — fact: persisted entity (table:categories (convention))
+  - `Product` (model, domain) — services/catalog/internal/catalog/model.go:13 — fact: persisted entity (table:products (convention))
+- `services/catalog/internal/catalog/service.go`
+  - `Service.List` (service, application) — services/catalog/internal/catalog/service.go:34 — fact: reads Product via s.db (direct) (entity-access, line 36)
+  - `Service.Create` (service, application) — services/catalog/internal/catalog/service.go:41 — fact: writes Product via s.db (direct) (entity-access, line 45)
+  - `Service.PriceOf` (service, application) — services/catalog/internal/catalog/service.go:49 — fact: reads Product via s.db (direct) (entity-access, line 57)
+- `services/catalog/internal/platform/db.go`
+  - `Open` (open: service|util, unresolved: kind unresolved) — services/catalog/internal/platform/db.go:15 — jev p=0.93
+- `services/catalog/internal/store/db.go`
+  - `Open` (open: service|util, unresolved: kind unresolved) — services/catalog/internal/store/db.go:12 — jev p=0.92
+- `services/customers/internal/app/app.go`
+  - `Deps` (open: repository|service, unresolved: kind unresolved) — services/customers/internal/app/app.go:20 — fact: access (db.json, line 23)
+  - `New` (service, application) — services/customers/internal/app/app.go:35 — jev p=0.95
+- `services/customers/internal/customers/model.go`
+  - `Customer` (model, domain) — services/customers/internal/customers/model.go:10 — fact: persisted entity (table:customers (convention))
+- `services/customers/internal/customers/service.go`
+  - `Service.Get` (service, application) — services/customers/internal/customers/service.go:12 — fact: reads Customer via s.db (direct) (entity-access, line 14)
+  - `Service.Register` (service, application) — services/customers/internal/customers/service.go:21 — fact: writes Customer via s.db (direct) (entity-access, line 21)
+  - `Service.IsActive` (service, application) — services/customers/internal/customers/service.go:24 — jev p=0.73
+- `services/customers/internal/platform/db.go`
+  - `Open` (open: service|util, unresolved: kind unresolved) — services/customers/internal/platform/db.go:15 — jev p=0.95
+- `services/customers/internal/store/db.go`
+  - `Open` (open: service|util, unresolved: kind unresolved) — services/customers/internal/store/db.go:12 — jev p=0.93
+- `services/inventory/internal/app/app.go`
+  - `Deps` (open: repository|service, unresolved: kind unresolved) — services/inventory/internal/app/app.go:20 — fact: access (db.json, line 23)
+  - `New` (service, application) — services/inventory/internal/app/app.go:35 — jev p=0.96
+- `services/inventory/internal/app/create_order_compensation.go`
+  - `compensateHandler` (handler, transport) — services/inventory/internal/app/create_order_compensation.go:34 — fact: writes inventory_compensations via tx (direct) (entity-access, line 47)
+- `services/inventory/internal/app/remote_operations.go`
+  - `reserveHandler` (handler, transport) — services/inventory/internal/app/remote_operations.go:28 — fact: reads StockItem via tx (direct) (entity-access, line 43)
+- `services/inventory/internal/httpapi/stock_item_handlers.go`
+  - `getStockItem` (handler, transport) — services/inventory/internal/httpapi/stock_item_handlers.go:33 — fact: reads StockItem via db (direct) (entity-access, line 44)
+- `services/inventory/internal/inventory/model.go`
+  - `StockItem` (model, domain) — services/inventory/internal/inventory/model.go:6 — fact: persisted entity (table:stock_items)
+- `services/inventory/internal/inventory/service.go`
+  - `Service.Reserve` (service, application) — services/inventory/internal/inventory/service.go:18 — fact: reads StockItem via tx (direct) (entity-access, line 20)
+  - `Service.Restock` (service, application) — services/inventory/internal/inventory/service.go:36 — fact: writes StockItem via s.db (direct) (entity-access, line 38)
+- `services/inventory/internal/jobs/scheduler.go`
+  - `Run` (service, application) — services/inventory/internal/jobs/scheduler.go:17 — fact: access (db.json, line 17)
+  - `runLeased` (service, application) — services/inventory/internal/jobs/scheduler.go:30 — fact: access (db.json, line 30)
+- `services/inventory/internal/platform/db.go`
+  - `Open` (open: service|util, unresolved: kind unresolved) — services/inventory/internal/platform/db.go:15 — jev p=0.95
+- `services/inventory/internal/store/db.go`
+  - `Open` (open: service|util, unresolved: kind unresolved) — services/inventory/internal/store/db.go:16 — jev p=0.95
+- `services/orders/internal/app/app.go`
+  - `Deps` (open: repository|service, unresolved: kind unresolved) — services/orders/internal/app/app.go:20 — fact: access (db.json, line 23)
+  - `New` (service, application) — services/orders/internal/app/app.go:35 — jev p=0.96
+- `services/orders/internal/contracts/catalog/contracts.go`
+  - `Product` (model, domain) — services/orders/internal/contracts/catalog/contracts.go:12 — fact: persisted entity (table:products (convention))
+  - `Category` (model, domain) — services/orders/internal/contracts/catalog/contracts.go:22 — fact: persisted entity (table:categories (convention))
+- `services/orders/internal/orders/model.go`
+  - `Order` (model, domain) — services/orders/internal/orders/model.go:6 — fact: persisted entity (table:orders (convention))
+  - `OrderLine` (model, domain) — services/orders/internal/orders/model.go:15 — fact: persisted entity (table:order_lines (convention))
+- `services/orders/internal/orders/service.go`
+  - `Service.PlaceOrder` (service, application) — services/orders/internal/orders/service.go:51 — fact: writes Order via tx (direct) (entity-access, line 103)
+  - `Service.ForCustomer` (service, application) — services/orders/internal/orders/service.go:157 — fact: reads Order via s.db (direct) (entity-access, line 159)
+- `services/orders/internal/outbox/outbox.go`
+  - `Relay` (service, application) — services/orders/internal/outbox/outbox.go:18 — fact: access (db.json, line 18)
+- `services/orders/internal/platform/db.go`
+  - `Open` (open: service|util, unresolved: kind unresolved) — services/orders/internal/platform/db.go:15 — jev p=0.94
+- `services/orders/internal/store/db.go`
+  - `Open` (open: service|util, unresolved: kind unresolved) — services/orders/internal/store/db.go:17 — jev p=0.95
+- `services/payments/internal/app/app.go`
+  - `Deps` (open: repository|service, unresolved: kind unresolved) — services/payments/internal/app/app.go:20 — fact: access (db.json, line 23)
+  - `New` (service, application) — services/payments/internal/app/app.go:35 — jev p=0.96
+- `services/payments/internal/app/create_order_compensation.go`
+  - `compensatePaymentHandler` (handler, transport) — services/payments/internal/app/create_order_compensation.go:35 — fact: writes payment_compensations via tx (direct) (entity-access, line 48)
+- `services/payments/internal/app/remote_operations.go`
+  - `chargeHandler` (handler, transport) — services/payments/internal/app/remote_operations.go:26 — jev p=0.74
+- `services/payments/internal/httpapi/payment_handlers.go`
+  - `RegisterRoutes` (wiring, infrastructure) — services/payments/internal/httpapi/payment_handlers.go:25 — fact: reads Payment via db (direct) (entity-access, line 34)
+- `services/payments/internal/payments/model.go`
+  - `Payment` (model, domain) — services/payments/internal/payments/model.go:6 — fact: persisted entity (table:payments (convention))
+- `services/payments/internal/payments/service.go`
+  - `Service.Charge` (service, application) — services/payments/internal/payments/service.go:15 — fact: writes Payment via tx (direct) (entity-access, line 19)
+- `services/payments/internal/platform/db.go`
+  - `Open` (open: service|util, unresolved: kind unresolved) — services/payments/internal/platform/db.go:15 — jev p=0.94
+- `services/payments/internal/store/db.go`
+  - `Open` (open: service|util, unresolved: kind unresolved) — services/payments/internal/store/db.go:16 — jev p=0.95
 
-### scheduling (1)
+### scheduling (5)
 
-- `internal/inventory/service.go`
-  - `StartRestockJob` (job, application) — internal/inventory/service.go:42 — fact: references time.NewTicker
+- `pkg/outbox/outbox.go`
+  - `Relay.Run` (service, application) — pkg/outbox/outbox.go:57 — fact: references time.NewTicker
+- `services/inventory/internal/inventory/service.go`
+  - `Service.Restock` (service, application) — services/inventory/internal/inventory/service.go:36 — jev p=0.71
+  - `StartRestockJob` (job, application) — services/inventory/internal/inventory/service.go:42 — fact: references time.NewTicker
+- `services/inventory/internal/jobs/scheduler.go`
+  - `Run` (service, application) — services/inventory/internal/jobs/scheduler.go:17 — fact: references time.NewTicker
+  - `runLeased` (service, application) — services/inventory/internal/jobs/scheduler.go:30 — jev p=0.77
 
-### secrets_crypto (0)
+### secrets_crypto (4)
 
-_none_
+- `gateway/internal/proxy/auth.go`
+  - `Authenticate` (service, application) — gateway/internal/proxy/auth.go:16 — jev p=0.78
+- `pkg/events/envelope.go`
+  - `NewID` (util, cross-cutting) — pkg/events/envelope.go:39 — jev p=0.70
+- `pkg/httpx/internal.go`
+  - `internalToken` (util, cross-cutting) — pkg/httpx/internal.go:22 — jev p=0.90
+  - `IsInternal` (handler, transport) — pkg/httpx/internal.go:26 — jev p=0.72
 
-### serialization (1)
+### serialization (16)
 
-- `internal/payments/gateway.go`
-  - `Gateway.Charge` (client, infrastructure) — internal/payments/gateway.go:23 — fact: references encoding/json.Marshal
+- `pkg/events/envelope.go`
+  - `New` (open: service|util, unresolved: kind unresolved) — pkg/events/envelope.go:27 — fact: references encoding/json.Marshal
+  - `Envelope.Decode` (util, cross-cutting) — pkg/events/envelope.go:36 — fact: references encoding/json.Unmarshal
+- `pkg/events/nats.go`
+  - `NATS.Publish` (service, application) — pkg/events/nats.go:50 — fact: references encoding/json.Marshal
+  - `NATS.Subscribe` (service, application) — pkg/events/nats.go:77 — fact: references encoding/json.Unmarshal
+- `pkg/outbox/outbox.go`
+  - `Enqueue` (service, application) — pkg/outbox/outbox.go:39 — fact: references encoding/json.Marshal
+  - `Relay.Flush` (service, application) — pkg/outbox/outbox.go:77 — fact: references encoding/json.Unmarshal
+- `services/orders/internal/clients/catalog/client.go`
+  - `remoteError` (util, cross-cutting) — services/orders/internal/clients/catalog/client.go:38 — fact: references encoding/json.Unmarshal
+  - `Service.post` (service, application) — services/orders/internal/clients/catalog/client.go:78 — fact: references encoding/json.Marshal
+- `services/orders/internal/clients/customers/client.go`
+  - `remoteError` (util, cross-cutting) — services/orders/internal/clients/customers/client.go:37 — fact: references encoding/json.Unmarshal
+  - `Service.IsActive` (service, application) — services/orders/internal/clients/customers/client.go:71 — fact: references encoding/json.Marshal
+- `services/orders/internal/clients/inventory/client.go`
+  - `remoteError` (util, cross-cutting) — services/orders/internal/clients/inventory/client.go:30 — fact: references encoding/json.Unmarshal
+  - `Service.Reserve` (service, application) — services/orders/internal/clients/inventory/client.go:60 — fact: references encoding/json.Marshal
+- `services/orders/internal/clients/payments/client.go`
+  - `remoteError` (util, cross-cutting) — services/orders/internal/clients/payments/client.go:31 — fact: references encoding/json.Unmarshal
+  - `Service.Charge` (service, application) — services/orders/internal/clients/payments/client.go:64 — fact: references encoding/json.Marshal
+- `services/orders/internal/orders/service.go`
+  - `Service.releaseStock` (service, application) — services/orders/internal/orders/service.go:131 — fact: references encoding/json.Marshal
+- `services/payments/internal/payments/gateway.go`
+  - `Gateway.Charge` (client, infrastructure) — services/payments/internal/payments/gateway.go:23 — fact: references encoding/json.Marshal
 
-### transactions (1)
+### transactions (6)
 
-- `internal/orders/service.go`
-  - `Service.PlaceOrder` (service, application) — internal/orders/service.go:36 — fact: calls .Transaction()
+- `pkg/outbox/outbox.go`
+  - `Relay.Flush` (service, application) — pkg/outbox/outbox.go:77 — fact: calls .BeginTx(), .Commit(), .Rollback()
+- `services/inventory/internal/app/create_order_compensation.go`
+  - `compensateHandler` (handler, transport) — services/inventory/internal/app/create_order_compensation.go:34 — fact: calls .Transaction()
+- `services/inventory/internal/app/remote_operations.go`
+  - `reserveHandler` (handler, transport) — services/inventory/internal/app/remote_operations.go:28 — fact: calls .Transaction()
+- `services/orders/internal/orders/service.go`
+  - `Service.PlaceOrder` (service, application) — services/orders/internal/orders/service.go:51 — fact: calls .Transaction()
+- `services/payments/internal/app/create_order_compensation.go`
+  - `compensatePaymentHandler` (handler, transport) — services/payments/internal/app/create_order_compensation.go:35 — fact: calls .Transaction()
+- `services/payments/internal/app/remote_operations.go`
+  - `chargeHandler` (handler, transport) — services/payments/internal/app/remote_operations.go:26 — fact: calls .Transaction()
 
 ## Needs review
 
 Unresolved answers never feed a derivation; these units are listed by name in every playbook that routes them.
 
-- `Category` (model, domain) — internal/catalog/model.go:6 — unresolved: serialization
-- `Service.PriceOf` (service, application) — internal/catalog/service.go:38 — unresolved: business_rules
-- `registerCustomer` (handler, transport) — internal/customers/handlers.go:30 — unresolved: error_mapping
-- `Service.IsActive` (service, application) — internal/customers/service.go:24 — unresolved: change_risk
-- `StockItem` (model, domain) — internal/inventory/model.go:6 — unresolved: serialization
-- `Service.OnOrderPlaced` (service, application) — internal/inventory/service.go:31 — unresolved: change_risk
-- `Service.Restock` (service, application) — internal/inventory/service.go:36 — unresolved: scheduling
-- `Service.PlaceOrder` (service, application) — internal/orders/service.go:36 — unresolved: authorization, external_integration
-- `Service.Charge` (service, application) — internal/payments/service.go:15 — unresolved: change_risk
-- `AuthMiddleware` (middleware, cross-cutting) — internal/platform/auth.go:17 — unresolved: error_mapping
-- `UserID` (util, cross-cutting) — internal/platform/auth.go:32 — unresolved: change_risk
-- `Bus` (open: model|service|util, unresolved: kind unresolved) — internal/platform/bus.go:10 — unresolved: kind
-- `Bus.Subscribe` (open: service|util, unresolved: kind unresolved) — internal/platform/bus.go:19 — unresolved: kind
-- `Bus.Publish` (util, cross-cutting) — internal/platform/bus.go:26 — unresolved: change_risk
-- `Open` (open: service|util, unresolved: kind unresolved) — internal/platform/db.go:15 — unresolved: kind, concurrency
+- `Authenticate` (service, application) — gateway/internal/proxy/auth.go:16 — unresolved: error_mapping
+- `FromEnv` (open: service|util, unresolved: kind unresolved) — gateway/internal/proxy/proxy.go:24 — unresolved: kind
+- `New` (middleware, cross-cutting) — gateway/internal/proxy/proxy.go:38 — unresolved: external_integration
+- `Routes` (util, cross-cutting) — gateway/internal/proxy/routes.go:5 — unresolved: http_transport
+- `Bus` (open: repository|service|client, unresolved: kind unresolved) — pkg/events/bus.go:14 — unresolved: kind
+- `NewMemory` (util, cross-cutting) — pkg/events/bus.go:27 — unresolved: messaging
+- `Memory.Subscribe` (open: service|util, unresolved: kind unresolved) — pkg/events/bus.go:43 — unresolved: kind
+- `Connect` (service, application) — pkg/events/connect.go:7 — unresolved: input_validation, messaging
+- `Envelope` (open: dto|model, unresolved: kind unresolved) — pkg/events/envelope.go:17 — unresolved: kind, serialization
+- `New` (open: service|util, unresolved: kind unresolved) — pkg/events/envelope.go:27 — unresolved: kind
+- `Idempotent` (util, cross-cutting) — pkg/events/idempotent.go:16 — unresolved: messaging
+- `NewMemorySeen` (util, cross-cutting) — pkg/events/idempotent.go:36 — unresolved: caching
+- `MemorySeen.MarkSeen` (open: service|util, unresolved: kind unresolved) — pkg/events/idempotent.go:39 — unresolved: kind, business_rules
+- `SQLSeen.MarkSeen` (repository, infrastructure) — pkg/events/idempotent.go:55 — unresolved: concurrency, business_rules
+- `ConnectNATS` (open: service|util, unresolved: kind unresolved) — pkg/events/nats.go:23 — unresolved: kind, external_integration
+- `NATS.ensure` (service, application) — pkg/events/nats.go:41 — unresolved: persistence
+- `NATS.Subscribe` (service, application) — pkg/events/nats.go:77 — unresolved: concurrency
+- `NewClient` (util, cross-cutting) — pkg/httpx/client.go:13 — unresolved: observability
+- `IsInternal` (handler, transport) — pkg/httpx/internal.go:26 — unresolved: input_validation, configuration
+- `UnlessInternal` (util, cross-cutting) — pkg/httpx/internal.go:39 — unresolved: authorization
+- `internalCaller.RoundTrip` (handler, transport) — pkg/httpx/internal.go:55 — unresolved: external_integration, observability, secrets_crypto
+- `Health.AddReadiness` (open: service|util, unresolved: kind unresolved) — pkg/httpx/server.go:28 — unresolved: kind, caching
+- `WriteJSON` (handler, transport) — pkg/httpx/server.go:65 — unresolved: serialization
+- `Setup` (open: service|util, unresolved: kind unresolved) — pkg/otelx/otelx.go:20 — unresolved: kind, external_integration
+- `Enqueue` (service, application) — pkg/outbox/outbox.go:39 — unresolved: messaging
+- `Relay.Flush` (service, application) — pkg/outbox/outbox.go:77 — unresolved: scheduling, business_rules
+- `Saga.Run` (model, domain) — pkg/saga/saga.go:49 — unresolved: transactions, business_rules
+- `Deps` (open: repository|service, unresolved: kind unresolved) — services/catalog/internal/app/app.go:20 — unresolved: kind
+- `New` (service, application) — services/catalog/internal/app/app.go:35 — unresolved: messaging
+- `Deps.Close` (open: model|util, unresolved: kind unresolved) — services/catalog/internal/app/app.go:69 — unresolved: kind
+- `Category` (model, domain) — services/catalog/internal/catalog/model.go:6 — unresolved: serialization
+- `Service.PriceOf` (service, application) — services/catalog/internal/catalog/service.go:49 — unresolved: business_rules
+- `Load` (config, cross-cutting) — services/catalog/internal/config/config.go:22 — unresolved: secrets_crypto
+- `AuthMiddleware` (middleware, cross-cutting) — services/catalog/internal/platform/auth.go:17 — unresolved: error_mapping
+- `Bus` (open: model|service|util, unresolved: kind unresolved) — services/catalog/internal/platform/bus.go:10 — unresolved: kind
+- `Bus.Subscribe` (open: service|util, unresolved: kind unresolved) — services/catalog/internal/platform/bus.go:19 — unresolved: kind
+- `Bus.Publish` (open: service|util, unresolved: kind unresolved) — services/catalog/internal/platform/bus.go:26 — unresolved: kind
+- `Open` (open: service|util, unresolved: kind unresolved) — services/catalog/internal/platform/db.go:15 — unresolved: kind, concurrency
+- `Open` (open: service|util, unresolved: kind unresolved) — services/catalog/internal/store/db.go:12 — unresolved: kind
+- `Deps` (open: repository|service, unresolved: kind unresolved) — services/customers/internal/app/app.go:20 — unresolved: kind
+- `New` (service, application) — services/customers/internal/app/app.go:35 — unresolved: messaging
+- `Deps.Close` (open: model|util, unresolved: kind unresolved) — services/customers/internal/app/app.go:69 — unresolved: kind
+- `Load` (config, cross-cutting) — services/customers/internal/config/config.go:22 — unresolved: secrets_crypto
+- `registerCustomer` (handler, transport) — services/customers/internal/customers/handlers.go:30 — unresolved: error_mapping
+- `AuthMiddleware` (middleware, cross-cutting) — services/customers/internal/platform/auth.go:17 — unresolved: error_mapping
+- `Bus` (open: model|service|util, unresolved: kind unresolved) — services/customers/internal/platform/bus.go:10 — unresolved: kind
+- `Bus.Subscribe` (open: service|util, unresolved: kind unresolved) — services/customers/internal/platform/bus.go:19 — unresolved: kind
+- `Bus.Publish` (open: service|util, unresolved: kind unresolved) — services/customers/internal/platform/bus.go:26 — unresolved: kind
+- `Open` (open: service|util, unresolved: kind unresolved) — services/customers/internal/platform/db.go:15 — unresolved: kind
+- `Open` (open: service|util, unresolved: kind unresolved) — services/customers/internal/store/db.go:12 — unresolved: kind
+- `LegacyStockItem` (model, domain) — services/inventory/internal/acl/legacy.go:13 — unresolved: serialization
+- `Deps` (open: repository|service, unresolved: kind unresolved) — services/inventory/internal/app/app.go:20 — unresolved: kind
+- `New` (service, application) — services/inventory/internal/app/app.go:35 — unresolved: messaging
+- `Deps.Close` (open: model|util, unresolved: kind unresolved) — services/inventory/internal/app/app.go:69 — unresolved: kind
+- `compensateHandler` (handler, transport) — services/inventory/internal/app/create_order_compensation.go:34 — unresolved: error_mapping, concurrency
+- `reserveHandler` (handler, transport) — services/inventory/internal/app/remote_operations.go:28 — unresolved: business_rules
+- `Load` (config, cross-cutting) — services/inventory/internal/config/config.go:22 — unresolved: secrets_crypto
+- `SubscribeOrderPlaced` (service, application) — services/inventory/internal/events/order_placed_consumer.go:17 — unresolved: serialization
+- `StockItem` (model, domain) — services/inventory/internal/inventory/model.go:6 — unresolved: serialization
+- `Service.OnOrderPlaced` (service, application) — services/inventory/internal/inventory/service.go:31 — unresolved: observability
+- `runLeased` (service, application) — services/inventory/internal/jobs/scheduler.go:30 — unresolved: concurrency
+- `AuthMiddleware` (middleware, cross-cutting) — services/inventory/internal/platform/auth.go:17 — unresolved: error_mapping
+- `Bus` (open: model|service|util, unresolved: kind unresolved) — services/inventory/internal/platform/bus.go:10 — unresolved: kind
+- `Bus.Subscribe` (open: service|util, unresolved: kind unresolved) — services/inventory/internal/platform/bus.go:19 — unresolved: kind
+- `Bus.Publish` (open: service|util, unresolved: kind unresolved) — services/inventory/internal/platform/bus.go:26 — unresolved: kind
+- `Open` (open: service|util, unresolved: kind unresolved) — services/inventory/internal/platform/db.go:15 — unresolved: kind, concurrency
+- `Open` (open: service|util, unresolved: kind unresolved) — services/inventory/internal/store/db.go:16 — unresolved: kind
+- `Deps` (open: repository|service, unresolved: kind unresolved) — services/orders/internal/app/app.go:20 — unresolved: kind
+- `New` (service, application) — services/orders/internal/app/app.go:35 — unresolved: messaging
+- `Deps.Close` (open: model|util, unresolved: kind unresolved) — services/orders/internal/app/app.go:69 — unresolved: kind
+- `baseURL` (open: service|util, unresolved: kind unresolved) — services/orders/internal/clients/catalog/client.go:27 — unresolved: kind
+- `newService` (service, unresolved: depends on configuration) — services/orders/internal/clients/catalog/client.go:65 — unresolved: configuration
+- `Service.post` (service, application) — services/orders/internal/clients/catalog/client.go:78 — unresolved: http_transport
+- `baseURL` (open: service|util, unresolved: kind unresolved) — services/orders/internal/clients/customers/client.go:26 — unresolved: kind
+- `newService` (service, unresolved: depends on configuration) — services/orders/internal/clients/customers/client.go:60 — unresolved: configuration
+- `Service.IsActive` (service, application) — services/orders/internal/clients/customers/client.go:71 — unresolved: business_rules
+- `baseURL` (open: service|util, unresolved: kind unresolved) — services/orders/internal/clients/inventory/client.go:19 — unresolved: kind
+- `newService` (service, unresolved: depends on configuration) — services/orders/internal/clients/inventory/client.go:53 — unresolved: configuration
+- `baseURL` (open: service|util, unresolved: kind unresolved) — services/orders/internal/clients/payments/client.go:20 — unresolved: kind
+- `newService` (service, unresolved: depends on configuration) — services/orders/internal/clients/payments/client.go:57 — unresolved: configuration
+- `Load` (config, cross-cutting) — services/orders/internal/config/config.go:22 — unresolved: secrets_crypto
+- `Category` (model, domain) — services/orders/internal/contracts/catalog/contracts.go:22 — unresolved: serialization
+- `OrderPlaced` (model, domain) — services/orders/internal/events/order_placed.go:13 — unresolved: serialization
+- `PublishOrderPlaced` (service, application) — services/orders/internal/events/order_placed.go:20 — unresolved: persistence
+- `Service.PlaceOrder` (service, application) — services/orders/internal/orders/service.go:51 — unresolved: external_integration
+- `AuthMiddleware` (middleware, cross-cutting) — services/orders/internal/platform/auth.go:17 — unresolved: error_mapping
+- `Bus` (open: model|service|util, unresolved: kind unresolved) — services/orders/internal/platform/bus.go:10 — unresolved: kind
+- `NewBus` (util, cross-cutting) — services/orders/internal/platform/bus.go:16 — unresolved: messaging
+- `Bus.Subscribe` (open: service|util, unresolved: kind unresolved) — services/orders/internal/platform/bus.go:19 — unresolved: kind
+- `Bus.Publish` (open: service|util, unresolved: kind unresolved) — services/orders/internal/platform/bus.go:26 — unresolved: kind
+- `Open` (open: service|util, unresolved: kind unresolved) — services/orders/internal/platform/db.go:15 — unresolved: kind
+- `CreateOrder` (open: service|util, unresolved: kind unresolved) — services/orders/internal/saga/create_order.go:20 — unresolved: kind
+- `Open` (open: service|util, unresolved: kind unresolved) — services/orders/internal/store/db.go:17 — unresolved: kind
+- `ParseStatus` (open: service|util, unresolved: kind unresolved) — services/payments/internal/acl/legacy.go:21 — unresolved: kind, business_rules
+- `ChargeRequest.Validate` (dto, transport) — services/payments/internal/acl/legacy.go:36 — unresolved: business_rules
+- `Deps` (open: repository|service, unresolved: kind unresolved) — services/payments/internal/app/app.go:20 — unresolved: kind
+- `Deps.Close` (open: model|util, unresolved: kind unresolved) — services/payments/internal/app/app.go:69 — unresolved: kind
+- `compensatePaymentHandler` (handler, transport) — services/payments/internal/app/create_order_compensation.go:35 — unresolved: error_mapping, concurrency
+- `chargeHandler` (handler, transport) — services/payments/internal/app/remote_operations.go:26 — unresolved: business_rules
+- `Routes` (middleware, cross-cutting) — services/payments/internal/app/routes.go:15 — unresolved: concurrency
+- `Load` (config, cross-cutting) — services/payments/internal/config/config.go:22 — unresolved: secrets_crypto
+- `AuthMiddleware` (middleware, cross-cutting) — services/payments/internal/platform/auth.go:17 — unresolved: error_mapping
+- `Bus` (open: model|service|util, unresolved: kind unresolved) — services/payments/internal/platform/bus.go:10 — unresolved: kind
+- `Bus.Subscribe` (open: service|util, unresolved: kind unresolved) — services/payments/internal/platform/bus.go:19 — unresolved: kind
+- `Bus.Publish` (open: service|util, unresolved: kind unresolved) — services/payments/internal/platform/bus.go:26 — unresolved: kind
+- `Open` (open: service|util, unresolved: kind unresolved) — services/payments/internal/platform/db.go:15 — unresolved: kind, concurrency
+- `Open` (open: service|util, unresolved: kind unresolved) — services/payments/internal/store/db.go:16 — unresolved: kind
 
 ## Kind open
 
-- `Bus` (open: model|service|util, unresolved: kind unresolved) — internal/platform/bus.go:10 — unresolved (struct without tags or a telling name)
-- `Bus.Subscribe` (open: service|util, unresolved: kind unresolved) — internal/platform/bus.go:19 — unresolved (no fact or name settles it)
-- `Open` (open: service|util, unresolved: kind unresolved) — internal/platform/db.go:15 — unresolved (no fact or name settles it)
+- `FromEnv` (open: service|util, unresolved: kind unresolved) — gateway/internal/proxy/proxy.go:24 — unresolved (no fact or name settles it)
+- `Bus` (open: repository|service|client, unresolved: kind unresolved) — pkg/events/bus.go:14 — unresolved (interface without a telling name)
+- `Memory.Subscribe` (open: service|util, unresolved: kind unresolved) — pkg/events/bus.go:43 — unresolved (no fact or name settles it)
+- `Memory.Close` (open: model|util, unresolved: kind not-asked) — pkg/events/bus.go:51 — not-asked (method with no facts on an untyped receiver)
+- `Envelope` (open: dto|model, unresolved: kind unresolved) — pkg/events/envelope.go:17 — unresolved (wire tags only (`json`))
+- `New` (open: service|util, unresolved: kind unresolved) — pkg/events/envelope.go:27 — unresolved (no fact or name settles it)
+- `MemorySeen.MarkSeen` (open: service|util, unresolved: kind unresolved) — pkg/events/idempotent.go:39 — unresolved (no fact or name settles it)
+- `ConnectNATS` (open: service|util, unresolved: kind unresolved) — pkg/events/nats.go:23 — unresolved (no fact or name settles it)
+- `NATS.Close` (open: model|util, unresolved: kind not-asked) — pkg/events/nats.go:106 — not-asked (method with no facts on an untyped receiver)
+- `Health.AddReadiness` (open: service|util, unresolved: kind unresolved) — pkg/httpx/server.go:28 — unresolved (no fact or name settles it)
+- `Setup` (open: service|util, unresolved: kind unresolved) — pkg/otelx/otelx.go:20 — unresolved (no fact or name settles it)
+- `StepError.Unwrap` (open: model|util, unresolved: kind not-asked) — pkg/saga/saga.go:44 — not-asked (method with no facts on an untyped receiver)
+- `Deps` (open: repository|service, unresolved: kind unresolved) — services/catalog/internal/app/app.go:20 — unresolved (holds a database handle)
+- `Deps.Ready` (open: model|util, unresolved: kind not-asked) — services/catalog/internal/app/app.go:66 — not-asked (method with no facts on an untyped receiver)
+- `Deps.Close` (open: model|util, unresolved: kind unresolved) — services/catalog/internal/app/app.go:69 — unresolved (method with no facts on an untyped receiver)
+- `Bus` (open: model|service|util, unresolved: kind unresolved) — services/catalog/internal/platform/bus.go:10 — unresolved (struct without tags or a telling name)
+- `Bus.Subscribe` (open: service|util, unresolved: kind unresolved) — services/catalog/internal/platform/bus.go:19 — unresolved (no fact or name settles it)
+- `Bus.Publish` (open: service|util, unresolved: kind unresolved) — services/catalog/internal/platform/bus.go:26 — unresolved (no fact or name settles it)
+- `Open` (open: service|util, unresolved: kind unresolved) — services/catalog/internal/platform/db.go:15 — unresolved (no fact or name settles it)
+- `Open` (open: service|util, unresolved: kind unresolved) — services/catalog/internal/store/db.go:12 — unresolved (no fact or name settles it)
+- `Deps` (open: repository|service, unresolved: kind unresolved) — services/customers/internal/app/app.go:20 — unresolved (holds a database handle)
+- `Deps.Ready` (open: model|util, unresolved: kind not-asked) — services/customers/internal/app/app.go:66 — not-asked (method with no facts on an untyped receiver)
+- `Deps.Close` (open: model|util, unresolved: kind unresolved) — services/customers/internal/app/app.go:69 — unresolved (method with no facts on an untyped receiver)
+- `Bus` (open: model|service|util, unresolved: kind unresolved) — services/customers/internal/platform/bus.go:10 — unresolved (struct without tags or a telling name)
+- `Bus.Subscribe` (open: service|util, unresolved: kind unresolved) — services/customers/internal/platform/bus.go:19 — unresolved (no fact or name settles it)
+- `Bus.Publish` (open: service|util, unresolved: kind unresolved) — services/customers/internal/platform/bus.go:26 — unresolved (no fact or name settles it)
+- `Open` (open: service|util, unresolved: kind unresolved) — services/customers/internal/platform/db.go:15 — unresolved (no fact or name settles it)
+- `Open` (open: service|util, unresolved: kind unresolved) — services/customers/internal/store/db.go:12 — unresolved (no fact or name settles it)
+- `Deps` (open: repository|service, unresolved: kind unresolved) — services/inventory/internal/app/app.go:20 — unresolved (holds a database handle)
+- `Deps.Ready` (open: model|util, unresolved: kind not-asked) — services/inventory/internal/app/app.go:66 — not-asked (method with no facts on an untyped receiver)
+- `Deps.Close` (open: model|util, unresolved: kind unresolved) — services/inventory/internal/app/app.go:69 — unresolved (method with no facts on an untyped receiver)
+- `Bus` (open: model|service|util, unresolved: kind unresolved) — services/inventory/internal/platform/bus.go:10 — unresolved (struct without tags or a telling name)
+- `Bus.Subscribe` (open: service|util, unresolved: kind unresolved) — services/inventory/internal/platform/bus.go:19 — unresolved (no fact or name settles it)
+- `Bus.Publish` (open: service|util, unresolved: kind unresolved) — services/inventory/internal/platform/bus.go:26 — unresolved (no fact or name settles it)
+- `Open` (open: service|util, unresolved: kind unresolved) — services/inventory/internal/platform/db.go:15 — unresolved (no fact or name settles it)
+- `Open` (open: service|util, unresolved: kind unresolved) — services/inventory/internal/store/db.go:16 — unresolved (no fact or name settles it)
+- `Deps` (open: repository|service, unresolved: kind unresolved) — services/orders/internal/app/app.go:20 — unresolved (holds a database handle)
+- `Deps.Ready` (open: model|util, unresolved: kind not-asked) — services/orders/internal/app/app.go:66 — not-asked (method with no facts on an untyped receiver)
+- `Deps.Close` (open: model|util, unresolved: kind unresolved) — services/orders/internal/app/app.go:69 — unresolved (method with no facts on an untyped receiver)
+- `baseURL` (open: service|util, unresolved: kind unresolved) — services/orders/internal/clients/catalog/client.go:27 — unresolved (no fact or name settles it)
+- `baseURL` (open: service|util, unresolved: kind unresolved) — services/orders/internal/clients/customers/client.go:26 — unresolved (no fact or name settles it)
+- `baseURL` (open: service|util, unresolved: kind unresolved) — services/orders/internal/clients/inventory/client.go:19 — unresolved (no fact or name settles it)
+- `baseURL` (open: service|util, unresolved: kind unresolved) — services/orders/internal/clients/payments/client.go:20 — unresolved (no fact or name settles it)
+- `Bus` (open: model|service|util, unresolved: kind unresolved) — services/orders/internal/platform/bus.go:10 — unresolved (struct without tags or a telling name)
+- `Bus.Subscribe` (open: service|util, unresolved: kind unresolved) — services/orders/internal/platform/bus.go:19 — unresolved (no fact or name settles it)
+- `Bus.Publish` (open: service|util, unresolved: kind unresolved) — services/orders/internal/platform/bus.go:26 — unresolved (no fact or name settles it)
+- `Open` (open: service|util, unresolved: kind unresolved) — services/orders/internal/platform/db.go:15 — unresolved (no fact or name settles it)
+- `CreateOrder` (open: service|util, unresolved: kind unresolved) — services/orders/internal/saga/create_order.go:20 — unresolved (no fact or name settles it)
+- `Open` (open: service|util, unresolved: kind unresolved) — services/orders/internal/store/db.go:17 — unresolved (no fact or name settles it)
+- `ParseStatus` (open: service|util, unresolved: kind unresolved) — services/payments/internal/acl/legacy.go:21 — unresolved (no fact or name settles it)
+- `Deps` (open: repository|service, unresolved: kind unresolved) — services/payments/internal/app/app.go:20 — unresolved (holds a database handle)
+- `Deps.Ready` (open: model|util, unresolved: kind not-asked) — services/payments/internal/app/app.go:66 — not-asked (method with no facts on an untyped receiver)
+- `Deps.Close` (open: model|util, unresolved: kind unresolved) — services/payments/internal/app/app.go:69 — unresolved (method with no facts on an untyped receiver)
+- `Bus` (open: model|service|util, unresolved: kind unresolved) — services/payments/internal/platform/bus.go:10 — unresolved (struct without tags or a telling name)
+- `Bus.Subscribe` (open: service|util, unresolved: kind unresolved) — services/payments/internal/platform/bus.go:19 — unresolved (no fact or name settles it)
+- `Bus.Publish` (open: service|util, unresolved: kind unresolved) — services/payments/internal/platform/bus.go:26 — unresolved (no fact or name settles it)
+- `Open` (open: service|util, unresolved: kind unresolved) — services/payments/internal/platform/db.go:15 — unresolved (no fact or name settles it)
+- `Open` (open: service|util, unresolved: kind unresolved) — services/payments/internal/store/db.go:16 — unresolved (no fact or name settles it)
 
 ## All units
 
-- `cmd/shop/main.go`
-  - `main` (wiring, infrastructure) — cmd/shop/main.go:18 — configuration, messaging
-- `internal/catalog/handlers.go`
-  - `RegisterRoutes` (wiring, infrastructure) — internal/catalog/handlers.go:11 — http_transport
-  - `listProducts` (handler, transport) — internal/catalog/handlers.go:16 — http_transport, risk 1
-  - `createProduct` (handler, transport) — internal/catalog/handlers.go:25 — http_transport, risk 1
-- `internal/catalog/model.go`
-  - `Category` (model, domain) — internal/catalog/model.go:6 — persistence
-  - `Product` (model, domain) — internal/catalog/model.go:13 — input_validation, persistence
-  - `init` (wiring, infrastructure) — internal/catalog/model.go:22 — no category
-- `internal/catalog/service.go`
-  - `Service` (service, application) — internal/catalog/service.go:17 — no category
-  - `NewService` (service, application) — internal/catalog/service.go:20 — no category, risk 0
-  - `Service.List` (service, application) — internal/catalog/service.go:23 — persistence, risk 1
-  - `Service.Create` (service, application) — internal/catalog/service.go:30 — persistence, input_validation, business_rules, risk 1
-  - `Service.PriceOf` (service, application) — internal/catalog/service.go:38 — concurrency, persistence, caching, risk 1
-- `internal/customers/handlers.go`
-  - `RegisterRoutes` (wiring, infrastructure) — internal/customers/handlers.go:11 — http_transport
-  - `getCustomer` (handler, transport) — internal/customers/handlers.go:16 — http_transport, input_validation, error_mapping, risk 1
-  - `registerCustomer` (handler, transport) — internal/customers/handlers.go:30 — http_transport, risk 1
-- `internal/customers/model.go`
-  - `Customer` (model, domain) — internal/customers/model.go:10 — input_validation, persistence
-  - `init` (wiring, infrastructure) — internal/customers/model.go:18 — no category
-- `internal/customers/service.go`
-  - `Service` (service, application) — internal/customers/service.go:6 — no category
-  - `NewService` (service, application) — internal/customers/service.go:9 — no category, risk 0
-  - `Service.Get` (service, application) — internal/customers/service.go:12 — persistence, risk 1
-  - `Service.Register` (service, application) — internal/customers/service.go:21 — persistence, risk 1
-  - `Service.IsActive` (service, application) — internal/customers/service.go:24 — persistence, business_rules
-- `internal/inventory/model.go`
-  - `StockItem` (model, domain) — internal/inventory/model.go:6 — persistence
-  - `StockItem.TableName` (model, domain) — internal/inventory/model.go:14 — no category
-  - `init` (wiring, infrastructure) — internal/inventory/model.go:16 — no category
-- `internal/inventory/service.go`
-  - `Service` (service, application) — internal/inventory/service.go:12 — no category
-  - `NewService` (service, application) — internal/inventory/service.go:15 — no category, risk 0
-  - `Service.Reserve` (service, application) — internal/inventory/service.go:18 — persistence, business_rules, risk 1
-  - `Service.OnOrderPlaced` (service, application) — internal/inventory/service.go:31 — messaging
-  - `Service.Restock` (service, application) — internal/inventory/service.go:36 — persistence, business_rules, risk 1
-  - `StartRestockJob` (job, application) — internal/inventory/service.go:42 — scheduling, concurrency, risk 1
-- `internal/orders/handlers.go`
-  - `RegisterRoutes` (wiring, infrastructure) — internal/orders/handlers.go:13 — http_transport
-  - `placeOrder` (handler, transport) — internal/orders/handlers.go:18 — http_transport, risk 1
-  - `myOrders` (handler, transport) — internal/orders/handlers.go:33 — http_transport, risk 1
-- `internal/orders/model.go`
-  - `Order` (model, domain) — internal/orders/model.go:6 — persistence
-  - `OrderLine` (model, domain) — internal/orders/model.go:15 — persistence
-  - `PlaceOrderRequest` (dto, transport) — internal/orders/model.go:24 — input_validation
-  - `LineItem` (dto, transport) — internal/orders/model.go:30 — input_validation
-  - `init` (wiring, infrastructure) — internal/orders/model.go:35 — no category
-- `internal/orders/service.go`
-  - `Service` (service, application) — internal/orders/service.go:19 — no category
-  - `NewService` (service, application) — internal/orders/service.go:29 — no category, risk 0
-  - `Service.PlaceOrder` (service, application) — internal/orders/service.go:36 — transactions, persistence, messaging, business_rules, risk 2
-  - `Service.ForCustomer` (service, application) — internal/orders/service.go:78 — persistence, risk 1
-- `internal/payments/gateway.go`
-  - `Gateway` (client, infrastructure) — internal/payments/gateway.go:12 — no category
-  - `NewGateway` (client, infrastructure) — internal/payments/gateway.go:18 — no category, risk 0
-  - `Gateway.Charge` (client, infrastructure) — internal/payments/gateway.go:23 — serialization, external_integration, risk 2
-- `internal/payments/model.go`
-  - `Payment` (model, domain) — internal/payments/model.go:6 — persistence
-  - `init` (wiring, infrastructure) — internal/payments/model.go:13 — no category
-- `internal/payments/service.go`
-  - `Service` (service, application) — internal/payments/service.go:6 — no category
-  - `NewService` (service, application) — internal/payments/service.go:12 — no category, risk 0
-  - `Service.Charge` (service, application) — internal/payments/service.go:15 — persistence, external_integration, business_rules
-- `internal/platform/auth.go`
-  - `AuthMiddleware` (middleware, cross-cutting) — internal/platform/auth.go:17 — http_transport, authentication, input_validation, risk 2
-  - `UserID` (util, cross-cutting) — internal/platform/auth.go:32 — no category
-- `internal/platform/bus.go`
-  - `Bus` (open: model|service|util, unresolved: kind unresolved) — internal/platform/bus.go:10 — concurrency
-  - `NewBus` (util, cross-cutting) — internal/platform/bus.go:16 — no category, risk 0
-  - `Bus.Subscribe` (open: service|util, unresolved: kind unresolved) — internal/platform/bus.go:19 — concurrency, messaging, risk 1
-  - `Bus.Publish` (util, cross-cutting) — internal/platform/bus.go:26 — concurrency, messaging
-- `internal/platform/db.go`
-  - `Register` (util, cross-cutting) — internal/platform/db.go:12 — concurrency, risk 1
-  - `Open` (open: service|util, unresolved: kind unresolved) — internal/platform/db.go:15 — persistence, risk 1
+- `gateway/cmd/gateway/main.go`
+  - `main` (wiring, infrastructure) — gateway/cmd/gateway/main.go:22 — no category, risk 0
+  - `run` (wiring, infrastructure) — gateway/cmd/gateway/main.go:29 — configuration, http_transport, risk 0
+- `gateway/internal/proxy/auth.go`
+  - `Authenticate` (service, application) — gateway/internal/proxy/auth.go:16 — authentication, http_transport, input_validation, external_integration, secrets_crypto, risk 0
+- `gateway/internal/proxy/proxy.go`
+  - `Route` (model, domain) — gateway/internal/proxy/proxy.go:17 — no category
+  - `FromEnv` (open: service|util, unresolved: kind unresolved) — gateway/internal/proxy/proxy.go:24 — configuration, risk 0
+  - `New` (middleware, cross-cutting) — gateway/internal/proxy/proxy.go:38 — http_transport, input_validation, risk 1
+- `gateway/internal/proxy/routes.go`
+  - `Routes` (util, cross-cutting) — gateway/internal/proxy/routes.go:5 — no category, risk 1
+- `pkg/events/bus.go`
+  - `Bus` (open: repository|service|client, unresolved: kind unresolved) — pkg/events/bus.go:14 — no category
+  - `Memory` (model, domain) — pkg/events/bus.go:21 — concurrency
+  - `NewMemory` (util, cross-cutting) — pkg/events/bus.go:27 — no category, risk 1
+  - `Memory.Publish` (service, application) — pkg/events/bus.go:30 — concurrency, messaging, risk 0
+  - `Memory.Subscribe` (open: service|util, unresolved: kind unresolved) — pkg/events/bus.go:43 — concurrency, messaging, risk 0
+  - `Memory.Close` (open: model|util, unresolved: kind not-asked) — pkg/events/bus.go:51 — no category, risk 0
+- `pkg/events/connect.go`
+  - `Connect` (service, application) — pkg/events/connect.go:7 — no category, risk 0
+- `pkg/events/envelope.go`
+  - `Envelope` (open: dto|model, unresolved: kind unresolved) — pkg/events/envelope.go:17 — no category
+  - `New` (open: service|util, unresolved: kind unresolved) — pkg/events/envelope.go:27 — serialization, risk 1
+  - `Envelope.Decode` (util, cross-cutting) — pkg/events/envelope.go:36 — serialization, risk 1
+  - `NewID` (util, cross-cutting) — pkg/events/envelope.go:39 — secrets_crypto, risk 1
+- `pkg/events/idempotent.go`
+  - `Seen` (repository, infrastructure) — pkg/events/idempotent.go:10 — no category
+  - `Idempotent` (util, cross-cutting) — pkg/events/idempotent.go:16 — no category, risk 1
+  - `MemorySeen` (model, domain) — pkg/events/idempotent.go:30 — concurrency
+  - `NewMemorySeen` (util, cross-cutting) — pkg/events/idempotent.go:36 — no category, risk 0
+  - `MemorySeen.MarkSeen` (open: service|util, unresolved: kind unresolved) — pkg/events/idempotent.go:39 — concurrency, caching, risk 0
+  - `SQLSeen` (repository, infrastructure) — pkg/events/idempotent.go:52 — persistence
+  - `SQLSeen.MarkSeen` (repository, infrastructure) — pkg/events/idempotent.go:55 — persistence, risk 1
+- `pkg/events/nats.go`
+  - `NATS` (model, domain) — pkg/events/nats.go:17 — no category
+  - `ConnectNATS` (open: service|util, unresolved: kind unresolved) — pkg/events/nats.go:23 — messaging, risk 0
+  - `streamFor` (util, cross-cutting) — pkg/events/nats.go:36 — no category, risk 0
+  - `NATS.ensure` (service, application) — pkg/events/nats.go:41 — messaging, risk 1
+  - `NATS.Publish` (service, application) — pkg/events/nats.go:50 — serialization, messaging, risk 1
+  - `DurableName` (util, cross-cutting) — pkg/events/nats.go:66 — no category, risk 0
+  - `NATS.Subscribe` (service, application) — pkg/events/nats.go:77 — serialization, messaging, risk 0
+  - `NATS.Close` (open: model|util, unresolved: kind not-asked) — pkg/events/nats.go:106 — no category, risk 0
+- `pkg/httpx/client.go`
+  - `NewClient` (util, cross-cutting) — pkg/httpx/client.go:13 — no category, risk 1
+- `pkg/httpx/internal.go`
+  - `internalToken` (util, cross-cutting) — pkg/httpx/internal.go:22 — configuration, secrets_crypto, risk 1
+  - `IsInternal` (handler, transport) — pkg/httpx/internal.go:26 — http_transport, authentication, secrets_crypto, risk 1
+  - `UnlessInternal` (util, cross-cutting) — pkg/httpx/internal.go:39 — http_transport, risk 0
+  - `internalCaller` (handler, transport) — pkg/httpx/internal.go:53 — no category
+  - `internalCaller.RoundTrip` (handler, transport) — pkg/httpx/internal.go:55 — configuration, http_transport, risk 0
+- `pkg/httpx/server.go`
+  - `Health` (model, domain) — pkg/httpx/server.go:19 — concurrency
+  - `NewHealth` (util, cross-cutting) — pkg/httpx/server.go:25 — no category, risk 1
+  - `Health.AddReadiness` (open: service|util, unresolved: kind unresolved) — pkg/httpx/server.go:28 — concurrency, risk 1
+  - `Health.Mount` (wiring, infrastructure) — pkg/httpx/server.go:35 — http_transport, risk 0
+  - `Health.Live` (handler, transport) — pkg/httpx/server.go:41 — http_transport, risk 1
+  - `Health.Ready` (handler, transport) — pkg/httpx/server.go:46 — http_transport, concurrency, risk 1
+  - `WriteJSON` (handler, transport) — pkg/httpx/server.go:65 — http_transport, risk 1
+  - `Run` (service, application) — pkg/httpx/server.go:72 — concurrency, risk 0
+- `pkg/otelx/otelx.go`
+  - `Setup` (open: service|util, unresolved: kind unresolved) — pkg/otelx/otelx.go:20 — observability, risk 0
+- `pkg/outbox/outbox.go`
+  - `Execer` (repository, infrastructure) — pkg/outbox/outbox.go:34 — no category
+  - `Enqueue` (service, application) — pkg/outbox/outbox.go:39 — serialization, persistence, risk 0
+  - `Relay` (service, application) — pkg/outbox/outbox.go:49 — persistence
+  - `Relay.Run` (service, application) — pkg/outbox/outbox.go:57 — scheduling, concurrency, messaging, risk 2
+  - `Relay.Flush` (service, application) — pkg/outbox/outbox.go:77 — serialization, transactions, persistence, messaging, risk 2
+- `pkg/saga/saga.go`
+  - `Step` (model, domain) — pkg/saga/saga.go:12 — no category
+  - `Saga` (model, domain) — pkg/saga/saga.go:19 — no category
+  - `Result` (model, domain) — pkg/saga/saga.go:25 — no category
+  - `StepError` (model, domain) — pkg/saga/saga.go:35 — no category
+  - `StepError.Error` (model, domain) — pkg/saga/saga.go:41 — no category, risk 0
+  - `StepError.Unwrap` (open: model|util, unresolved: kind not-asked) — pkg/saga/saga.go:44 — no category, risk 0
+  - `Saga.Run` (model, domain) — pkg/saga/saga.go:49 — no category, risk 1
+- `services/catalog/cmd/catalog/main.go`
+  - `main` (wiring, infrastructure) — services/catalog/cmd/catalog/main.go:24 — no category, risk 0
+  - `run` (wiring, infrastructure) — services/catalog/cmd/catalog/main.go:31 — concurrency, http_transport, configuration, risk 0
+- `services/catalog/internal/acl/legacy.go`
+  - `ValidatePrice` (util, cross-cutting) — services/catalog/internal/acl/legacy.go:9 — no category, risk 0
+- `services/catalog/internal/app/app.go`
+  - `Deps` (open: repository|service, unresolved: kind unresolved) — services/catalog/internal/app/app.go:20 — persistence
+  - `New` (service, application) — services/catalog/internal/app/app.go:35 — persistence, configuration, risk 0
+  - `Deps.Ready` (open: model|util, unresolved: kind not-asked) — services/catalog/internal/app/app.go:66 — no category, risk 0
+  - `Deps.Close` (open: model|util, unresolved: kind unresolved) — services/catalog/internal/app/app.go:69 — no category, risk 0
+- `services/catalog/internal/app/models.go`
+  - `models` (util, cross-cutting) — services/catalog/internal/app/models.go:9 — no category, risk 0
+- `services/catalog/internal/app/remote_operations.go`
+  - `priceOfRequest` (dto, transport) — services/catalog/internal/app/remote_operations.go:14 — input_validation
+  - `priceOfResponse` (dto, transport) — services/catalog/internal/app/remote_operations.go:19 — no category
+  - `init` (wiring, infrastructure) — services/catalog/internal/app/remote_operations.go:24 — http_transport, risk 0
+- `services/catalog/internal/app/routes.go`
+  - `Routes` (middleware, cross-cutting) — services/catalog/internal/app/routes.go:15 — http_transport, risk 1
+- `services/catalog/internal/app/wire.go`
+  - `wire` (wiring, infrastructure) — services/catalog/internal/app/wire.go:13 — no category, risk 0
+- `services/catalog/internal/catalog/handlers.go`
+  - `RegisterRoutes` (wiring, infrastructure) — services/catalog/internal/catalog/handlers.go:11 — http_transport, risk 1
+  - `listProducts` (handler, transport) — services/catalog/internal/catalog/handlers.go:16 — http_transport, risk 2
+  - `createProduct` (handler, transport) — services/catalog/internal/catalog/handlers.go:25 — http_transport, risk 2
+- `services/catalog/internal/catalog/model.go`
+  - `Category` (model, domain) — services/catalog/internal/catalog/model.go:6 — persistence
+  - `Product` (model, domain) — services/catalog/internal/catalog/model.go:13 — input_validation, persistence
+  - `init` (wiring, infrastructure) — services/catalog/internal/catalog/model.go:22 — no category, risk 0
+- `services/catalog/internal/catalog/service.go`
+  - `priceCacheEntry` (model, domain) — services/catalog/internal/catalog/service.go:15 — no category
+  - `Service` (service, application) — services/catalog/internal/catalog/service.go:28 — no category
+  - `NewService` (service, application) — services/catalog/internal/catalog/service.go:31 — no category, risk 2
+  - `Service.List` (service, application) — services/catalog/internal/catalog/service.go:34 — persistence, risk 0
+  - `Service.Create` (service, application) — services/catalog/internal/catalog/service.go:41 — persistence, input_validation, business_rules, risk 2
+  - `Service.PriceOf` (service, application) — services/catalog/internal/catalog/service.go:49 — concurrency, persistence, caching, risk 1
+- `services/catalog/internal/config/config.go`
+  - `Config` (config, cross-cutting) — services/catalog/internal/config/config.go:11 — no category
+  - `Load` (config, cross-cutting) — services/catalog/internal/config/config.go:22 — configuration, risk 1
+  - `env` (config, cross-cutting) — services/catalog/internal/config/config.go:34 — configuration, risk 0
+  - `envInt` (config, cross-cutting) — services/catalog/internal/config/config.go:41 — configuration, risk 0
+- `services/catalog/internal/events/events.go`
+  - `Publish` (service, application) — services/catalog/internal/events/events.go:16 — messaging, risk 0
+- `services/catalog/internal/platform/auth.go`
+  - `AuthMiddleware` (middleware, cross-cutting) — services/catalog/internal/platform/auth.go:17 — http_transport, authentication, input_validation, risk 0
+  - `UserID` (util, cross-cutting) — services/catalog/internal/platform/auth.go:32 — no category, risk 0
+- `services/catalog/internal/platform/bus.go`
+  - `Bus` (open: model|service|util, unresolved: kind unresolved) — services/catalog/internal/platform/bus.go:10 — concurrency
+  - `NewBus` (util, cross-cutting) — services/catalog/internal/platform/bus.go:16 — no category, risk 0
+  - `Bus.Subscribe` (open: service|util, unresolved: kind unresolved) — services/catalog/internal/platform/bus.go:19 — concurrency, messaging, risk 0
+  - `Bus.Publish` (open: service|util, unresolved: kind unresolved) — services/catalog/internal/platform/bus.go:26 — concurrency, messaging, risk 0
+- `services/catalog/internal/platform/db.go`
+  - `Register` (util, cross-cutting) — services/catalog/internal/platform/db.go:12 — concurrency, risk 0
+  - `Open` (open: service|util, unresolved: kind unresolved) — services/catalog/internal/platform/db.go:15 — persistence, risk 0
+- `services/catalog/internal/store/db.go`
+  - `Open` (open: service|util, unresolved: kind unresolved) — services/catalog/internal/store/db.go:12 — persistence, risk 0
+- `services/customers/cmd/customers/main.go`
+  - `main` (wiring, infrastructure) — services/customers/cmd/customers/main.go:24 — no category, risk 0
+  - `run` (wiring, infrastructure) — services/customers/cmd/customers/main.go:31 — concurrency, http_transport, configuration, risk 0
+- `services/customers/internal/acl/legacy.go`
+  - `ValidateCustomer` (util, cross-cutting) — services/customers/internal/acl/legacy.go:13 — input_validation, risk 0
+- `services/customers/internal/app/app.go`
+  - `Deps` (open: repository|service, unresolved: kind unresolved) — services/customers/internal/app/app.go:20 — persistence
+  - `New` (service, application) — services/customers/internal/app/app.go:35 — persistence, configuration, risk 0
+  - `Deps.Ready` (open: model|util, unresolved: kind not-asked) — services/customers/internal/app/app.go:66 — no category, risk 0
+  - `Deps.Close` (open: model|util, unresolved: kind unresolved) — services/customers/internal/app/app.go:69 — no category, risk 0
+- `services/customers/internal/app/models.go`
+  - `models` (util, cross-cutting) — services/customers/internal/app/models.go:9 — no category, risk 0
+- `services/customers/internal/app/remote_operations.go`
+  - `isActiveRequest` (dto, transport) — services/customers/internal/app/remote_operations.go:14 — input_validation
+  - `isActiveResponse` (dto, transport) — services/customers/internal/app/remote_operations.go:19 — no category
+  - `init` (wiring, infrastructure) — services/customers/internal/app/remote_operations.go:24 — http_transport, risk 0
+- `services/customers/internal/app/routes.go`
+  - `Routes` (middleware, cross-cutting) — services/customers/internal/app/routes.go:15 — http_transport, risk 1
+- `services/customers/internal/app/wire.go`
+  - `wire` (wiring, infrastructure) — services/customers/internal/app/wire.go:13 — no category, risk 0
+- `services/customers/internal/config/config.go`
+  - `Config` (config, cross-cutting) — services/customers/internal/config/config.go:11 — no category
+  - `Load` (config, cross-cutting) — services/customers/internal/config/config.go:22 — configuration, risk 1
+  - `env` (config, cross-cutting) — services/customers/internal/config/config.go:34 — configuration, risk 0
+  - `envInt` (config, cross-cutting) — services/customers/internal/config/config.go:41 — configuration, risk 0
+- `services/customers/internal/customers/handlers.go`
+  - `RegisterRoutes` (wiring, infrastructure) — services/customers/internal/customers/handlers.go:11 — http_transport, risk 1
+  - `getCustomer` (handler, transport) — services/customers/internal/customers/handlers.go:16 — http_transport, input_validation, error_mapping, risk 2
+  - `registerCustomer` (handler, transport) — services/customers/internal/customers/handlers.go:30 — http_transport, risk 2
+- `services/customers/internal/customers/model.go`
+  - `Customer` (model, domain) — services/customers/internal/customers/model.go:10 — input_validation, persistence
+  - `init` (wiring, infrastructure) — services/customers/internal/customers/model.go:18 — no category, risk 0
+- `services/customers/internal/customers/service.go`
+  - `Service` (service, application) — services/customers/internal/customers/service.go:6 — no category
+  - `NewService` (service, application) — services/customers/internal/customers/service.go:9 — no category, risk 2
+  - `Service.Get` (service, application) — services/customers/internal/customers/service.go:12 — persistence, risk 1
+  - `Service.Register` (service, application) — services/customers/internal/customers/service.go:21 — persistence, risk 1
+  - `Service.IsActive` (service, application) — services/customers/internal/customers/service.go:24 — persistence, business_rules, risk 0
+- `services/customers/internal/events/events.go`
+  - `Publish` (service, application) — services/customers/internal/events/events.go:16 — messaging, risk 0
+- `services/customers/internal/platform/auth.go`
+  - `AuthMiddleware` (middleware, cross-cutting) — services/customers/internal/platform/auth.go:17 — http_transport, authentication, input_validation, risk 0
+  - `UserID` (util, cross-cutting) — services/customers/internal/platform/auth.go:32 — no category, risk 0
+- `services/customers/internal/platform/bus.go`
+  - `Bus` (open: model|service|util, unresolved: kind unresolved) — services/customers/internal/platform/bus.go:10 — concurrency
+  - `NewBus` (util, cross-cutting) — services/customers/internal/platform/bus.go:16 — no category, risk 0
+  - `Bus.Subscribe` (open: service|util, unresolved: kind unresolved) — services/customers/internal/platform/bus.go:19 — concurrency, messaging, risk 0
+  - `Bus.Publish` (open: service|util, unresolved: kind unresolved) — services/customers/internal/platform/bus.go:26 — concurrency, messaging, risk 0
+- `services/customers/internal/platform/db.go`
+  - `Register` (util, cross-cutting) — services/customers/internal/platform/db.go:12 — concurrency, risk 0
+  - `Open` (open: service|util, unresolved: kind unresolved) — services/customers/internal/platform/db.go:15 — persistence, risk 0
+- `services/customers/internal/store/db.go`
+  - `Open` (open: service|util, unresolved: kind unresolved) — services/customers/internal/store/db.go:12 — persistence, risk 0
+- `services/inventory/cmd/inventory/main.go`
+  - `main` (wiring, infrastructure) — services/inventory/cmd/inventory/main.go:24 — no category, risk 0
+  - `run` (wiring, infrastructure) — services/inventory/cmd/inventory/main.go:31 — concurrency, http_transport, configuration, risk 0
+- `services/inventory/internal/acl/legacy.go`
+  - `LegacyStockItem` (model, domain) — services/inventory/internal/acl/legacy.go:13 — no category
+  - `ToStockItem` (util, cross-cutting) — services/inventory/internal/acl/legacy.go:26 — no category, risk 0
+  - `ToLegacy` (util, cross-cutting) — services/inventory/internal/acl/legacy.go:34 — no category, risk 0
+- `services/inventory/internal/app/app.go`
+  - `Deps` (open: repository|service, unresolved: kind unresolved) — services/inventory/internal/app/app.go:20 — persistence
+  - `New` (service, application) — services/inventory/internal/app/app.go:35 — persistence, configuration, risk 0
+  - `Deps.Ready` (open: model|util, unresolved: kind not-asked) — services/inventory/internal/app/app.go:66 — no category, risk 0
+  - `Deps.Close` (open: model|util, unresolved: kind unresolved) — services/inventory/internal/app/app.go:69 — no category, risk 0
+- `services/inventory/internal/app/create_order_compensation.go`
+  - `compensateRequest` (dto, transport) — services/inventory/internal/app/create_order_compensation.go:19 — no category
+  - `init` (wiring, infrastructure) — services/inventory/internal/app/create_order_compensation.go:25 — http_transport, risk 0
+  - `compensateHandler` (handler, transport) — services/inventory/internal/app/create_order_compensation.go:34 — http_transport, transactions, persistence, input_validation, business_rules, risk 2
+- `services/inventory/internal/app/models.go`
+  - `models` (util, cross-cutting) — services/inventory/internal/app/models.go:9 — no category, risk 0
+- `services/inventory/internal/app/remote_operations.go`
+  - `reserveRequest` (dto, transport) — services/inventory/internal/app/remote_operations.go:14 — no category
+  - `init` (wiring, infrastructure) — services/inventory/internal/app/remote_operations.go:19 — http_transport, risk 0
+  - `reserveHandler` (handler, transport) — services/inventory/internal/app/remote_operations.go:28 — http_transport, transactions, persistence, input_validation, error_mapping, risk 2
+- `services/inventory/internal/app/routes.go`
+  - `Routes` (middleware, cross-cutting) — services/inventory/internal/app/routes.go:15 — http_transport, risk 1
+- `services/inventory/internal/app/wire.go`
+  - `wire` (wiring, infrastructure) — services/inventory/internal/app/wire.go:23 — concurrency, risk 0
+- `services/inventory/internal/config/config.go`
+  - `Config` (config, cross-cutting) — services/inventory/internal/config/config.go:11 — no category
+  - `Load` (config, cross-cutting) — services/inventory/internal/config/config.go:22 — configuration, risk 1
+  - `env` (config, cross-cutting) — services/inventory/internal/config/config.go:34 — configuration, risk 0
+  - `envInt` (config, cross-cutting) — services/inventory/internal/config/config.go:41 — configuration, risk 0
+- `services/inventory/internal/events/events.go`
+  - `Publish` (service, application) — services/inventory/internal/events/events.go:16 — messaging, risk 0
+- `services/inventory/internal/events/order_placed_consumer.go`
+  - `SubscribeOrderPlaced` (service, application) — services/inventory/internal/events/order_placed_consumer.go:17 — messaging, risk 0
+- `services/inventory/internal/httpapi/stock_item_handlers.go`
+  - `RegisterRoutes` (wiring, infrastructure) — services/inventory/internal/httpapi/stock_item_handlers.go:18 — http_transport, risk 1
+  - `problem` (handler, transport) — services/inventory/internal/httpapi/stock_item_handlers.go:23 — http_transport, risk 0
+  - `getStockItem` (handler, transport) — services/inventory/internal/httpapi/stock_item_handlers.go:33 — http_transport, persistence, input_validation, error_mapping, risk 2
+- `services/inventory/internal/inventory/model.go`
+  - `StockItem` (model, domain) — services/inventory/internal/inventory/model.go:6 — persistence
+  - `StockItem.TableName` (model, domain) — services/inventory/internal/inventory/model.go:14 — no category, risk 0
+  - `init` (wiring, infrastructure) — services/inventory/internal/inventory/model.go:16 — no category, risk 0
+- `services/inventory/internal/inventory/service.go`
+  - `Service` (service, application) — services/inventory/internal/inventory/service.go:12 — no category
+  - `NewService` (service, application) — services/inventory/internal/inventory/service.go:15 — no category, risk 1
+  - `Service.Reserve` (service, application) — services/inventory/internal/inventory/service.go:18 — persistence, business_rules, risk 2
+  - `Service.OnOrderPlaced` (service, application) — services/inventory/internal/inventory/service.go:31 — messaging, risk 0
+  - `Service.Restock` (service, application) — services/inventory/internal/inventory/service.go:36 — persistence, scheduling, business_rules, risk 1
+  - `StartRestockJob` (job, application) — services/inventory/internal/inventory/service.go:42 — scheduling, concurrency, risk 1
+- `services/inventory/internal/jobs/scheduler.go`
+  - `Run` (service, application) — services/inventory/internal/jobs/scheduler.go:17 — scheduling, concurrency, persistence, risk 0
+  - `runLeased` (service, application) — services/inventory/internal/jobs/scheduler.go:30 — persistence, scheduling, risk 0
+- `services/inventory/internal/platform/auth.go`
+  - `AuthMiddleware` (middleware, cross-cutting) — services/inventory/internal/platform/auth.go:17 — http_transport, authentication, input_validation, risk 0
+  - `UserID` (util, cross-cutting) — services/inventory/internal/platform/auth.go:32 — no category, risk 0
+- `services/inventory/internal/platform/bus.go`
+  - `Bus` (open: model|service|util, unresolved: kind unresolved) — services/inventory/internal/platform/bus.go:10 — concurrency
+  - `NewBus` (util, cross-cutting) — services/inventory/internal/platform/bus.go:16 — no category, risk 0
+  - `Bus.Subscribe` (open: service|util, unresolved: kind unresolved) — services/inventory/internal/platform/bus.go:19 — concurrency, messaging, risk 0
+  - `Bus.Publish` (open: service|util, unresolved: kind unresolved) — services/inventory/internal/platform/bus.go:26 — concurrency, messaging, risk 0
+- `services/inventory/internal/platform/db.go`
+  - `Register` (util, cross-cutting) — services/inventory/internal/platform/db.go:12 — concurrency, risk 0
+  - `Open` (open: service|util, unresolved: kind unresolved) — services/inventory/internal/platform/db.go:15 — persistence, risk 0
+- `services/inventory/internal/store/db.go`
+  - `Open` (open: service|util, unresolved: kind unresolved) — services/inventory/internal/store/db.go:16 — persistence, risk 0
+- `services/orders/cmd/orders/main.go`
+  - `main` (wiring, infrastructure) — services/orders/cmd/orders/main.go:24 — no category, risk 0
+  - `run` (wiring, infrastructure) — services/orders/cmd/orders/main.go:31 — concurrency, http_transport, configuration, risk 0
+- `services/orders/internal/acl/legacy.go`
+  - `LegacyOrderLine` (model, domain) — services/orders/internal/acl/legacy.go:13 — no category
+  - `ToOrderLine` (util, cross-cutting) — services/orders/internal/acl/legacy.go:26 — no category, risk 0
+  - `ToLegacy` (util, cross-cutting) — services/orders/internal/acl/legacy.go:34 — no category, risk 0
+- `services/orders/internal/app/app.go`
+  - `Deps` (open: repository|service, unresolved: kind unresolved) — services/orders/internal/app/app.go:20 — persistence
+  - `New` (service, application) — services/orders/internal/app/app.go:35 — persistence, configuration, risk 0
+  - `Deps.Ready` (open: model|util, unresolved: kind not-asked) — services/orders/internal/app/app.go:66 — no category, risk 0
+  - `Deps.Close` (open: model|util, unresolved: kind unresolved) — services/orders/internal/app/app.go:69 — no category, risk 0
+- `services/orders/internal/app/models.go`
+  - `models` (util, cross-cutting) — services/orders/internal/app/models.go:9 — no category, risk 0
+- `services/orders/internal/app/routes.go`
+  - `Routes` (middleware, cross-cutting) — services/orders/internal/app/routes.go:15 — http_transport, risk 1
+- `services/orders/internal/app/wire.go`
+  - `wire` (wiring, infrastructure) — services/orders/internal/app/wire.go:19 — configuration, risk 0
+- `services/orders/internal/clients/catalog/client.go`
+  - `baseURL` (open: service|util, unresolved: kind unresolved) — services/orders/internal/clients/catalog/client.go:27 — configuration, risk 0
+  - `remoteError` (util, cross-cutting) — services/orders/internal/clients/catalog/client.go:38 — serialization, risk 0
+  - `Service` (service, application) — services/orders/internal/clients/catalog/client.go:60 — no category
+  - `newService` (service, unresolved: depends on configuration) — services/orders/internal/clients/catalog/client.go:65 — no category, risk 0
+  - `Service.post` (service, application) — services/orders/internal/clients/catalog/client.go:78 — serialization, external_integration, risk 2
+  - `Service.Create` (service, application) — services/orders/internal/clients/catalog/client.go:118 — no category, risk 0
+  - `Service.PriceOf` (service, application) — services/orders/internal/clients/catalog/client.go:123 — external_integration, risk 0
+  - `NewService` (service, application) — services/orders/internal/clients/catalog/client.go:133 — no category, risk 0
+- `services/orders/internal/clients/customers/client.go`
+  - `baseURL` (open: service|util, unresolved: kind unresolved) — services/orders/internal/clients/customers/client.go:26 — configuration, risk 0
+  - `remoteError` (util, cross-cutting) — services/orders/internal/clients/customers/client.go:37 — serialization, risk 0
+  - `Service` (service, application) — services/orders/internal/clients/customers/client.go:55 — no category
+  - `newService` (service, unresolved: depends on configuration) — services/orders/internal/clients/customers/client.go:60 — no category, risk 0
+  - `Service.IsActive` (service, application) — services/orders/internal/clients/customers/client.go:71 — serialization, external_integration, risk 1
+  - `NewService` (service, application) — services/orders/internal/clients/customers/client.go:111 — no category, risk 0
+- `services/orders/internal/clients/inventory/client.go`
+  - `baseURL` (open: service|util, unresolved: kind unresolved) — services/orders/internal/clients/inventory/client.go:19 — configuration, risk 0
+  - `remoteError` (util, cross-cutting) — services/orders/internal/clients/inventory/client.go:30 — serialization, risk 0
+  - `Service` (service, application) — services/orders/internal/clients/inventory/client.go:48 — no category
+  - `newService` (service, unresolved: depends on configuration) — services/orders/internal/clients/inventory/client.go:53 — no category, risk 0
+  - `Service.Reserve` (service, application) — services/orders/internal/clients/inventory/client.go:60 — serialization, external_integration, risk 1
+  - `NewService` (service, application) — services/orders/internal/clients/inventory/client.go:87 — no category, risk 0
+- `services/orders/internal/clients/payments/client.go`
+  - `baseURL` (open: service|util, unresolved: kind unresolved) — services/orders/internal/clients/payments/client.go:20 — configuration, risk 0
+  - `remoteError` (util, cross-cutting) — services/orders/internal/clients/payments/client.go:31 — serialization, risk 0
+  - `Service` (service, application) — services/orders/internal/clients/payments/client.go:52 — no category
+  - `newService` (service, unresolved: depends on configuration) — services/orders/internal/clients/payments/client.go:57 — no category, risk 0
+  - `Service.Charge` (service, application) — services/orders/internal/clients/payments/client.go:64 — serialization, external_integration, risk 1
+  - `NewService` (service, application) — services/orders/internal/clients/payments/client.go:85 — no category, risk 0
+  - `NewGateway` (client, infrastructure) — services/orders/internal/clients/payments/client.go:89 — no category, risk 0
+- `services/orders/internal/config/config.go`
+  - `Config` (config, cross-cutting) — services/orders/internal/config/config.go:11 — no category
+  - `Load` (config, cross-cutting) — services/orders/internal/config/config.go:22 — configuration, risk 1
+  - `env` (config, cross-cutting) — services/orders/internal/config/config.go:36 — configuration, risk 0
+  - `envInt` (config, cross-cutting) — services/orders/internal/config/config.go:43 — configuration, risk 0
+- `services/orders/internal/contracts/catalog/contracts.go`
+  - `Product` (model, domain) — services/orders/internal/contracts/catalog/contracts.go:12 — input_validation, persistence
+  - `Category` (model, domain) — services/orders/internal/contracts/catalog/contracts.go:22 — persistence
+- `services/orders/internal/contracts/payments/contracts.go`
+  - `Gateway` (client, infrastructure) — services/orders/internal/contracts/payments/contracts.go:6 — no category
+- `services/orders/internal/events/events.go`
+  - `Publish` (service, application) — services/orders/internal/events/events.go:16 — messaging, risk 0
+- `services/orders/internal/events/order_placed.go`
+  - `OrderPlaced` (model, domain) — services/orders/internal/events/order_placed.go:13 — no category
+  - `PublishOrderPlaced` (service, application) — services/orders/internal/events/order_placed.go:20 — messaging, risk 0
+- `services/orders/internal/orders/handlers.go`
+  - `RegisterRoutes` (wiring, infrastructure) — services/orders/internal/orders/handlers.go:13 — http_transport, risk 1
+  - `placeOrder` (handler, transport) — services/orders/internal/orders/handlers.go:18 — http_transport, risk 2
+  - `myOrders` (handler, transport) — services/orders/internal/orders/handlers.go:33 — http_transport, risk 2
+- `services/orders/internal/orders/model.go`
+  - `Order` (model, domain) — services/orders/internal/orders/model.go:6 — persistence
+  - `OrderLine` (model, domain) — services/orders/internal/orders/model.go:15 — persistence
+  - `PlaceOrderRequest` (dto, transport) — services/orders/internal/orders/model.go:24 — input_validation
+  - `LineItem` (dto, transport) — services/orders/internal/orders/model.go:30 — input_validation
+  - `init` (wiring, infrastructure) — services/orders/internal/orders/model.go:35 — no category, risk 0
+- `services/orders/internal/orders/service.go`
+  - `Service` (service, application) — services/orders/internal/orders/service.go:31 — no category
+  - `NewService` (service, application) — services/orders/internal/orders/service.go:42 — no category, risk 0
+  - `Service.PlaceOrder` (service, application) — services/orders/internal/orders/service.go:51 — transactions, persistence, messaging, business_rules, risk 2
+  - `Service.releaseStock` (service, application) — services/orders/internal/orders/service.go:131 — serialization, external_integration, configuration, risk 1
+  - `Service.ForCustomer` (service, application) — services/orders/internal/orders/service.go:157 — persistence, risk 0
+- `services/orders/internal/outbox/outbox.go`
+  - `Relay` (service, application) — services/orders/internal/outbox/outbox.go:18 — persistence, messaging, risk 0
+- `services/orders/internal/platform/auth.go`
+  - `AuthMiddleware` (middleware, cross-cutting) — services/orders/internal/platform/auth.go:17 — http_transport, authentication, input_validation, risk 0
+  - `UserID` (util, cross-cutting) — services/orders/internal/platform/auth.go:32 — no category, risk 0
+- `services/orders/internal/platform/bus.go`
+  - `Bus` (open: model|service|util, unresolved: kind unresolved) — services/orders/internal/platform/bus.go:10 — concurrency
+  - `NewBus` (util, cross-cutting) — services/orders/internal/platform/bus.go:16 — no category, risk 0
+  - `Bus.Subscribe` (open: service|util, unresolved: kind unresolved) — services/orders/internal/platform/bus.go:19 — concurrency, messaging, risk 0
+  - `Bus.Publish` (open: service|util, unresolved: kind unresolved) — services/orders/internal/platform/bus.go:26 — concurrency, messaging, risk 0
+- `services/orders/internal/platform/db.go`
+  - `Register` (util, cross-cutting) — services/orders/internal/platform/db.go:12 — concurrency, risk 0
+  - `Open` (open: service|util, unresolved: kind unresolved) — services/orders/internal/platform/db.go:15 — persistence, risk 0
+- `services/orders/internal/saga/create_order.go`
+  - `CreateOrder` (open: service|util, unresolved: kind unresolved) — services/orders/internal/saga/create_order.go:20 — no category, risk 1
+  - `notBound` (util, cross-cutting) — services/orders/internal/saga/create_order.go:32 — no category, risk 0
+  - `UnboundError` (util, cross-cutting) — services/orders/internal/saga/create_order.go:37 — no category
+  - `UnboundError.Error` (model, domain) — services/orders/internal/saga/create_order.go:39 — no category, risk 0
+- `services/orders/internal/store/db.go`
+  - `Open` (open: service|util, unresolved: kind unresolved) — services/orders/internal/store/db.go:17 — persistence, risk 0
+- `services/payments/cmd/payments/main.go`
+  - `main` (wiring, infrastructure) — services/payments/cmd/payments/main.go:24 — no category, risk 0
+  - `run` (wiring, infrastructure) — services/payments/cmd/payments/main.go:31 — concurrency, http_transport, configuration, risk 0
+- `services/payments/internal/acl/legacy.go`
+  - `ParseStatus` (open: service|util, unresolved: kind unresolved) — services/payments/internal/acl/legacy.go:21 — input_validation, risk 0
+  - `ChargeRequest` (dto, transport) — services/payments/internal/acl/legacy.go:30 — no category
+  - `ChargeRequest.Validate` (dto, transport) — services/payments/internal/acl/legacy.go:36 — input_validation, risk 0
+- `services/payments/internal/app/app.go`
+  - `Deps` (open: repository|service, unresolved: kind unresolved) — services/payments/internal/app/app.go:20 — persistence
+  - `New` (service, application) — services/payments/internal/app/app.go:35 — persistence, messaging, configuration, risk 0
+  - `Deps.Ready` (open: model|util, unresolved: kind not-asked) — services/payments/internal/app/app.go:66 — no category, risk 0
+  - `Deps.Close` (open: model|util, unresolved: kind unresolved) — services/payments/internal/app/app.go:69 — no category, risk 0
+- `services/payments/internal/app/create_order_compensation.go`
+  - `compensateRequest` (dto, transport) — services/payments/internal/app/create_order_compensation.go:21 — no category
+  - `init` (wiring, infrastructure) — services/payments/internal/app/create_order_compensation.go:26 — http_transport, risk 0
+  - `compensatePaymentHandler` (handler, transport) — services/payments/internal/app/create_order_compensation.go:35 — http_transport, transactions, persistence, input_validation, business_rules, risk 2
+- `services/payments/internal/app/models.go`
+  - `models` (util, cross-cutting) — services/payments/internal/app/models.go:9 — no category, risk 0
+- `services/payments/internal/app/remote_operations.go`
+  - `init` (wiring, infrastructure) — services/payments/internal/app/remote_operations.go:15 — http_transport, risk 0
+  - `chargeHandler` (handler, transport) — services/payments/internal/app/remote_operations.go:26 — configuration, http_transport, transactions, persistence, input_validation, external_integration, risk 2
+- `services/payments/internal/app/routes.go`
+  - `Routes` (middleware, cross-cutting) — services/payments/internal/app/routes.go:15 — http_transport, risk 1
+- `services/payments/internal/app/wire.go`
+  - `wire` (wiring, infrastructure) — services/payments/internal/app/wire.go:15 — configuration, risk 0
+- `services/payments/internal/config/config.go`
+  - `Config` (config, cross-cutting) — services/payments/internal/config/config.go:11 — no category
+  - `Load` (config, cross-cutting) — services/payments/internal/config/config.go:22 — configuration, risk 1
+  - `env` (config, cross-cutting) — services/payments/internal/config/config.go:34 — configuration, risk 0
+  - `envInt` (config, cross-cutting) — services/payments/internal/config/config.go:41 — configuration, risk 0
+- `services/payments/internal/events/events.go`
+  - `Publish` (service, application) — services/payments/internal/events/events.go:16 — messaging, risk 0
+- `services/payments/internal/httpapi/payment_handlers.go`
+  - `problem` (handler, transport) — services/payments/internal/httpapi/payment_handlers.go:15 — http_transport, risk 0
+  - `RegisterRoutes` (wiring, infrastructure) — services/payments/internal/httpapi/payment_handlers.go:25 — http_transport, persistence, risk 0
+- `services/payments/internal/payments/gateway.go`
+  - `Gateway` (client, infrastructure) — services/payments/internal/payments/gateway.go:12 — no category
+  - `NewGateway` (client, infrastructure) — services/payments/internal/payments/gateway.go:18 — no category, risk 1
+  - `Gateway.Charge` (client, infrastructure) — services/payments/internal/payments/gateway.go:23 — serialization, external_integration, risk 2
+- `services/payments/internal/payments/model.go`
+  - `Payment` (model, domain) — services/payments/internal/payments/model.go:6 — persistence
+  - `init` (wiring, infrastructure) — services/payments/internal/payments/model.go:13 — no category, risk 0
+- `services/payments/internal/payments/service.go`
+  - `Service` (service, application) — services/payments/internal/payments/service.go:6 — no category
+  - `NewService` (service, application) — services/payments/internal/payments/service.go:12 — no category, risk 1
+  - `Service.Charge` (service, application) — services/payments/internal/payments/service.go:15 — persistence, external_integration, business_rules, risk 2
+- `services/payments/internal/platform/auth.go`
+  - `AuthMiddleware` (middleware, cross-cutting) — services/payments/internal/platform/auth.go:17 — http_transport, authentication, input_validation, risk 0
+  - `UserID` (util, cross-cutting) — services/payments/internal/platform/auth.go:32 — no category, risk 0
+- `services/payments/internal/platform/bus.go`
+  - `Bus` (open: model|service|util, unresolved: kind unresolved) — services/payments/internal/platform/bus.go:10 — concurrency
+  - `NewBus` (util, cross-cutting) — services/payments/internal/platform/bus.go:16 — no category, risk 0
+  - `Bus.Subscribe` (open: service|util, unresolved: kind unresolved) — services/payments/internal/platform/bus.go:19 — concurrency, messaging, risk 0
+  - `Bus.Publish` (open: service|util, unresolved: kind unresolved) — services/payments/internal/platform/bus.go:26 — concurrency, messaging, risk 0
+- `services/payments/internal/platform/db.go`
+  - `Register` (util, cross-cutting) — services/payments/internal/platform/db.go:12 — concurrency, risk 0
+  - `Open` (open: service|util, unresolved: kind unresolved) — services/payments/internal/platform/db.go:15 — persistence, risk 0
+- `services/payments/internal/store/db.go`
+  - `Open` (open: service|util, unresolved: kind unresolved) — services/payments/internal/store/db.go:16 — persistence, risk 0
 
 ## Excluded
 
-### named non-struct type (not a unit: no fields, no behaviour) (2)
+### named non-struct type (not a unit: no fields, no behaviour) (16)
 
-- `internal/platform/auth.go#ctxKey` — internal/platform/auth.go:11
-- `internal/platform/bus.go#Handler` — internal/platform/bus.go:6
+- `pkg/events/bus.go#Handler` — pkg/events/bus.go:11
+- `pkg/httpx/server.go#Check` — pkg/httpx/server.go:16
+- `services/catalog/internal/platform/auth.go#ctxKey` — services/catalog/internal/platform/auth.go:11
+- `services/catalog/internal/platform/bus.go#Handler` — services/catalog/internal/platform/bus.go:6
+- `services/customers/internal/platform/auth.go#ctxKey` — services/customers/internal/platform/auth.go:11
+- `services/customers/internal/platform/bus.go#Handler` — services/customers/internal/platform/bus.go:6
+- `services/inventory/internal/platform/auth.go#ctxKey` — services/inventory/internal/platform/auth.go:11
+- `services/inventory/internal/platform/bus.go#Handler` — services/inventory/internal/platform/bus.go:6
+- `services/orders/internal/clients/catalog/client.go#Product` — services/orders/internal/clients/catalog/client.go:56
+- `services/orders/internal/clients/catalog/client.go#Category` — services/orders/internal/clients/catalog/client.go:57
+- `services/orders/internal/clients/payments/client.go#Gateway` — services/orders/internal/clients/payments/client.go:49
+- `services/orders/internal/platform/auth.go#ctxKey` — services/orders/internal/platform/auth.go:11
+- `services/orders/internal/platform/bus.go#Handler` — services/orders/internal/platform/bus.go:6
+- `services/payments/internal/acl/legacy.go#PaymentStatus` — services/payments/internal/acl/legacy.go:13
+- `services/payments/internal/platform/auth.go#ctxKey` — services/payments/internal/platform/auth.go:11
+- `services/payments/internal/platform/bus.go#Handler` — services/payments/internal/platform/bus.go:6
+
+### test (`_test.go`) (43)
+
+- `gateway/internal/proxy/proxy_test.go#upstream` — gateway/internal/proxy/proxy_test.go:10
+- `gateway/internal/proxy/proxy_test.go#TestEveryRouteReachesItsService` — gateway/internal/proxy/proxy_test.go:16
+- `gateway/internal/proxy/proxy_test.go#TestNoOutsideCallerReachesAServiceClaimingToBeOne` — gateway/internal/proxy/proxy_test.go:44
+- `pkg/events/events_test.go#TestIdempotentDropsARedelivery` — pkg/events/events_test.go:8
+- `pkg/events/events_test.go#TestEnvelopeRoundTrip` — pkg/events/events_test.go:29
+- `pkg/httpx/server_test.go#TestReadinessReportsAFailedDependency` — pkg/httpx/server_test.go:11
+- `pkg/httpx/server_test.go#TestAServiceCallPassesTheUserCheckAndAnOutsideCallDoesNot` — pkg/httpx/server_test.go:25
+- `pkg/saga/saga_test.go#TestAFailedStepCompensatesTheCompletedOnesInReverse` — pkg/saga/saga_test.go:10
+- `pkg/saga/saga_test.go#TestAFailedStepAnswersWithItsOwnMessage` — pkg/saga/saga_test.go:26
+- `services/catalog/internal/app/routes_test.go#TestRoutesBuildWithoutLiveDependencies` — services/catalog/internal/app/routes_test.go:9
+- `services/catalog/internal/catalog/catalog_test.go#TestPriceOfServesUnexpiredCacheEntry` — services/catalog/internal/catalog/catalog_test.go:8
+- `services/catalog/internal/catalog/catalog_test.go#TestCreateRejectsNonPositivePrice` — services/catalog/internal/catalog/catalog_test.go:28
+- `services/catalog/internal/config/config_test.go#TestLoadFallsBackToLocalDefaults` — services/catalog/internal/config/config_test.go:5
+- `services/catalog/internal/config/config_test.go#TestLoadReadsTheEnvironment` — services/catalog/internal/config/config_test.go:13
+- `services/catalog/test/equivalence/catalog_equivalence_test.go#TestCreateProductValidation` — services/catalog/test/equivalence/catalog_equivalence_test.go:16
+- `services/customers/internal/app/routes_test.go#TestRoutesBuildWithoutLiveDependencies` — services/customers/internal/app/routes_test.go:9
+- `services/customers/internal/config/config_test.go#TestLoadFallsBackToLocalDefaults` — services/customers/internal/config/config_test.go:5
+- `services/customers/internal/config/config_test.go#TestLoadReadsTheEnvironment` — services/customers/internal/config/config_test.go:13
+- `services/customers/internal/customers/customers_test.go#TestRegisterCustomerValidation` — services/customers/internal/customers/customers_test.go:12
+- `services/customers/internal/customers/customers_test.go#TestGetCustomerBadID` — services/customers/internal/customers/customers_test.go:37
+- `services/customers/test/equivalence/customers_equivalence_test.go#TestRegisterCustomerValidation` — services/customers/test/equivalence/customers_equivalence_test.go:16
+- `services/inventory/internal/app/routes_test.go#TestRoutesBuildWithoutLiveDependencies` — services/inventory/internal/app/routes_test.go:9
+- `services/inventory/internal/config/config_test.go#TestLoadFallsBackToLocalDefaults` — services/inventory/internal/config/config_test.go:5
+- `services/inventory/internal/config/config_test.go#TestLoadReadsTheEnvironment` — services/inventory/internal/config/config_test.go:13
+- `services/inventory/internal/inventory/inventory_test.go#testDB` — services/inventory/internal/inventory/inventory_test.go:11
+- `services/inventory/internal/inventory/inventory_test.go#TestReserve` — services/inventory/internal/inventory/inventory_test.go:27
+- `services/inventory/test/equivalence/inventory_equivalence_test.go#TestStockItemBadIDIsProblemJSON` — services/inventory/test/equivalence/inventory_equivalence_test.go:15
+- `services/orders/internal/app/routes_test.go#TestRoutesBuildWithoutLiveDependencies` — services/orders/internal/app/routes_test.go:9
+- `services/orders/internal/clients/catalog_contract_test.go#TestCatalogContractFixtures` — services/orders/internal/clients/catalog_contract_test.go:17
+- `services/orders/internal/clients/customers_contract_test.go#isActiveResponse` — services/orders/internal/clients/customers_contract_test.go:14
+- `services/orders/internal/clients/customers_contract_test.go#TestCustomersContractFixtures` — services/orders/internal/clients/customers_contract_test.go:19
+- `services/orders/internal/config/config_test.go#TestLoadFallsBackToLocalDefaults` — services/orders/internal/config/config_test.go:5
+- `services/orders/internal/config/config_test.go#TestLoadReadsTheEnvironment` — services/orders/internal/config/config_test.go:13
+- `services/orders/internal/orders/orders_test.go#TestPlaceOrderRejectsInvalidBody` — services/orders/internal/orders/orders_test.go:13
+- `services/orders/internal/saga/create_order_test.go#TestCreateOrderRunsThePivotLast` — services/orders/internal/saga/create_order_test.go:8
+- `services/orders/internal/saga/create_order_test.go#TestCreateOrderFailsOnAnUnboundStep` — services/orders/internal/saga/create_order_test.go:14
+- `services/orders/test/equivalence/orders_equivalence_test.go#TestPlaceOrderValidationMatchesMonolith` — services/orders/test/equivalence/orders_equivalence_test.go:17
+- `services/payments/internal/app/routes_test.go#TestRoutesBuildWithoutLiveDependencies` — services/payments/internal/app/routes_test.go:9
+- `services/payments/internal/config/config_test.go#TestLoadFallsBackToLocalDefaults` — services/payments/internal/config/config_test.go:5
+- `services/payments/internal/config/config_test.go#TestLoadReadsTheEnvironment` — services/payments/internal/config/config_test.go:13
+- `services/payments/internal/payments/payments_test.go#TestGatewayCharge` — services/payments/internal/payments/payments_test.go:10
+- `services/payments/internal/payments/payments_test.go#TestServiceChargeDeclinedWritesNothing` — services/payments/internal/payments/payments_test.go:43
+- `services/payments/test/equivalence/payments_equivalence_test.go#TestChargeRequestValidation` — services/payments/test/equivalence/payments_equivalence_test.go:14
 

@@ -1,6 +1,6 @@
 {
-  "elapsedMs": 379,
-  "finishedAt": 1790392783,
+  "elapsedMs": 382,
+  "finishedAt": 1790651912,
   "inputs": [],
   "kind": "plan-tasks",
   "outputs": [
@@ -9,10 +9,10 @@
       "kind": "plan",
       "name": "plan",
       "optional": false,
-      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/.cognidev/modernization-go-monolith/plan/"
+      "path": "./.cognidev/modernization-go-monolith/plan/"
     }
   ],
   "status": "Ok",
   "step": "plan-tasks",
-  "summary": "Planned 27 tasks — a structure check, then 27 scoped edits, each performed and verified before the next.\n\n• Create the catalog slice — 8 files (data) — 8 files\n• Create the customers slice — 8 files (data) — 8 files\n• Create the inventory slice — 10 files (data) — 10 files\n• Create the payments slice — 9 files (data) — 9 files\n• Create the orders slice — 14 files (data) — 14 files\n• Create the catalog slice — 1 files (data) — 1 file\n• Create the customers slice — 1 files (data) — 1 file\n• Update the modify slice — 1 files (services) — 1 file\n• Create the catalog slice — 1 files (cicd) — 1 file\n• Create the deploy slice — 5 files (deploy) — 5 files\n• Create the docs-catalog slice — 1 files (docs) — 1 file\n• Create the catalog slice — 1 files (equivalence) — 1 file\n• Create the customers slice — 1 files (cicd) — 1 file\n• Create the docs-customers slice — 1 files (docs) — 1 file\n• Create the customers slice — 1 files (equivalence) — 1 file\n• Create the inventory slice — 1 files (cicd) — 1 file\n• Create the docs-inventory slice — 1 files (docs) — 1 file\n• Create the inventory slice — 1 files (equivalence) — 1 file\n• Create the payments slice — 1 files (cicd) — 1 file\n• Create the docs-payments slice — 1 files (docs) — 1 file\n• Create the payments slice — 1 files (equivalence) — 1 file\n• Create the orders slice — 1 files (cicd) — 1 file\n• Create the docs-orders slice — 1 files (docs) — 1 file\n• Create the orders-catalog slice — 1 files (contracts) — 1 file\n• Create the orders-customers slice — 1 files (contracts) — 1 file\n• Create the orders slice — 1 files (equivalence) — 1 file\n• Create the docs-architecture slice — 1 files (docs) — 1 file\n"
+  "summary": "Planned 26 tasks — a structure check, then 26 scoped edits, each performed and verified before the next.\n\n• Create the catalog slice — 9 files (data) — 9 files\n• Create the customers slice — 9 files (data) — 9 files\n• Create the inventory slice — 13 files (data) — 13 files\n• Create the payments slice — 12 files (data) — 12 files\n• Create the orders slice — 14 files (data) — 14 files\n• Create the catalog slice — 1 files (data) — 1 file\n• Create the customers slice — 1 files (data) — 1 file\n• Create the catalog slice — 1 files (cicd) — 1 file\n• Create the deploy slice — 5 files (deploy) — 5 files\n• Create the docs-catalog slice — 1 files (docs) — 1 file\n• Create the catalog slice — 1 files (equivalence) — 1 file\n• Create the customers slice — 1 files (cicd) — 1 file\n• Create the docs-customers slice — 1 files (docs) — 1 file\n• Create the customers slice — 1 files (equivalence) — 1 file\n• Create the inventory slice — 1 files (cicd) — 1 file\n• Create the docs-inventory slice — 1 files (docs) — 1 file\n• Create the inventory slice — 1 files (equivalence) — 1 file\n• Create the payments slice — 1 files (cicd) — 1 file\n• Create the docs-payments slice — 1 files (docs) — 1 file\n• Create the payments slice — 1 files (equivalence) — 1 file\n• Create the orders slice — 1 files (cicd) — 1 file\n• Create the docs-orders slice — 1 files (docs) — 1 file\n• Create the orders-catalog slice — 1 files (contracts) — 1 file\n• Create the orders-customers slice — 1 files (contracts) — 1 file\n• Create the orders slice — 1 files (equivalence) — 1 file\n• Create the docs-architecture slice — 1 files (docs) — 1 file\n"
 }

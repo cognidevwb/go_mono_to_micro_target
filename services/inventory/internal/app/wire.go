@@ -4,9 +4,13 @@ package app
 
 import (
 	"context"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	pkgevents "github.com/acme/shop/pkg/events"
+	"github.com/acme/shop/pkg/httpx"
 	"github.com/acme/shop/services/inventory/internal/events"
 	"github.com/acme/shop/services/inventory/internal/httpapi"
 	"github.com/acme/shop/services/inventory/internal/inventory"
@@ -19,16 +23,27 @@ import (
 func wire(r *gin.Engine, d *Deps) error {
 	db := d.DB
 	inventorySvc := inventory.NewService(db)
+	// Background work stops on SIGTERM/interrupt.
+	ctx, _ := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	if d.Bus != nil && d.SQL != nil {
 		seen := pkgevents.SQLSeen{DB: d.SQL}
-		if err := events.SubscribeOrderPlaced(context.Background(), d.Bus, seen, inventorySvc); err != nil {
+		if err := events.SubscribeOrderPlaced(ctx, d.Bus, seen, inventorySvc); err != nil {
 			return err
 		}
 	}
 	if d.SQL != nil {
-		jobs.Run(context.Background(), d.SQL, time.Minute, inventorySvc.Restock)
+		go jobs.Run(ctx, d.SQL, time.Minute, inventorySvc.Restock)
 	}
-	r.Use(platform.AuthMiddleware())
+	auth := platform.AuthMiddleware()
+	// A call from another service of this platform (pkg/httpx internal.go) skips the
+	// monolith's user check, as the in-process call it replaces did.
+	r.Use(func(c *gin.Context) {
+		if httpx.IsInternal(c.Request) {
+			c.Next()
+			return
+		}
+		auth(c)
+	})
 	httpapi.RegisterRoutes(r, db, inventorySvc)
 	return nil
 }

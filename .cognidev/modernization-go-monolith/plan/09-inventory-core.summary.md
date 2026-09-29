@@ -1,1 +1,1 @@
-Edited services/inventory/internal/acl/legacy.go (10 files); compiled in the end-of-run pass.
+Edited services/inventory/internal/acl/legacy.go (11 files); compiled in the end-of-run pass.

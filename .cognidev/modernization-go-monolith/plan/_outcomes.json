@@ -51,7 +51,7 @@
     "id": "09-inventory-core",
     "title": "Implement inventory-service — domain + wiring",
     "status": "done",
-    "summary": "Edited services/inventory/internal/acl/legacy.go (10 files); compiled in the end-of-run pass."
+    "summary": "Edited services/inventory/internal/acl/legacy.go (11 files); compiled in the end-of-run pass."
   },
   {
     "id": "10-inventory-docs",
@@ -111,7 +111,7 @@
     "id": "19-payments-core",
     "title": "Implement payments-service — domain + wiring",
     "status": "done",
-    "summary": "Edited services/payments/internal/acl/legacy.go (7 files); compiled in the end-of-run pass."
+    "summary": "Edited services/payments/internal/acl/legacy.go (8 files); compiled in the end-of-run pass."
   },
   {
     "id": "20-payments-docs",

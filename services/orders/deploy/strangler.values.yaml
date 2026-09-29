@@ -1,6 +1,6 @@
 # Strangler-fig traffic for orders-service. The gateway sends `weight` percent of
 # the listed legacy paths here; the rest still reach the monolith.
-weight: 5
+weight: 10
 legacyPaths:
   - /api/orders
   - /api/orders/mine

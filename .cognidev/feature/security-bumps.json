@@ -1,5 +1,411 @@
 {
   "tool": "bump-security-go",
-  "scanned": false,
-  "why": "the advisory scan did not run (offline by default — search_registry: false); nothing is bumped and the advisory claim stays NOT VERIFIED"
+  "scanned": true,
+  "source": ".cognidev/feature/cve-pre.json",
+  "findings": 41,
+  "passes": [
+    {
+      "pass": 1,
+      "findings": 41,
+      "landed": 15
+    },
+    {
+      "pass": 2,
+      "findings": 15,
+      "landed": 1
+    },
+    {
+      "pass": 3,
+      "findings": 14,
+      "landed": 0
+    }
+  ],
+  "passes_run": 3,
+  "rescan": "go-cve beside this tool",
+  "modules": [
+    "pkg",
+    "services/catalog",
+    "services/customers",
+    "services/inventory",
+    "services/payments",
+    "services/orders",
+    "gateway"
+  ],
+  "bumps": [
+    {
+      "module": "pkg",
+      "dependency": "github.com/klauspost/compress",
+      "from": "v1.18.5",
+      "to": "v1.18.7",
+      "advisories": [
+        "GO-2026-5841"
+      ],
+      "landed": true,
+      "now": "v1.18.7",
+      "pass": 1
+    },
+    {
+      "module": "pkg",
+      "dependency": "go.opentelemetry.io/otel/exporters/otlp/otlptrace",
+      "from": "v1.44.0",
+      "to": "v1.45.0",
+      "advisories": [
+        "GHSA-8wmf-6v46-5gfg"
+      ],
+      "landed": true,
+      "now": "v1.45.0",
+      "pass": 1
+    },
+    {
+      "module": "pkg",
+      "dependency": "go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp",
+      "from": "v1.44.0",
+      "to": "v1.45.0",
+      "advisories": [
+        "GHSA-8wmf-6v46-5gfg"
+      ],
+      "landed": true,
+      "now": "v1.45.0",
+      "pass": 1
+    },
+    {
+      "module": "pkg",
+      "dependency": "golang.org/x/crypto",
+      "from": "v0.54.0",
+      "to": "v0.56.0",
+      "advisories": [
+        "GHSA-5cgq-3rg8-m6cv",
+        "GHSA-89gr-r52h-f8rx",
+        "GHSA-f5wc-c3c7-36mc",
+        "GHSA-jppx-rxg9-jmrx",
+        "GHSA-rm3j-f69w-wqmq",
+        "GHSA-vgwf-h737-ff37",
+        "GHSA-x527-x647-q7gg",
+        "GHSA-q4h4-gmj2-qvw2",
+        "GHSA-w879-237q-wc7r",
+        "GHSA-45gg-vh54-h5m9",
+        "GHSA-78mq-xcr3-xm33",
+        "GHSA-9m57-25v3-79x9",
+        "GHSA-qpw4-5x99-6vjp",
+        "GO-2026-6303",
+        "GO-2026-6354",
+        "GO-2026-6355"
+      ],
+      "landed": true,
+      "now": "v0.56.0",
+      "pass": 1
+    },
+    {
+      "module": "pkg",
+      "dependency": "golang.org/x/mod",
+      "from": "v0.38.0",
+      "to": "v0.40.0",
+      "advisories": [
+        "GO-2026-6179",
+        "GO-2026-6180"
+      ],
+      "landed": false,
+      "pinned_by": [
+        "golang.org/x/text@v0.41.0"
+      ],
+      "why": "go mod tidy kept golang.org/x/mod@v0.38.0: required at that version by golang.org/x/text@v0.41.0",
+      "now": "v0.38.0",
+      "pass": 1
+    },
+    {
+      "module": "pkg",
+      "dependency": "google.golang.org/grpc",
+      "from": "v1.83.0",
+      "to": "v1.83.1",
+      "advisories": [
+        "GHSA-2v4p-qf9q-27wj",
+        "GHSA-hrxh-6v49-42gf",
+        "GHSA-vp52-pcj8-j9qc",
+        "GHSA-qc2q-p7wx-3px3"
+      ],
+      "landed": true,
+      "now": "v1.83.1",
+      "pass": 1
+    },
+    {
+      "module": "services/catalog",
+      "dependency": "github.com/klauspost/compress",
+      "from": "v1.18.5",
+      "to": "v1.18.7",
+      "advisories": [
+        "GO-2026-5841"
+      ],
+      "landed": true,
+      "now": "v1.18.7",
+      "pass": 1
+    },
+    {
+      "module": "services/catalog",
+      "dependency": "github.com/quic-go/quic-go",
+      "from": "v0.59.0",
+      "to": "v0.59.1",
+      "advisories": [
+        "GHSA-vvgj-x9jq-8cj9"
+      ],
+      "landed": true,
+      "now": "v0.59.1",
+      "pass": 1
+    },
+    {
+      "module": "services/catalog",
+      "dependency": "golang.org/x/mod",
+      "from": "v0.38.0",
+      "to": "v0.40.0",
+      "advisories": [
+        "GO-2026-6179",
+        "GO-2026-6180"
+      ],
+      "landed": false,
+      "pinned_by": [
+        "golang.org/x/text@v0.41.0"
+      ],
+      "why": "go mod tidy kept golang.org/x/mod@v0.38.0: required at that version by golang.org/x/text@v0.41.0",
+      "now": "v0.38.0",
+      "pass": 1
+    },
+    {
+      "module": "services/customers",
+      "dependency": "github.com/klauspost/compress",
+      "from": "v1.18.5",
+      "to": "v1.18.7",
+      "advisories": [
+        "GO-2026-5841"
+      ],
+      "landed": true,
+      "now": "v1.18.7",
+      "pass": 1
+    },
+    {
+      "module": "services/customers",
+      "dependency": "github.com/quic-go/quic-go",
+      "from": "v0.59.0",
+      "to": "v0.59.1",
+      "advisories": [
+        "GHSA-vvgj-x9jq-8cj9"
+      ],
+      "landed": true,
+      "now": "v0.59.1",
+      "pass": 1
+    },
+    {
+      "module": "services/customers",
+      "dependency": "golang.org/x/mod",
+      "from": "v0.38.0",
+      "to": "v0.40.0",
+      "advisories": [
+        "GO-2026-6179",
+        "GO-2026-6180"
+      ],
+      "landed": false,
+      "pinned_by": [
+        "golang.org/x/text@v0.41.0"
+      ],
+      "why": "go mod tidy kept golang.org/x/mod@v0.38.0: required at that version by golang.org/x/text@v0.41.0",
+      "now": "v0.38.0",
+      "pass": 1
+    },
+    {
+      "module": "services/inventory",
+      "dependency": "github.com/klauspost/compress",
+      "from": "v1.18.5",
+      "to": "v1.18.7",
+      "advisories": [
+        "GO-2026-5841"
+      ],
+      "landed": true,
+      "now": "v1.18.7",
+      "pass": 1
+    },
+    {
+      "module": "services/inventory",
+      "dependency": "github.com/quic-go/quic-go",
+      "from": "v0.59.0",
+      "to": "v0.59.1",
+      "advisories": [
+        "GHSA-vvgj-x9jq-8cj9"
+      ],
+      "landed": true,
+      "now": "v0.59.1",
+      "pass": 1
+    },
+    {
+      "module": "services/inventory",
+      "dependency": "golang.org/x/mod",
+      "from": "v0.38.0",
+      "to": "v0.40.0",
+      "advisories": [
+        "GO-2026-6179",
+        "GO-2026-6180"
+      ],
+      "landed": false,
+      "pinned_by": [
+        "golang.org/x/text@v0.41.0"
+      ],
+      "why": "go mod tidy kept golang.org/x/mod@v0.38.0: required at that version by golang.org/x/text@v0.41.0",
+      "now": "v0.38.0",
+      "pass": 1
+    },
+    {
+      "module": "services/payments",
+      "dependency": "github.com/klauspost/compress",
+      "from": "v1.18.5",
+      "to": "v1.18.7",
+      "advisories": [
+        "GO-2026-5841"
+      ],
+      "landed": true,
+      "now": "v1.18.7",
+      "pass": 1
+    },
+    {
+      "module": "services/payments",
+      "dependency": "github.com/quic-go/quic-go",
+      "from": "v0.59.0",
+      "to": "v0.59.1",
+      "advisories": [
+        "GHSA-vvgj-x9jq-8cj9"
+      ],
+      "landed": true,
+      "now": "v0.59.1",
+      "pass": 1
+    },
+    {
+      "module": "services/payments",
+      "dependency": "golang.org/x/mod",
+      "from": "v0.38.0",
+      "to": "v0.40.0",
+      "advisories": [
+        "GO-2026-6179",
+        "GO-2026-6180"
+      ],
+      "landed": false,
+      "pinned_by": [
+        "golang.org/x/text@v0.41.0"
+      ],
+      "why": "go mod tidy kept golang.org/x/mod@v0.38.0: required at that version by golang.org/x/text@v0.41.0",
+      "now": "v0.38.0",
+      "pass": 1
+    },
+    {
+      "module": "services/orders",
+      "dependency": "github.com/klauspost/compress",
+      "from": "v1.18.5",
+      "to": "v1.18.7",
+      "advisories": [
+        "GO-2026-5841"
+      ],
+      "landed": true,
+      "now": "v1.18.7",
+      "pass": 1
+    },
+    {
+      "module": "services/orders",
+      "dependency": "github.com/quic-go/quic-go",
+      "from": "v0.59.0",
+      "to": "v0.59.1",
+      "advisories": [
+        "GHSA-vvgj-x9jq-8cj9"
+      ],
+      "landed": true,
+      "now": "v0.59.1",
+      "pass": 1
+    },
+    {
+      "module": "services/orders",
+      "dependency": "golang.org/x/mod",
+      "from": "v0.38.0",
+      "to": "v0.40.0",
+      "advisories": [
+        "GO-2026-6179",
+        "GO-2026-6180"
+      ],
+      "landed": false,
+      "pinned_by": [
+        "golang.org/x/text@v0.41.0"
+      ],
+      "why": "go mod tidy kept golang.org/x/mod@v0.38.0: required at that version by golang.org/x/text@v0.41.0",
+      "now": "v0.38.0",
+      "pass": 1
+    },
+    {
+      "module": "gateway",
+      "dependency": "golang.org/x/mod",
+      "from": "v0.38.0",
+      "to": "v0.40.0",
+      "advisories": [
+        "GO-2026-6179",
+        "GO-2026-6180"
+      ],
+      "landed": false,
+      "pinned_by": [
+        "golang.org/x/text@v0.41.0"
+      ],
+      "why": "go mod tidy kept golang.org/x/mod@v0.38.0: required at that version by golang.org/x/text@v0.41.0",
+      "now": "v0.38.0",
+      "pass": 1
+    },
+    {
+      "module": "pkg",
+      "dependency": "google.golang.org/grpc",
+      "from": "v1.83.1",
+      "to": "v1.83.2",
+      "advisories": [
+        "GHSA-2v4p-qf9q-27wj"
+      ],
+      "landed": true,
+      "now": "v1.83.2",
+      "pass": 2
+    }
+  ],
+  "toolchain": {
+    "pin": "go1.26.8",
+    "fixes_from": "go1.26.6",
+    "verified_via": "go list -m -versions golang.org/toolchain (module proxy)",
+    "advisories": [
+      "GO-2026-4970",
+      "GO-2026-5026",
+      "GO-2026-5856",
+      "GO-2026-5942",
+      "GO-2026-5972",
+      "GO-2026-6088",
+      "GO-2026-6089",
+      "GO-2026-6090",
+      "GO-2026-6091",
+      "GO-2026-6218"
+    ],
+    "pinned": [
+      "pkg",
+      "services/catalog",
+      "services/customers",
+      "services/inventory",
+      "services/payments",
+      "services/orders",
+      "gateway"
+    ]
+  },
+  "stdlib_outside_release": [],
+  "unresolved": [
+    {
+      "module": "golang.org/x/crypto",
+      "version": "0.56.0",
+      "advisory": "GO-2026-5932",
+      "why": "no fixed release is published"
+    },
+    {
+      "module": "rsc.io/pdf",
+      "version": "0.1.1",
+      "advisory": "GO-2026-5781",
+      "why": "no fixed release is published"
+    }
+  ],
+  "counts": {
+    "landed": 16,
+    "reverted": 0,
+    "unresolved": 2
+  }
 }

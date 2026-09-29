@@ -1,19 +1,84 @@
 {
   "tool": "go-cve",
-  "scanned": false,
-  "why": "the advisory database was not queried — this run is offline by default; enable the registry lookup to scan",
-  "reason": "the advisory database was not queried — this run is offline by default; enable the registry lookup to scan",
+  "scanned": true,
   "package_source": "resolved",
   "coverage": "every module in the build list as the go command selected it (go list -m all), replacements applied",
-  "scanned_packages": 109,
+  "scanned_packages": 113,
   "counts": {
     "critical": 0,
     "high": 0,
-    "medium": 0,
+    "medium": 4,
     "low": 0,
-    "total": 0
+    "total": 4
   },
-  "findings": [],
+  "findings": [
+    {
+      "package": "golang.org/x/crypto",
+      "version": "0.56.0",
+      "id": "GO-2026-5932",
+      "advisory": "GO-2026-5932",
+      "aliases": [],
+      "reachability": "required",
+      "severity": "medium",
+      "fixed_version": "",
+      "fixed_elsewhere": [],
+      "summary": "The golang.org/x/crypto/openpgp package is unmaintained, unsafe by design, and has known security issues",
+      "project": "gateway/go.mod"
+    },
+    {
+      "package": "golang.org/x/mod",
+      "version": "0.38.0",
+      "id": "GO-2026-6179",
+      "advisory": "GO-2026-6179",
+      "aliases": [
+        "BIT-golang-2026-56865",
+        "CVE-2026-56865"
+      ],
+      "reachability": "not_reported",
+      "severity": "medium",
+      "fixed_version": "0.40.0",
+      "fixed_elsewhere": [],
+      "summary": "Fix transparency log tile verification bypass in golang.org/x/mod/sumdb/tlog",
+      "project": "gateway/go.mod"
+    },
+    {
+      "package": "golang.org/x/mod",
+      "version": "0.38.0",
+      "id": "GO-2026-6180",
+      "advisory": "GO-2026-6180",
+      "aliases": [
+        "BIT-golang-2026-56864",
+        "CVE-2026-56864"
+      ],
+      "reachability": "not_reported",
+      "severity": "medium",
+      "fixed_version": "0.40.0",
+      "fixed_elsewhere": [],
+      "summary": "Ignore unrelated, unauthenticated hashes in Lookup in golang.org/x/mod/sumdb",
+      "project": "gateway/go.mod"
+    },
+    {
+      "package": "rsc.io/pdf",
+      "version": "0.1.1",
+      "id": "GO-2026-5781",
+      "advisory": "GO-2026-5781",
+      "aliases": [],
+      "reachability": "not_reported",
+      "severity": "medium",
+      "fixed_version": "",
+      "fixed_elsewhere": [],
+      "summary": "Uncatchable stack-overflow denial of service in rsc.io/pdf",
+      "project": "services/catalog/go.mod"
+    }
+  ],
+  "reachability": {
+    "tool": "govulncheck",
+    "ran": true,
+    "called": 0,
+    "imported": 0,
+    "required": 1,
+    "not_reported": 3
+  },
   "outside_workspace": [
     "go.mod"
   ]

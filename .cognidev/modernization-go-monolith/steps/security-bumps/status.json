@@ -1,6 +1,6 @@
 {
-  "elapsedMs": 124,
-  "finishedAt": 1790395035,
+  "elapsedMs": 157188,
+  "finishedAt": 1790652852,
   "inputs": [],
   "kind": "rust-binary",
   "outputs": [
@@ -9,7 +9,7 @@
       "kind": null,
       "name": "security-bumps",
       "optional": true,
-      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/.cognidev/feature/security-bumps.json"
+      "path": "./.cognidev/feature/security-bumps.json"
     }
   ],
   "status": "Ok",

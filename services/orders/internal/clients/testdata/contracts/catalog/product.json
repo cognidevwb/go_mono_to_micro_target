@@ -1,7 +1,1 @@
-{
-  "id": 42,
-  "sku": "WIDGET-001",
-  "name": "Widget",
-  "price": 19.99,
-  "categoryId": 7
-}
+{"id": 7, "sku": "SKU-0007", "name": "Widget", "price": 19.99, "categoryId": 3}

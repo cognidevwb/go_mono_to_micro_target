@@ -58,7 +58,7 @@
       "candidate": "inventory",
       "confidence": {
         "confidence": 0.95,
-        "p": 0.97
+        "p": 0.96
       }
     },
     {
@@ -73,8 +73,8 @@
       "answer": "own",
       "candidate": "payments",
       "confidence": {
-        "confidence": 0.96,
-        "p": 0.97
+        "confidence": 0.95,
+        "p": 0.96
       }
     }
   ],

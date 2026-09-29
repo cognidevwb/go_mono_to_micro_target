@@ -41,24 +41,8 @@ flowchart LR
 
 ## Why these boundaries
 
-The monolith's five internal packages (`catalog`, `customers`, `inventory`, `payments`,
-`orders`) mapped one-to-one onto the five services above — none were merged or split.
-Each package already owned a disjoint set of gorm models (`service-map.json`) and had no
-package-level state shared with another, so the module boundary could follow the existing
-package boundary exactly.
+The monolith already had one package per business capability (`internal/catalog`, `internal/customers`, `internal/inventory`, `internal/orders`, `internal/payments`), so each package became one service and no candidates were merged. Two entities were kept together because they change together: `Category` and `Product` stay in catalog (`products` has a foreign key to `categories`), and `Order` and `OrderLine` stay in orders, so neither pair needs a distributed join. `StockItem` was split out of the catalog data because stock is written on every reservation, while the price list is mostly read.
 
-`catalog`, `customers`, `inventory` and `payments` had no outbound calls into a sibling
-package in the monolith, so they became leaf services: each owns its own table(s) and
-exposes a REST API, with no service-to-service coupling to redesign.
+Two couplings were accepted as synchronous reads. Orders calls catalog for prices and customers for the active check through typed HTTP clients, and each caller keeps its own copy of the provider's DTOs. Both are cheap, read-only lookups on the order path, and an event-fed read model would only add staleness.
 
-`orders` was the one context coupled to others — it called into `catalog` (to price and
-validate order lines) and `customers` (to validate the customer) synchronously, and its
-checkout flow wrote to `orders`, `inventory` and `payments` inside a single database
-transaction. That transaction could not be preserved once the tables moved to separate
-databases, so it was redesigned into the `CreateOrder` saga orchestrated by `orders`:
-inventory is reserved first (reversible), payment is captured last (hardest to reverse),
-and a failure compensates by releasing the reservation. The synchronous reads into
-`catalog` and `customers` were kept as accepted coupling — they are simple, low-latency
-lookups with no write side effects — and became HTTP calls through generated clients
-(`internal/clients/catalog`, `internal/clients/customers`) rather than events, since
-`orders` needs an authoritative, synchronous answer before accepting an order.
+The write coupling was redesigned. `orders` placed an order in one `db.Transaction` that also reserved stock and charged payment. That transaction can no longer span databases, so it became the CreateOrder saga, orchestrated by `orders` through the outbox. Inventory is reserved first and payment is charged last, because it is the hardest step to reverse. If a step fails, the earlier steps are compensated in reverse. The order and its lines are written only in the final local commit, so a failed saga leaves no order row behind. Cross-service events go through each service's transactional outbox, and consumers dedupe on message id.

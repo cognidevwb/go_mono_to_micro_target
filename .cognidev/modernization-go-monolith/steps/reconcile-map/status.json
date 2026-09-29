@@ -1,6 +1,6 @@
 {
-  "elapsedMs": 123,
-  "finishedAt": 1790392782,
+  "elapsedMs": 122,
+  "finishedAt": 1790651910,
   "inputs": [],
   "kind": "rust-binary",
   "outputs": [
@@ -9,7 +9,7 @@
       "kind": null,
       "name": "service-map",
       "optional": false,
-      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/.cognidev/feature/service-map.json"
+      "path": "./.cognidev/feature/service-map.json"
     }
   ],
   "status": "Ok",

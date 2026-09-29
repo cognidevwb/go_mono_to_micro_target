@@ -1,0 +1,374 @@
+{
+  "domain": "E-commerce order management (online shop backend split into catalog, customer, inventory, payment and order services behind a gateway)",
+  "summary": "This is the backend of an online shop. The shown code lets shoppers list products, register a customer account, look up a customer, place orders and list their orders. It lets staff add priced products, check stock for a product and look up the payments recorded for an order. Placing an order is the central flow.\n\nWhen an order is placed, the order service checks that the customer is active. It reserves stock for each item, looks up each item's price from the catalog, then charges payment as the last step. The order is only committed once the charge succeeds, and a failure returns the failing step's own message. If a step fails, stock already reserved is released through an idempotent inventory compensation route. A payment-void route also exists in the payment service, but the shown order code does not call it. A declined charge writes no payment record.\n\nThe services are separate HTTP services. A gateway routes requests by path prefix and strips internal-caller headers from outside requests. It verifies bearer tokens only when an issuer is configured. An order-placed event is published and the inventory service consumes it without handling a message twice, but that handler only logs the payload. A scheduled restock job also runs. Evidence scope: the shown source excerpts. Deployment, monitoring and legacy-format conversion material is excluded, and nothing here is runtime-verified.",
+  "useCases": [
+    {
+      "id": "place-order",
+      "title": "Place an order",
+      "actor": "Customer",
+      "description": "A customer submits an order with one or more items and quantities. The shop rejects an invalid request or an inactive customer, reserves stock, prices the lines and charges payment last, and returns the placed order.",
+      "steps": [
+        "Customer submits their id and items with positive quantities",
+        "An invalid request is rejected with an error message",
+        "The order service asks the customer service whether the account is active and refuses if it is not",
+        "Stock is reserved for each item and its unit price is fetched from the catalog",
+        "A pending order is saved and the total is charged through the payment service",
+        "The order is marked placed and an 'order placed' event is published in the same transaction",
+        "Any failure is returned to the customer as a conflict with the failing step's message"
+      ],
+      "evidence": "POST /orders handler placeOrder; Service.PlaceOrder; saga.CreateOrder (inventory \u2192 payments); PlaceOrderRequest binding rules",
+      "files": [
+        "services/orders/internal/orders/handlers.go",
+        "services/orders/internal/orders/service.go",
+        "services/orders/internal/orders/model.go",
+        "services/orders/internal/saga/create_order.go"
+      ],
+      "evidenceLevel": "source-implemented",
+      "folders": [
+        "services/orders/internal/orders",
+        "services/orders/internal/saga"
+      ]
+    },
+    {
+      "id": "rollback-failed-order",
+      "title": "Have a failed order release its reserved stock",
+      "actor": "Customer",
+      "description": "When a step of order placement fails, completed steps are compensated in reverse order. Reserved stock is released through an idempotent inventory route and the customer sees the step's own error such as 'out of stock'. The payment service also has a route that voids captured payments, but the shown order code does not call it.",
+      "steps": [
+        "A step fails, for example stock is short or the charge is declined",
+        "The saga compensates completed steps in reverse order",
+        "Reserved quantities are released through inventory's compensation route, keyed by saga id and product",
+        "The order transaction rolls back so no order is left behind",
+        "The customer receives the failing step's message"
+      ],
+      "evidence": "pkg/saga Saga.Run; TestAFailedStepCompensatesTheCompletedOnesInReverse; Service.releaseStock; POST /v1/inventory/create_order/compensate; POST /v1/payments/create_order/compensate",
+      "files": [
+        "pkg/saga/saga.go",
+        "pkg/saga/saga_test.go",
+        "services/orders/internal/orders/service.go",
+        "services/inventory/internal/app/create_order_compensation.go",
+        "services/payments/internal/app/create_order_compensation.go"
+      ],
+      "evidenceLevel": "source-implemented",
+      "folders": [
+        "pkg/saga",
+        "services/inventory/internal/app",
+        "services/orders/internal/orders",
+        "services/payments/internal/app"
+      ]
+    },
+    {
+      "id": "view-my-orders",
+      "title": "View my past orders",
+      "actor": "Customer",
+      "description": "A customer lists the orders placed under their user id, with their order lines.",
+      "steps": [
+        "Customer requests their orders",
+        "The user id is taken from the request context",
+        "Orders for that customer are returned with their lines"
+      ],
+      "evidence": "GET /orders/mine handler myOrders; Service.ForCustomer",
+      "files": [
+        "services/orders/internal/orders/handlers.go",
+        "services/orders/internal/orders/service.go",
+        "services/orders/internal/orders/model.go"
+      ],
+      "evidenceLevel": "source-implemented",
+      "folders": [
+        "services/orders/internal/orders"
+      ]
+    },
+    {
+      "id": "browse-catalog",
+      "title": "Browse the product catalog",
+      "actor": "Shopper",
+      "description": "A shopper lists all products, each with SKU, name, price and category id.",
+      "steps": [
+        "Shopper requests the product list",
+        "The catalog returns every product"
+      ],
+      "evidence": "GET /products handler listProducts; Service.List; Product model",
+      "files": [
+        "services/catalog/internal/catalog/handlers.go",
+        "services/catalog/internal/catalog/service.go",
+        "services/catalog/internal/catalog/model.go"
+      ],
+      "evidenceLevel": "source-implemented",
+      "folders": [
+        "services/catalog/internal/catalog"
+      ]
+    },
+    {
+      "id": "add-product",
+      "title": "Add a product to the catalog",
+      "actor": "Admin",
+      "description": "Shop staff add a product with SKU, name and a price. Products with a missing SKU or name, or a non-positive price, are rejected.",
+      "steps": [
+        "Admin submits the product's SKU, name and price",
+        "The request is rejected if required fields are missing or the price is not positive",
+        "The product is saved with an assigned id",
+        "The stored product is returned"
+      ],
+      "evidence": "POST /products handler createProduct; Service.Create; TestCreateRejectsNonPositivePrice",
+      "files": [
+        "services/catalog/internal/catalog/handlers.go",
+        "services/catalog/internal/catalog/service.go",
+        "services/catalog/internal/catalog/model.go",
+        "services/catalog/internal/catalog/catalog_test.go"
+      ],
+      "evidenceLevel": "source-implemented",
+      "folders": [
+        "services/catalog/internal/catalog"
+      ]
+    },
+    {
+      "id": "register-customer",
+      "title": "Register a customer account",
+      "actor": "Customer",
+      "description": "A new shopper registers with an email and name. The account is created active by default.",
+      "steps": [
+        "Shopper submits an email and name",
+        "A missing name or invalid email is rejected",
+        "The customer is saved and returned",
+        "A storage failure such as a duplicate email is reported as a conflict"
+      ],
+      "evidence": "POST /customers handler registerCustomer; Service.Register; Customer binding rules",
+      "files": [
+        "services/customers/internal/customers/handlers.go",
+        "services/customers/internal/customers/service.go",
+        "services/customers/internal/customers/model.go"
+      ],
+      "evidenceLevel": "source-implemented",
+      "folders": [
+        "services/customers/internal/customers"
+      ]
+    },
+    {
+      "id": "view-customer-account",
+      "title": "Look up a customer's account details",
+      "actor": "Account holder",
+      "description": "A caller retrieves a customer record by id, including email, name and active flag.",
+      "steps": [
+        "Caller requests a customer by id",
+        "A non-numeric id is rejected",
+        "The customer is loaded, or not found is returned",
+        "The customer record is returned"
+      ],
+      "evidence": "GET /customers/:id handler getCustomer; Service.Get",
+      "files": [
+        "services/customers/internal/customers/handlers.go",
+        "services/customers/internal/customers/service.go",
+        "services/customers/internal/customers/model.go"
+      ],
+      "evidenceLevel": "source-implemented",
+      "folders": [
+        "services/customers/internal/customers"
+      ]
+    },
+    {
+      "id": "verify-account-active",
+      "title": "Block ordering for inactive customers",
+      "actor": "Customer",
+      "description": "Before an order proceeds, the order service asks the customer service whether the account is active, and an inactive customer is refused. The call is retried with backoff on transport or server errors.",
+      "steps": [
+        "The order service calls the customer service's is-active route",
+        "The customer service looks up the account and returns its active flag",
+        "An inactive account stops the order with 'customer inactive'"
+      ],
+      "evidence": "POST /v1/customers/is_active; Service.IsActive; orders clients/customers IsActive; PlaceOrder",
+      "files": [
+        "services/customers/internal/app/remote_operations.go",
+        "services/customers/internal/customers/service.go",
+        "services/orders/internal/clients/customers/client.go",
+        "services/orders/internal/orders/service.go"
+      ],
+      "evidenceLevel": "source-implemented",
+      "folders": [
+        "services/customers/internal/app",
+        "services/customers/internal/customers",
+        "services/orders/internal/clients/customers",
+        "services/orders/internal/orders"
+      ]
+    },
+    {
+      "id": "price-order-items",
+      "title": "Price order items from the catalog",
+      "actor": "Customer",
+      "description": "Each ordered product's unit price comes from the catalog and the line totals are summed into the order total. The catalog may serve a price from a per-instance cache for up to 30 seconds.",
+      "steps": [
+        "The order service asks the catalog for each product's price",
+        "The catalog returns the price, or not found for an unknown product",
+        "The price is stored on the order line and added to the total"
+      ],
+      "evidence": "POST /v1/catalog/price_of; Service.PriceOf with priceCacheTTL; orders clients/catalog PriceOf",
+      "files": [
+        "services/catalog/internal/app/remote_operations.go",
+        "services/catalog/internal/catalog/service.go",
+        "services/orders/internal/clients/catalog/client.go",
+        "services/orders/internal/orders/service.go"
+      ],
+      "evidenceLevel": "source-implemented",
+      "folders": [
+        "services/catalog/internal/app",
+        "services/catalog/internal/catalog",
+        "services/orders/internal/clients/catalog",
+        "services/orders/internal/orders"
+      ]
+    },
+    {
+      "id": "reserve-stock",
+      "title": "Reserve stock for ordered items",
+      "actor": "Customer",
+      "description": "Stock is reserved for a product only if on-hand minus reserved covers the quantity, and the stock row is locked during reservation. The inventory service also consumes order-placed events without reprocessing a redelivered message, but its handler only logs the payload.",
+      "steps": [
+        "The order service asks inventory to reserve a product quantity",
+        "Inventory locks the stock row and checks available units",
+        "The reserved count is increased, or a not-reserved answer is returned",
+        "An unknown product returns not found",
+        "Order-placed events are de-duplicated by message id before being logged"
+      ],
+      "evidence": "POST /v1/inventory/reserve; reserveHandler; Service.Reserve; OnOrderPlaced; SubscribeOrderPlaced with Idempotent",
+      "files": [
+        "services/inventory/internal/app/remote_operations.go",
+        "services/inventory/internal/inventory/service.go",
+        "services/inventory/internal/inventory/model.go",
+        "services/inventory/internal/events/order_placed_consumer.go",
+        "services/orders/internal/clients/inventory/client.go",
+        "pkg/events/idempotent.go"
+      ],
+      "evidenceLevel": "source-implemented",
+      "folders": [
+        "pkg/events",
+        "services/inventory/internal/app",
+        "services/inventory/internal/events",
+        "services/inventory/internal/inventory",
+        "services/orders/internal/clients/inventory"
+      ]
+    },
+    {
+      "id": "check-stock",
+      "title": "Check the stock level of a product",
+      "actor": "Admin",
+      "description": "A caller reads the on-hand and reserved counts for one product by product id. Errors are returned as problem+json.",
+      "steps": [
+        "Caller requests a stock item by product id",
+        "A non-positive or non-numeric id is rejected",
+        "The stock item is loaded, or not found is returned",
+        "On-hand and reserved counts are returned"
+      ],
+      "evidence": "GET /v1/stockitem/:product_id; getStockItem",
+      "files": [
+        "services/inventory/internal/httpapi/stock_item_handlers.go",
+        "services/inventory/internal/acl/legacy.go",
+        "services/inventory/internal/inventory/model.go"
+      ],
+      "evidenceLevel": "source-implemented",
+      "folders": [
+        "services/inventory/internal/acl",
+        "services/inventory/internal/httpapi",
+        "services/inventory/internal/inventory"
+      ]
+    },
+    {
+      "id": "restock-products",
+      "title": "Have under-stocked products replenished automatically",
+      "actor": "Admin",
+      "description": "A scheduled job sets on-hand to reserved plus 10 for stock items whose on-hand is below reserved. It runs every minute.",
+      "steps": [
+        "A timer fires every minute",
+        "The restock update is run",
+        "Failures are logged"
+      ],
+      "evidence": "Service.Restock; StartRestockJob; jobs.Run with advisory-lock lease",
+      "files": [
+        "services/inventory/internal/inventory/service.go",
+        "services/inventory/internal/jobs/scheduler.go"
+      ],
+      "evidenceLevel": "source-implemented",
+      "folders": [
+        "services/inventory/internal/inventory",
+        "services/inventory/internal/jobs"
+      ]
+    },
+    {
+      "id": "pay-for-order",
+      "title": "Pay for an order",
+      "actor": "Customer",
+      "description": "A charge is validated, the external payment provider is asked to capture it, and a captured payment record is saved in the same transaction. A provider decline is reported as an error and no record is saved.",
+      "steps": [
+        "The order service posts the order id and amount to payments",
+        "The request is rejected if the order id is missing or the amount is negative or not a number",
+        "The payment gateway is asked to capture the amount",
+        "On success a captured payment is saved",
+        "On decline an error is returned and nothing is saved"
+      ],
+      "evidence": "POST /v1/payments/charge; chargeHandler; Service.Charge; Gateway.Charge; ChargeRequest.Validate",
+      "files": [
+        "services/payments/internal/app/remote_operations.go",
+        "services/payments/internal/payments/service.go",
+        "services/payments/internal/payments/gateway.go",
+        "services/payments/internal/payments/model.go",
+        "services/payments/internal/acl/legacy.go",
+        "services/orders/internal/clients/payments/client.go"
+      ],
+      "evidenceLevel": "source-implemented",
+      "folders": [
+        "services/orders/internal/clients/payments",
+        "services/payments/internal/acl",
+        "services/payments/internal/app",
+        "services/payments/internal/payments"
+      ]
+    },
+    {
+      "id": "payment-status",
+      "title": "Look up the payments recorded for an order",
+      "actor": "Customer",
+      "description": "A caller retrieves the payment records for an order id, each with amount and status, or not found when there are none.",
+      "steps": [
+        "Caller requests payments for an order id",
+        "An invalid id is rejected",
+        "The payment records are loaded in id order",
+        "The records are returned, or not found if none exist"
+      ],
+      "evidence": "GET /v1/payment/order/:orderId; Payment model",
+      "files": [
+        "services/payments/internal/httpapi/payment_handlers.go",
+        "services/payments/internal/payments/model.go"
+      ],
+      "evidenceLevel": "source-implemented",
+      "folders": [
+        "services/payments/internal/httpapi",
+        "services/payments/internal/payments"
+      ]
+    },
+    {
+      "id": "access-through-gateway",
+      "title": "Use the shop through a single authenticated entry point",
+      "actor": "Customer",
+      "description": "The gateway routes requests by longest path prefix to the catalog, customer, inventory, payment and order services. When an issuer is configured, it requires a valid bearer token. It strips internal-caller headers so outsiders cannot pose as services.",
+      "steps": [
+        "A caller sends a request to the gateway",
+        "When an issuer is configured, a missing or invalid bearer token gets 401",
+        "The internal-caller and token headers are removed from the request",
+        "The request goes to the service with the longest matching prefix, otherwise to the legacy upstream or 404"
+      ],
+      "evidence": "gateway Authenticate; proxy.New; httpx.IsInternal",
+      "files": [
+        "gateway/internal/proxy/auth.go",
+        "gateway/internal/proxy/proxy.go",
+        "pkg/httpx/internal.go"
+      ],
+      "evidenceLevel": "source-implemented",
+      "folders": [
+        "gateway/internal/proxy",
+        "pkg/httpx"
+      ]
+    }
+  ],
+  "analysisEvidence": {
+    "status": "implementation-refined",
+    "scope": "model-inferred-from-source",
+    "runtimeVerified": false,
+    "version": 4
+  }
+}

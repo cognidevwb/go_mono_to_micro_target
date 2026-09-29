@@ -5,7 +5,6 @@ package saga
 
 import (
 	"context"
-	"errors"
 	"fmt"
 )
 
@@ -28,26 +27,42 @@ type Result struct {
 	Compensated []string
 }
 
+// StepError is the failure of one step. Its message is the step's own error,
+// so a caller answers with exactly what the monolith's single transaction
+// answered ("out of stock", not "saga CreateOrder: step inventory: out of
+// stock"); Saga and Step say where it happened, for logs, and Compensation
+// holds any compensation that failed in turn.
+type StepError struct {
+	Saga, Step   string
+	Err          error
+	Compensation []error
+}
+
+func (e *StepError) Error() string { return e.Err.Error() }
+
+// Unwrap exposes the step's error and every failed compensation to errors.Is/As.
+func (e *StepError) Unwrap() []error { return append([]error{e.Err}, e.Compensation...) }
+
 // Run executes the steps. On failure it compensates the completed steps in
-// reverse and returns the step error joined with any compensation errors.
+// reverse and returns a *StepError carrying the step's error and any
+// compensation errors.
 func (s Saga) Run(ctx context.Context) (Result, error) {
 	var res Result
 	for i, st := range s.Steps {
 		if err := st.Do(ctx); err != nil {
-			stepErr := fmt.Errorf("saga %s: step %s: %w", s.Name, st.Name, err)
-			var compErrs []error
+			stepErr := &StepError{Saga: s.Name, Step: st.Name, Err: err}
 			for j := i - 1; j >= 0; j-- {
 				done := s.Steps[j]
 				if done.Compensate == nil {
 					continue
 				}
 				if cerr := done.Compensate(ctx); cerr != nil {
-					compErrs = append(compErrs, fmt.Errorf("compensate %s: %w", done.Name, cerr))
+					stepErr.Compensation = append(stepErr.Compensation, fmt.Errorf("compensate %s: %w", done.Name, cerr))
 					continue
 				}
 				res.Compensated = append(res.Compensated, done.Name)
 			}
-			return res, errors.Join(append([]error{stepErr}, compErrs...)...)
+			return res, stepErr
 		}
 		res.Completed = append(res.Completed, st.Name)
 	}

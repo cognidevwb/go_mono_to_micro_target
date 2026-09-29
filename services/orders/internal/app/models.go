@@ -8,7 +8,7 @@ import (
 // models lists the persisted types THIS service owns; New migrates exactly these.
 func models() []any {
 	return []any{
-		&orders.OrderLine{},
 		&orders.Order{},
+		&orders.OrderLine{},
 	}
 }

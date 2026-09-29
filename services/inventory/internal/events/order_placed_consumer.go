@@ -1,7 +1,3 @@
-// services · consume `order.placed` (raised by orders) over the broker: a
-// durable subscription per consumer, an idempotent handler keyed on the
-// message id (processed_messages, seen via pkg/events.Idempotent) — replaces
-// the in-process bus Subscribe (inventory-service)
 package events
 
 import (
@@ -12,15 +8,14 @@ import (
 	"github.com/acme/shop/services/inventory/internal/inventory"
 )
 
-// DurableOrderPlacedConsumer names inventory's durable subscription to
-// order.placed.
-const DurableOrderPlacedConsumer = "inventory-service.order-placed"
+// OrderPlacedDurable names the JetStream consumer (letters, digits, - and _ only).
+const OrderPlacedDurable = "inventory-service-order_placed"
 
-// SubscribeOrderPlaced durably subscribes to order.placed and hands each
-// fresh delivery to svc.OnOrderPlaced, dropping redeliveries the consumer
-// already handled.
+// SubscribeOrderPlaced consumes `order.placed` from the broker and hands the
+// payload to the ported handler. Redeliveries are dropped by message id; the
+// broker acks only after the handler returns without error.
 func SubscribeOrderPlaced(ctx context.Context, bus pkgevents.Bus, seen pkgevents.Seen, svc *inventory.Service) error {
-	handler := pkgevents.Idempotent(DurableOrderPlacedConsumer, seen, func(_ context.Context, e pkgevents.Envelope) error {
+	h := pkgevents.Idempotent(OrderPlacedDurable, seen, func(_ context.Context, e pkgevents.Envelope) error {
 		var payload any
 		if err := e.Decode(&payload); err != nil {
 			return err
@@ -28,5 +23,5 @@ func SubscribeOrderPlaced(ctx context.Context, bus pkgevents.Bus, seen pkgevents
 		svc.OnOrderPlaced(payload)
 		return nil
 	})
-	return bus.Subscribe(ctx, orders.TopicOrderPlaced, DurableOrderPlacedConsumer, handler)
+	return bus.Subscribe(ctx, orders.TopicOrderPlaced, OrderPlacedDurable, h)
 }

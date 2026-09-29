@@ -1,6 +1,6 @@
 {
   "elapsedMs": 3,
-  "finishedAt": 1790392774,
+  "finishedAt": 1790651902,
   "inputs": [],
   "kind": "questionnaire",
   "outputs": [
@@ -9,14 +9,14 @@
       "kind": null,
       "name": "intent",
       "optional": false,
-      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/.cognidev/intent.yml"
+      "path": "./.cognidev/intent.yml"
     },
     {
       "exists": true,
       "kind": null,
       "name": "intent",
       "optional": false,
-      "path": "/Users/rajasekharkarawalla/dev/2026/cognidev/.cw-worktrees/pb-go-jev-mono/playbooks-v2/modernization-go-monolith/config/intent.yml"
+      "path": "~/dev/2026/cognidev/.cw-worktrees/pb-cpp-rust/playbooks-v2/modernization-go-monolith/config/intent.yml"
     }
   ],
   "status": "Ok",

@@ -4,29 +4,50 @@
   "failed_targets": [],
   "failed_test_targets": [],
   "failed_tests": [],
-  "go_version": "go1.26.4",
+  "go_version": "go1.26.8",
   "lint": {
     "findings": 60,
     "issues": [
       {
         "col": 15,
-        "file": "gateway/../monolith-shop-base/gateway/internal/proxy/proxy.go",
+        "file": "gateway/../monolith-rt6/gateway/internal/proxy/proxy.go",
         "line": 61,
         "message": "ST1023: should omit type http.Handler from declaration; it will be inferred from the right-hand side",
         "source": "golangci-lint/staticcheck"
       },
       {
+        "col": 17,
+        "file": "pkg/../monolith-rt6/pkg/httpx/server_test.go",
+        "line": 38,
+        "message": "Error return value of `resp.Body.Close` is not checked",
+        "source": "golangci-lint/errcheck"
+      },
+      {
+        "col": 17,
+        "file": "pkg/../monolith-rt6/pkg/httpx/server_test.go",
+        "line": 49,
+        "message": "Error return value of `resp.Body.Close` is not checked",
+        "source": "golangci-lint/errcheck"
+      },
+      {
         "col": 18,
-        "file": "pkg/../monolith-shop-base/pkg/outbox/outbox.go",
+        "file": "pkg/../monolith-rt6/pkg/outbox/outbox.go",
         "line": 102,
         "message": "Close should use defer",
         "source": "golangci-lint/sqlclosecheck"
       },
       {
         "col": 1,
-        "file": "services/catalog/../monolith-shop-base/services/catalog/internal/platform/auth.go",
+        "file": "services/catalog/../monolith-rt6/services/catalog/internal/platform/auth.go",
         "line": 1,
         "message": "package-comments: should have a package comment",
+        "source": "golangci-lint/revive"
+      },
+      {
+        "col": 1,
+        "file": "services/catalog/internal/app/app.go",
+        "line": 35,
+        "message": "exported: exported function New should have comment or be unexported",
         "source": "golangci-lint/revive"
       },
       {
@@ -44,17 +65,24 @@
         "source": "golangci-lint/revive"
       },
       {
-        "col": 15,
-        "file": "services/catalog/test/equivalence/catalog_equivalence_test.go",
-        "line": 33,
-        "message": "G304: Potential file inclusion via variable",
-        "source": "golangci-lint/gosec"
+        "col": 1,
+        "file": "services/catalog/internal/catalog/catalog_test.go",
+        "line": 1,
+        "message": "package-comments: should have a package comment",
+        "source": "golangci-lint/revive"
       },
       {
         "col": 1,
-        "file": "services/customers/../monolith-shop-base/services/customers/internal/platform/auth.go",
+        "file": "services/customers/../monolith-rt6/services/customers/internal/platform/auth.go",
         "line": 1,
         "message": "package-comments: should have a package comment",
+        "source": "golangci-lint/revive"
+      },
+      {
+        "col": 1,
+        "file": "services/customers/internal/app/app.go",
+        "line": 35,
+        "message": "exported: exported function New should have comment or be unexported",
         "source": "golangci-lint/revive"
       },
       {
@@ -72,38 +100,38 @@
         "source": "golangci-lint/revive"
       },
       {
-        "col": 15,
-        "file": "services/customers/test/equivalence/customers_equivalence_test.go",
-        "line": 34,
-        "message": "G304: Potential file inclusion via variable",
-        "source": "golangci-lint/gosec"
+        "col": 1,
+        "file": "services/customers/internal/customers/customers_test.go",
+        "line": 1,
+        "message": "package-comments: should have a package comment",
+        "source": "golangci-lint/revive"
       },
       {
         "col": 1,
-        "file": "services/inventory/../monolith-shop-base/services/inventory/internal/contracts/orders/contracts.go",
+        "file": "services/inventory/../monolith-rt6/services/inventory/internal/contracts/orders/contracts.go",
         "line": 1,
         "message": "package-comments: package comment should be of the form \"Package orders ...\"",
         "source": "golangci-lint/revive"
       },
       {
         "col": 7,
-        "file": "services/inventory/../monolith-shop-base/services/inventory/internal/contracts/orders/contracts.go",
-        "line": 5,
+        "file": "services/inventory/../monolith-rt6/services/inventory/internal/contracts/orders/contracts.go",
+        "line": 11,
         "message": "exported: exported const TopicOrderPlaced should have comment or be unexported",
         "source": "golangci-lint/revive"
       },
       {
         "col": 1,
-        "file": "services/inventory/../monolith-shop-base/services/inventory/internal/platform/auth.go",
+        "file": "services/inventory/../monolith-rt6/services/inventory/internal/platform/auth.go",
         "line": 1,
         "message": "package-comments: should have a package comment",
         "source": "golangci-lint/revive"
       },
       {
-        "col": 2,
-        "file": "services/inventory/internal/acl/legacy.go",
-        "line": 19,
-        "message": "exported: exported const StatusInStock should have comment (or a comment on this block) or be unexported",
+        "col": 1,
+        "file": "services/inventory/internal/app/app.go",
+        "line": 35,
+        "message": "exported: exported function New should have comment or be unexported",
         "source": "golangci-lint/revive"
       },
       {
@@ -121,59 +149,52 @@
         "source": "golangci-lint/revive"
       },
       {
-        "col": 1,
-        "file": "services/inventory/internal/events/order_placed_consumer.go",
-        "line": 1,
-        "message": "package-comments: package comment should be of the form \"Package events ...\"",
-        "source": "golangci-lint/revive"
-      },
-      {
-        "col": 1,
+        "col": 49,
         "file": "services/inventory/internal/httpapi/stock_item_handlers.go",
-        "line": 1,
-        "message": "package-comments: package comment should be of the form \"Package httpapi ...\"",
+        "line": 18,
+        "message": "unused-parameter: parameter 'svc' seems to be unused, consider removing or renaming it as _",
         "source": "golangci-lint/revive"
       },
       {
         "col": 1,
-        "file": "services/inventory/internal/jobs/scheduler.go",
+        "file": "services/inventory/internal/inventory/inventory_test.go",
         "line": 1,
-        "message": "package-comments: package comment should be of the form \"Package jobs ...\"",
+        "message": "package-comments: should have a package comment",
         "source": "golangci-lint/revive"
       },
       {
         "col": 18,
         "file": "services/inventory/internal/jobs/scheduler.go",
-        "line": 45,
+        "line": 36,
         "message": "Error return value of `conn.Close` is not checked",
         "source": "golangci-lint/errcheck"
       },
       {
-        "col": 15,
-        "file": "services/inventory/test/equivalence/inventory_equivalence_test.go",
-        "line": 34,
-        "message": "G304: Potential file inclusion via variable",
-        "source": "golangci-lint/gosec"
-      },
-      {
         "col": 1,
-        "file": "services/orders/../monolith-shop-base/services/orders/internal/contracts/catalog/contracts.go",
+        "file": "services/orders/../monolith-rt6/services/orders/internal/contracts/catalog/contracts.go",
         "line": 1,
         "message": "package-comments: package comment should be of the form \"Package catalog ...\"",
         "source": "golangci-lint/revive"
       },
       {
         "col": 1,
-        "file": "services/orders/../monolith-shop-base/services/orders/internal/contracts/payments/contracts.go",
+        "file": "services/orders/../monolith-rt6/services/orders/internal/contracts/payments/contracts.go",
         "line": 1,
         "message": "package-comments: package comment should be of the form \"Package payments ...\"",
         "source": "golangci-lint/revive"
       },
       {
         "col": 1,
-        "file": "services/orders/../monolith-shop-base/services/orders/internal/platform/auth.go",
+        "file": "services/orders/../monolith-rt6/services/orders/internal/platform/auth.go",
         "line": 1,
         "message": "package-comments: should have a package comment",
+        "source": "golangci-lint/revive"
+      },
+      {
+        "col": 1,
+        "file": "services/orders/internal/app/app.go",
+        "line": 35,
+        "message": "exported: exported function New should have comment or be unexported",
         "source": "golangci-lint/revive"
       },
       {
@@ -200,37 +221,23 @@
       {
         "col": 1,
         "file": "services/orders/internal/clients/catalog/client.go",
-        "line": 30,
+        "line": 55,
         "message": "exported: comment on exported type Product should be of the form \"Product ...\" (with optional leading article)",
         "source": "golangci-lint/revive"
       },
       {
         "col": 6,
         "file": "services/orders/internal/clients/catalog/client.go",
-        "line": 32,
+        "line": 57,
         "message": "exported: exported type Category should have comment or be unexported",
         "source": "golangci-lint/revive"
       },
       {
-        "col": 1,
-        "file": "services/orders/internal/clients/catalog/client.go",
-        "line": 44,
-        "message": "exported: exported method Service.Create should have comment or be unexported",
-        "source": "golangci-lint/revive"
-      },
-      {
-        "col": 1,
-        "file": "services/orders/internal/clients/catalog/client.go",
-        "line": 70,
-        "message": "exported: exported method Service.PriceOf should have comment or be unexported",
-        "source": "golangci-lint/revive"
-      },
-      {
-        "col": 1,
-        "file": "services/orders/internal/clients/catalog/client.go",
-        "line": 118,
-        "message": "exported: exported function NewService should have comment or be unexported",
-        "source": "golangci-lint/revive"
+        "col": 16,
+        "file": "services/orders/internal/clients/catalog_contract_test.go",
+        "line": 24,
+        "message": "G304: Potential file inclusion via variable",
+        "source": "golangci-lint/gosec"
       },
       {
         "col": 1,
@@ -240,32 +247,25 @@
         "source": "golangci-lint/revive"
       },
       {
-        "col": 1,
-        "file": "services/orders/internal/clients/customers/client.go",
-        "line": 44,
-        "message": "exported: exported method Service.IsActive should have comment or be unexported",
-        "source": "golangci-lint/revive"
-      },
-      {
         "col": 19,
         "file": "services/orders/internal/clients/customers/client.go",
-        "line": 64,
+        "line": 93,
         "message": "Error return value of `resp.Body.Close` is not checked",
         "source": "golangci-lint/errcheck"
       },
       {
-        "col": 23,
+        "col": 17,
         "file": "services/orders/internal/clients/customers/client.go",
-        "line": 73,
-        "message": "Error return value of `resp.Body.Close` is not checked",
-        "source": "golangci-lint/errcheck"
-      },
-      {
-        "col": 1,
-        "file": "services/orders/internal/clients/customers/client.go",
-        "line": 91,
-        "message": "exported: exported function NewService should have comment or be unexported",
+        "line": 111,
+        "message": "unused-parameter: parameter 'db' seems to be unused, consider removing or renaming it as _",
         "source": "golangci-lint/revive"
+      },
+      {
+        "col": 16,
+        "file": "services/orders/internal/clients/customers_contract_test.go",
+        "line": 26,
+        "message": "G304: Potential file inclusion via variable",
+        "source": "golangci-lint/gosec"
       },
       {
         "col": 1,
@@ -277,8 +277,22 @@
       {
         "col": 27,
         "file": "services/orders/internal/clients/inventory/client.go",
-        "line": 50,
+        "line": 60,
         "message": "unused-parameter: parameter 'tx' seems to be unused, consider removing or renaming it as _",
+        "source": "golangci-lint/revive"
+      },
+      {
+        "col": 23,
+        "file": "services/orders/internal/clients/inventory/client.go",
+        "line": 74,
+        "message": "Error return value of `resp.Body.Close` is not checked",
+        "source": "golangci-lint/errcheck"
+      },
+      {
+        "col": 17,
+        "file": "services/orders/internal/clients/inventory/client.go",
+        "line": 87,
+        "message": "unused-parameter: parameter 'db' seems to be unused, consider removing or renaming it as _",
         "source": "golangci-lint/revive"
       },
       {
@@ -291,85 +305,85 @@
       {
         "col": 1,
         "file": "services/orders/internal/clients/payments/client.go",
-        "line": 25,
+        "line": 48,
         "message": "exported: comment on exported type Gateway should be of the form \"Gateway ...\" (with optional leading article)",
         "source": "golangci-lint/revive"
       },
       {
         "col": 26,
         "file": "services/orders/internal/clients/payments/client.go",
-        "line": 46,
+        "line": 64,
         "message": "unused-parameter: parameter 'tx' seems to be unused, consider removing or renaming it as _",
         "source": "golangci-lint/revive"
       },
       {
         "col": 23,
         "file": "services/orders/internal/clients/payments/client.go",
-        "line": 60,
+        "line": 78,
         "message": "Error return value of `resp.Body.Close` is not checked",
         "source": "golangci-lint/errcheck"
       },
       {
-        "col": 1,
+        "col": 17,
         "file": "services/orders/internal/clients/payments/client.go",
-        "line": 67,
-        "message": "exported: exported function NewService should have comment or be unexported",
+        "line": 85,
+        "message": "unused-parameter: parameter 'db' seems to be unused, consider removing or renaming it as _",
+        "source": "golangci-lint/revive"
+      },
+      {
+        "col": 17,
+        "file": "services/orders/internal/clients/payments/client.go",
+        "line": 89,
+        "message": "unused-parameter: parameter 'baseURL' seems to be unused, consider removing or renaming it as _",
         "source": "golangci-lint/revive"
       },
       {
         "col": 1,
-        "file": "services/orders/internal/clients/payments/client.go",
-        "line": 71,
-        "message": "exported: exported function NewGateway should have comment or be unexported",
+        "file": "services/orders/internal/orders/handlers.go",
+        "line": 1,
+        "message": "package-comments: should have a package comment",
         "source": "golangci-lint/revive"
       },
       {
-        "col": 73,
-        "file": "services/orders/internal/orders/orders_test.go",
-        "line": 44,
-        "message": "unused-parameter: parameter 'r' seems to be unused, consider removing or renaming it as _",
+        "col": 14,
+        "file": "services/orders/internal/orders/service.go",
+        "line": 102,
+        "message": "unused-parameter: parameter 'ctx' seems to be unused, consider removing or renaming it as _",
+        "source": "golangci-lint/revive"
+      },
+      {
+        "col": 40,
+        "file": "services/orders/internal/orders/service.go",
+        "line": 140,
+        "message": "G704: SSRF via taint analysis",
+        "source": "golangci-lint/gosec"
+      },
+      {
+        "col": 24,
+        "file": "services/orders/internal/orders/service.go",
+        "line": 145,
+        "message": "G704: SSRF via taint analysis",
+        "source": "golangci-lint/gosec"
+      },
+      {
+        "col": 1,
+        "file": "services/payments/../monolith-rt6/services/payments/internal/platform/auth.go",
+        "line": 1,
+        "message": "package-comments: should have a package comment",
         "source": "golangci-lint/revive"
       },
       {
         "col": 2,
-        "file": "services/orders/internal/orders/service.go",
-        "line": 28,
-        "message": "exported: exported const StatusPending should have comment (or a comment on this block) or be unexported",
-        "source": "golangci-lint/revive"
-      },
-      {
-        "col": 13,
-        "file": "services/orders/internal/orders/service.go",
-        "line": 84,
-        "message": "unused-parameter: parameter 'ctx' seems to be unused, consider removing or renaming it as _",
-        "source": "golangci-lint/revive"
-      },
-      {
-        "col": 13,
-        "file": "services/orders/internal/orders/service.go",
-        "line": 107,
-        "message": "unused-parameter: parameter 'ctx' seems to be unused, consider removing or renaming it as _",
-        "source": "golangci-lint/revive"
-      },
-      {
-        "col": 15,
-        "file": "services/orders/test/equivalence/orders_equivalence_test.go",
-        "line": 39,
-        "message": "G304: Potential file inclusion via variable",
-        "source": "golangci-lint/gosec"
-      },
-      {
-        "col": 73,
-        "file": "services/orders/test/equivalence/orders_equivalence_test.go",
-        "line": 52,
-        "message": "unused-parameter: parameter 'r' seems to be unused, consider removing or renaming it as _",
+        "file": "services/payments/internal/acl/legacy.go",
+        "line": 16,
+        "message": "exported: exported const PaymentCaptured should have comment (or a comment on this block) or be unexported",
         "source": "golangci-lint/revive"
       },
       {
         "col": 1,
-        "file": "services/payments/../monolith-shop-base/services/payments/internal/platform/auth.go",
-        "line": 1,
-        "message": "package-comments: should have a package comment",
+        "file": "services/payments/internal/app/app.go",
+        "line": 35,
+        "message": "exported: exported function New should have comment or be unexported",
         "source": "golangci-lint/revive"
       },
       {
@@ -387,6 +401,13 @@
         "source": "golangci-lint/revive"
       },
       {
+        "col": 49,
+        "file": "services/payments/internal/httpapi/payment_handlers.go",
+        "line": 25,
+        "message": "unused-parameter: parameter 'svc' seems to be unused, consider removing or renaming it as _",
+        "source": "golangci-lint/revive"
+      },
+      {
         "col": 1,
         "file": "services/payments/internal/payments/gateway.go",
         "line": 1,
@@ -401,30 +422,9 @@
         "source": "golangci-lint/errcheck"
       },
       {
-        "col": 2,
-        "file": "services/payments/internal/payments/payments_test.go",
-        "line": 18,
-        "message": "dot-imports: should not use dot imports",
-        "source": "golangci-lint/revive"
-      },
-      {
         "col": 73,
         "file": "services/payments/internal/payments/payments_test.go",
-        "line": 39,
-        "message": "unused-parameter: parameter 'r' seems to be unused, consider removing or renaming it as _",
-        "source": "golangci-lint/revive"
-      },
-      {
-        "col": 15,
-        "file": "services/payments/test/equivalence/payments_equivalence_test.go",
-        "line": 34,
-        "message": "G304: Potential file inclusion via variable",
-        "source": "golangci-lint/gosec"
-      },
-      {
-        "col": 73,
-        "file": "services/payments/test/equivalence/payments_equivalence_test.go",
-        "line": 47,
+        "line": 44,
         "message": "unused-parameter: parameter 'r' seems to be unused, consider removing or renaming it as _",
         "source": "golangci-lint/revive"
       }
@@ -447,7 +447,7 @@
   "tests_not_run": null,
   "tests_ran": true,
   "tests_requested": true,
-  "tests_total": 59,
+  "tests_total": 56,
   "tool": "go-verify",
   "vet": [],
   "vet_findings": 0,

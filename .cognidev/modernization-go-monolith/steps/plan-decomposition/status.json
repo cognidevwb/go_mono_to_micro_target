@@ -1,6 +1,6 @@
 {
-  "elapsedMs": 837,
-  "finishedAt": 1790392781,
+  "elapsedMs": 773,
+  "finishedAt": 1790651910,
   "inputs": [],
   "kind": "tool-loop",
   "outputs": [
@@ -9,28 +9,28 @@
       "kind": null,
       "name": "plan",
       "optional": false,
-      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/.cognidev/feature/plan.json"
+      "path": "./.cognidev/feature/plan.json"
     },
     {
       "exists": true,
       "kind": null,
       "name": "decomposition-steps",
       "optional": false,
-      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/.cognidev/feature/decomposition-steps.json"
+      "path": "./.cognidev/feature/decomposition-steps.json"
     },
     {
       "exists": true,
       "kind": null,
       "name": "decomposition",
       "optional": false,
-      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/.cognidev/feature/decomposition.yaml"
+      "path": "./.cognidev/feature/decomposition.yaml"
     },
     {
       "exists": true,
       "kind": null,
       "name": "decompose",
       "optional": false,
-      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/.cognidev/feature/decompose"
+      "path": "./.cognidev/feature/decompose"
     }
   ],
   "status": "Ok",

@@ -22,3 +22,16 @@ func TestAFailedStepCompensatesTheCompletedOnesInReverse(t *testing.T) {
 		t.Fatalf("compensated %v", res.Compensated)
 	}
 }
+
+func TestAFailedStepAnswersWithItsOwnMessage(t *testing.T) {
+	outOfStock := errors.New("out of stock")
+	s := Saga{Name: "CreateOrder", Steps: []Step{{Name: "inventory", Do: func(context.Context) error { return outOfStock }}}}
+	_, err := s.Run(context.Background())
+	if err == nil || err.Error() != "out of stock" || !errors.Is(err, outOfStock) {
+		t.Fatalf("err = %v, want the step's own message", err)
+	}
+	var se *StepError
+	if !errors.As(err, &se) || se.Step != "inventory" {
+		t.Fatalf("err = %#v, want a StepError naming the step", err)
+	}
+}

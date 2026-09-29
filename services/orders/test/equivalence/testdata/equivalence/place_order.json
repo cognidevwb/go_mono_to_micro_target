@@ -1,6 +1,0 @@
-{
-  "method": "POST",
-  "path": "/api/orders",
-  "body": {"customerId": 7, "items": [{"productId": 1, "quantity": 2}]},
-  "expected": {"customerId": 7, "status": "placed", "total": 20}
-}

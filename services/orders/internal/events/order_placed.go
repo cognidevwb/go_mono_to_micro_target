@@ -1,10 +1,22 @@
-// Package events defines the payloads orders-service publishes through the
-// outbox. order.placed is announced once PlaceOrder's saga commits.
 package events
 
-// OrderPlaced is orders-service's payload for the order.placed event.
+import (
+	"context"
+
+	"github.com/acme/shop/pkg/outbox"
+)
+
+// SubjectOrderPlaced is the topic an order announces itself on.
+const SubjectOrderPlaced = "order.placed"
+
+// OrderPlaced is the versioned payload of the order.placed event.
 type OrderPlaced struct {
-	OrderID    uint    `json:"orderId"`
-	CustomerID uint    `json:"customerId"`
-	Total      float64 `json:"total"`
+	Version int  `json:"version"`
+	OrderID uint `json:"orderId"`
+}
+
+// PublishOrderPlaced writes order.placed to the outbox inside tx, so it is
+// relayed only if the order commits.
+func PublishOrderPlaced(ctx context.Context, tx outbox.Execer, orderID uint) error {
+	return Publish(ctx, tx, SubjectOrderPlaced, OrderPlaced{Version: 1, OrderID: orderID})
 }

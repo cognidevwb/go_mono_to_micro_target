@@ -3,6 +3,7 @@
 package app
 
 import (
+	"github.com/acme/shop/pkg/httpx"
 	"github.com/acme/shop/services/catalog/internal/catalog"
 	"github.com/acme/shop/services/catalog/internal/platform"
 	"github.com/gin-gonic/gin"
@@ -12,7 +13,16 @@ import (
 func wire(r *gin.Engine, d *Deps) error {
 	db := d.DB
 	catalogSvc := catalog.NewService(db)
-	r.Use(platform.AuthMiddleware())
+	auth := platform.AuthMiddleware()
+	// A call from another service of this platform (pkg/httpx internal.go) skips the
+	// monolith's user check, as the in-process call it replaces did.
+	r.Use(func(c *gin.Context) {
+		if httpx.IsInternal(c.Request) {
+			c.Next()
+			return
+		}
+		auth(c)
+	})
 	api := r.Group("/api")
 	catalog.RegisterRoutes(api, catalogSvc)
 	return nil

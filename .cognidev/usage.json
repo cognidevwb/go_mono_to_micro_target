@@ -1,21 +1,21 @@
 {
   "totals": {
-    "inputTokens": 532,
-    "outputTokens": 179790,
-    "cacheReadTokens": 12075540,
-    "cacheWriteTokens": 599892,
-    "costMicros": 6613631,
+    "inputTokens": 268,
+    "outputTokens": 75658,
+    "cacheReadTokens": 3127852,
+    "cacheWriteTokens": 451577,
+    "costMicros": 3189000,
     "calls": 47
   },
   "byModel": {
     "sonnet": {
-      "inputTokens": 532,
-      "outputTokens": 179790,
-      "cacheReadTokens": 12075540,
-      "cacheWriteTokens": 599892,
-      "costMicros": 6613631,
+      "inputTokens": 268,
+      "outputTokens": 75658,
+      "cacheReadTokens": 3127852,
+      "cacheWriteTokens": 451577,
+      "costMicros": 3189000,
       "calls": 47
     }
   },
-  "updatedMs": 1790395034600
+  "updatedMs": 1790652632485
 }

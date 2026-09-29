@@ -1,6 +1,6 @@
 # inventory-service
 
-The inventory service owns on-hand and reserved stock counts for each product (`StockItem`). It reserves units against incoming orders, restocks items whose on-hand quantity has fallen below what is reserved, and consumes `order.placed` events from the orders context to keep stock levels in sync with order activity.
+The inventory service owns stock levels: each `StockItem` tracks the units on hand and the units reserved for a product. It reserves quantity for an order only when `on_hand - reserved` covers it, and releases the reservation through a compensating command if the order saga fails. It also reacts to the `order.placed` event and runs a periodic restock job that tops up items whose reserved count exceeds what is on hand.
 
 | | |
 |---|---|

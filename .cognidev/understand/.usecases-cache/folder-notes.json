@@ -1,0 +1,1127 @@
+{
+  "internal/orders": {
+    "hash": "d742e2c49a86a0f9",
+    "purpose": "Handles order placement and order history for customers, coordinating catalog pricing and inventory reservation.",
+    "useCases": [
+      {
+        "title": "Place an order",
+        "evidence": "PlaceOrder, PlaceOrderRequest, placeOrder handler"
+      },
+      {
+        "title": "View my order history",
+        "evidence": "ForCustomer, myOrders handler"
+      }
+    ],
+    "files": [
+      "internal/orders/handlers.go",
+      "internal/orders/model.go",
+      "internal/orders/service.go"
+    ]
+  },
+  "internal/catalog": {
+    "hash": "3b9dd1cf7ba1b9a5",
+    "purpose": "Manages the product catalog, including categories, listings, and pricing.",
+    "useCases": [
+      {
+        "title": "Browse available products",
+        "evidence": "List, listProducts handler"
+      },
+      {
+        "title": "Add a new product to the catalog",
+        "evidence": "Create, createProduct handler"
+      },
+      {
+        "title": "See a product's current price",
+        "evidence": "PriceOf"
+      }
+    ],
+    "files": [
+      "internal/catalog/handlers.go",
+      "internal/catalog/model.go",
+      "internal/catalog/service.go"
+    ]
+  },
+  "internal/platform": {
+    "hash": "1d4c95d9a489ddc3",
+    "purpose": "Shared cross-cutting infrastructure (authentication, event bus, database access) used by the other modules.",
+    "useCases": [],
+    "files": [
+      "internal/platform/auth.go",
+      "internal/platform/bus.go",
+      "internal/platform/db.go"
+    ]
+  },
+  "internal/customers": {
+    "hash": "04edcc270b0fa2d2",
+    "purpose": "Manages customer account registration and lookup.",
+    "useCases": [
+      {
+        "title": "Register a customer account",
+        "evidence": "Register, registerCustomer handler"
+      },
+      {
+        "title": "Look up a customer's account details",
+        "evidence": "Get, getCustomer handler"
+      }
+    ],
+    "files": [
+      "internal/customers/handlers.go",
+      "internal/customers/model.go",
+      "internal/customers/service.go"
+    ]
+  },
+  "internal/inventory": {
+    "hash": "f3e4f41f0c26cfab",
+    "purpose": "Tracks stock levels for products, reserving stock on orders and replenishing it via background restocking.",
+    "useCases": [
+      {
+        "title": "Have stock reserved automatically when an order is placed",
+        "evidence": "OnOrderPlaced, Reserve"
+      },
+      {
+        "title": "Have out-of-stock items automatically replenished",
+        "evidence": "Restock, StartRestockJob"
+      }
+    ],
+    "files": [
+      "internal/inventory/model.go",
+      "internal/inventory/service.go"
+    ]
+  },
+  "internal/payments": {
+    "hash": "c4fa5d0eba17e399",
+    "purpose": "Processes payment charges for orders via a payment gateway.",
+    "useCases": [
+      {
+        "title": "Pay for an order",
+        "evidence": "Charge, Payment, Gateway"
+      }
+    ],
+    "files": [
+      "internal/payments/gateway.go",
+      "internal/payments/model.go",
+      "internal/payments/service.go"
+    ]
+  },
+  "cmd/shop": {
+    "hash": "03bb5ba6c774dfc4",
+    "purpose": "Application entry point that boots the shop monolith (server startup/wiring).",
+    "useCases": [],
+    "files": [
+      "cmd/shop/main.go"
+    ]
+  },
+  "pkg/events": {
+    "hash": "c04143fc7ba42623",
+    "purpose": "Shared messaging plumbing that lets the shop's services publish and react to business events reliably, without processing the same event twice.",
+    "useCases": [],
+    "files": [
+      "pkg/events/bus.go",
+      "pkg/events/connect.go",
+      "pkg/events/envelope.go",
+      "pkg/events/events_test.go",
+      "pkg/events/idempotent.go",
+      "pkg/events/nats.go"
+    ]
+  },
+  "pkg/httpx": {
+    "hash": "8ce3048202b8b9f1",
+    "purpose": "Shared HTTP plumbing for the services: health and readiness checks, JSON responses, and a check that separates internal service calls from outside callers.",
+    "useCases": [],
+    "files": [
+      "pkg/httpx/client.go",
+      "pkg/httpx/internal.go",
+      "pkg/httpx/server.go",
+      "pkg/httpx/server_test.go"
+    ]
+  },
+  "services/orders/internal/orders": {
+    "hash": "65ad172079c6d7a6",
+    "purpose": "Lets shoppers place orders and see their order history, and releases reserved stock when an order fails.",
+    "useCases": [
+      {
+        "title": "Place an order",
+        "evidence": "PlaceOrder, PlaceOrderRequest, placeOrder handler in handlers.go/service.go"
+      },
+      {
+        "title": "View my past orders",
+        "evidence": "ForCustomer, myOrders handler"
+      },
+      {
+        "title": "Release reserved stock when an order can't be completed",
+        "evidence": "releaseStock in service.go"
+      }
+    ],
+    "files": [
+      "services/orders/internal/orders/handlers.go",
+      "services/orders/internal/orders/model.go",
+      "services/orders/internal/orders/orders_test.go",
+      "services/orders/internal/orders/service.go"
+    ]
+  },
+  "services/catalog/internal/catalog": {
+    "hash": "aeea02d46288c430",
+    "purpose": "Maintains the product catalog and its prices so shoppers can browse what is for sale.",
+    "useCases": [
+      {
+        "title": "Browse the product catalog",
+        "evidence": "List, listProducts, Product, Category"
+      },
+      {
+        "title": "Add a new product to the catalog",
+        "evidence": "Create, createProduct, TestCreateRejectsNonPositivePrice"
+      },
+      {
+        "title": "Look up a product's price when ordering",
+        "evidence": "PriceOf, priceCacheEntry"
+      }
+    ],
+    "files": [
+      "services/catalog/internal/catalog/catalog_test.go",
+      "services/catalog/internal/catalog/handlers.go",
+      "services/catalog/internal/catalog/model.go",
+      "services/catalog/internal/catalog/service.go"
+    ]
+  },
+  "services/inventory/internal/app": {
+    "hash": "c2751c58785b480b",
+    "purpose": "Tracks stock levels and holds stock for orders, giving it back if the order is cancelled or fails.",
+    "useCases": [
+      {
+        "title": "Reserve stock for an order",
+        "evidence": "reserveHandler, reserveRequest"
+      },
+      {
+        "title": "Return reserved stock when an order fails",
+        "evidence": "compensateHandler, create_order_compensation.go"
+      }
+    ],
+    "files": [
+      "services/inventory/internal/app/app.go",
+      "services/inventory/internal/app/create_order_compensation.go",
+      "services/inventory/internal/app/models.go",
+      "services/inventory/internal/app/remote_operations.go",
+      "services/inventory/internal/app/routes.go",
+      "services/inventory/internal/app/routes_test.go",
+      "services/inventory/internal/app/wire.go"
+    ]
+  },
+  "services/payments/internal/app": {
+    "hash": "2a6b733cce6c25f7",
+    "purpose": "Takes payment for orders and reverses the charge if the order can't be completed.",
+    "useCases": [
+      {
+        "title": "Pay for an order",
+        "evidence": "chargeHandler, Routes"
+      },
+      {
+        "title": "Refund a payment when an order fails",
+        "evidence": "compensatePaymentHandler, create_order_compensation.go"
+      }
+    ],
+    "files": [
+      "services/payments/internal/app/app.go",
+      "services/payments/internal/app/create_order_compensation.go",
+      "services/payments/internal/app/models.go",
+      "services/payments/internal/app/remote_operations.go",
+      "services/payments/internal/app/routes.go",
+      "services/payments/internal/app/routes_test.go",
+      "services/payments/internal/app/wire.go"
+    ]
+  },
+  "services/customers/internal/customers": {
+    "hash": "a1120fe94381c0db",
+    "purpose": "Customer account records: registering new shoppers and looking up their details and active status.",
+    "useCases": [
+      {
+        "title": "Register a customer account",
+        "evidence": "Service.Register, registerCustomer handler, TestRegisterCustomerValidation"
+      },
+      {
+        "title": "View a customer's account details",
+        "evidence": "Service.Get, getCustomer handler, TestGetCustomerBadID"
+      },
+      {
+        "title": "Check whether a customer account is active before they can order",
+        "evidence": "Customer.IsActive in model.go"
+      }
+    ],
+    "files": [
+      "services/customers/internal/customers/customers_test.go",
+      "services/customers/internal/customers/handlers.go",
+      "services/customers/internal/customers/model.go",
+      "services/customers/internal/customers/service.go"
+    ]
+  },
+  "services/catalog/internal/app": {
+    "hash": "aad5e9cb4c8c762a",
+    "purpose": "Wires the product catalog service together and exposes its routes, including price lookups that other services (such as orders) call.",
+    "useCases": [
+      {
+        "title": "Look up the price of a product",
+        "evidence": "priceOfRequest / priceOfResponse in remote_operations.go"
+      }
+    ],
+    "files": [
+      "services/catalog/internal/app/app.go",
+      "services/catalog/internal/app/models.go",
+      "services/catalog/internal/app/remote_operations.go",
+      "services/catalog/internal/app/routes.go",
+      "services/catalog/internal/app/routes_test.go",
+      "services/catalog/internal/app/wire.go"
+    ]
+  },
+  "services/customers/internal/app": {
+    "hash": "a831352abb8d47eb",
+    "purpose": "Wires the customer service together and exposes its routes, including the account-active check other services call during ordering.",
+    "useCases": [
+      {
+        "title": "Verify a customer account is active when placing an order",
+        "evidence": "isActiveRequest / isActiveResponse in remote_operations.go"
+      }
+    ],
+    "files": [
+      "services/customers/internal/app/app.go",
+      "services/customers/internal/app/models.go",
+      "services/customers/internal/app/remote_operations.go",
+      "services/customers/internal/app/routes.go",
+      "services/customers/internal/app/routes_test.go",
+      "services/customers/internal/app/wire.go"
+    ]
+  },
+  "services/inventory/internal/inventory": {
+    "hash": "44e36c3e883e4946",
+    "purpose": "Stock management: tracking stock levels, reserving stock for placed orders, and replenishing inventory.",
+    "useCases": [
+      {
+        "title": "Reserve stock for an order",
+        "evidence": "Service.Reserve, OnOrderPlaced, TestReserve"
+      },
+      {
+        "title": "Restock products automatically",
+        "evidence": "Service.Restock, StartRestockJob"
+      },
+      {
+        "title": "Track stock levels per product",
+        "evidence": "StockItem model"
+      }
+    ],
+    "files": [
+      "services/inventory/internal/inventory/inventory_test.go",
+      "services/inventory/internal/inventory/model.go",
+      "services/inventory/internal/inventory/service.go"
+    ]
+  },
+  "services/catalog/internal/platform": {
+    "hash": "1d4c95d9a489ddc3",
+    "purpose": "Shared technical plumbing for the catalog service: authentication, event bus and database connection.",
+    "useCases": [],
+    "files": [
+      "services/catalog/internal/platform/auth.go",
+      "services/catalog/internal/platform/bus.go",
+      "services/catalog/internal/platform/db.go"
+    ]
+  },
+  "services/customers/internal/platform": {
+    "hash": "1d4c95d9a489ddc3",
+    "purpose": "Shared technical plumbing for the customers service: authentication, event bus and database connection.",
+    "useCases": [],
+    "files": [
+      "services/customers/internal/platform/auth.go",
+      "services/customers/internal/platform/bus.go",
+      "services/customers/internal/platform/db.go"
+    ]
+  },
+  "services/inventory/internal/platform": {
+    "hash": "1d4c95d9a489ddc3",
+    "purpose": "Shared plumbing for the stock service: request authentication, event bus and database connection. No customer-facing features.",
+    "useCases": [],
+    "files": [
+      "services/inventory/internal/platform/auth.go",
+      "services/inventory/internal/platform/bus.go",
+      "services/inventory/internal/platform/db.go"
+    ]
+  },
+  "services/orders/internal/platform": {
+    "hash": "1d4c95d9a489ddc3",
+    "purpose": "Shared plumbing for the orders service: request authentication, event bus and database connection. No customer-facing features.",
+    "useCases": [],
+    "files": [
+      "services/orders/internal/platform/auth.go",
+      "services/orders/internal/platform/bus.go",
+      "services/orders/internal/platform/db.go"
+    ]
+  },
+  "services/payments/internal/platform": {
+    "hash": "1d4c95d9a489ddc3",
+    "purpose": "Shared plumbing for the payments service: request authentication, event bus and database connection. No customer-facing features.",
+    "useCases": [],
+    "files": [
+      "services/payments/internal/platform/auth.go",
+      "services/payments/internal/platform/bus.go",
+      "services/payments/internal/platform/db.go"
+    ]
+  },
+  "services/payments/internal/payments": {
+    "hash": "ca14677d2a92b7cf",
+    "purpose": "Takes payment for orders by charging the customer through a payment gateway and recording the result, with declined charges leaving no record.",
+    "useCases": [
+      {
+        "title": "Pay for an order",
+        "evidence": "Service.Charge / Gateway.Charge in service.go and gateway.go"
+      },
+      {
+        "title": "Have a declined payment leave no charge on record",
+        "evidence": "TestServiceChargeDeclinedWritesNothing in payments_test.go"
+      }
+    ],
+    "files": [
+      "services/payments/internal/payments/gateway.go",
+      "services/payments/internal/payments/model.go",
+      "services/payments/internal/payments/payments_test.go",
+      "services/payments/internal/payments/service.go"
+    ]
+  },
+  "pkg/saga": {
+    "hash": "d251bd73f905cdfc",
+    "purpose": "Coordinates multi-step order placement so that if any step fails, the steps already completed are undone in reverse order and the customer gets a clear failure message.",
+    "useCases": [
+      {
+        "title": "Place an order with stock reserved and payment taken, or rolled back entirely on failure",
+        "evidence": "Saga.Run, Step and StepError in saga.go; TestAFailedStepCompensatesTheCompletedOnesInReverse"
+      },
+      {
+        "title": "Get a clear reason when an order cannot be completed",
+        "evidence": "TestAFailedStepAnswersWithItsOwnMessage in saga_test.go"
+      }
+    ],
+    "files": [
+      "pkg/saga/saga.go",
+      "pkg/saga/saga_test.go"
+    ]
+  },
+  "gateway/internal/proxy": {
+    "hash": "8a6f5d5c89975385",
+    "purpose": "Single public entry point that authenticates callers and routes their requests to the right shop service, keeping outsiders from impersonating internal services.",
+    "useCases": [
+      {
+        "title": "Access shop features (catalog, accounts, stock, payments, orders) through one secured entry point",
+        "evidence": "Routes, Route and New in routes.go and proxy.go; TestEveryRouteReachesItsService"
+      },
+      {
+        "title": "Sign in and be identified on requests",
+        "evidence": "Authenticate in auth.go"
+      }
+    ],
+    "files": [
+      "gateway/internal/proxy/auth.go",
+      "gateway/internal/proxy/proxy.go",
+      "gateway/internal/proxy/proxy_test.go",
+      "gateway/internal/proxy/routes.go"
+    ]
+  },
+  "services/orders/internal/app": {
+    "hash": "3c04cd4e2874cd24",
+    "purpose": "Assembles the order service and exposes its order-taking HTTP endpoints, wiring in the catalog, customer, inventory and payment integrations.",
+    "useCases": [
+      {
+        "title": "Place an order",
+        "evidence": "routes.go Routes / app.go New / models.go"
+      }
+    ],
+    "files": [
+      "services/orders/internal/app/app.go",
+      "services/orders/internal/app/models.go",
+      "services/orders/internal/app/routes.go",
+      "services/orders/internal/app/routes_test.go",
+      "services/orders/internal/app/wire.go"
+    ]
+  },
+  "services/orders/internal/clients/catalog": {
+    "hash": "30814f9ba7821e6f",
+    "purpose": "Lets the order service look up product prices from the product catalog.",
+    "useCases": [
+      {
+        "title": "Price the items in an order from the product catalog",
+        "evidence": "client.go Service.PriceOf"
+      }
+    ],
+    "files": [
+      "services/orders/internal/clients/catalog/client.go"
+    ]
+  },
+  "services/orders/internal/clients/payments": {
+    "hash": "6365e511ff7d09bd",
+    "purpose": "Lets the order service charge the customer through the payments service.",
+    "useCases": [
+      {
+        "title": "Pay for an order",
+        "evidence": "client.go Service.Charge / NewGateway"
+      }
+    ],
+    "files": [
+      "services/orders/internal/clients/payments/client.go"
+    ]
+  },
+  "services/orders/internal/clients/customers": {
+    "hash": "c2af733fb61d155e",
+    "purpose": "Lets the order service check that the ordering customer has an active account.",
+    "useCases": [
+      {
+        "title": "Verify the customer account is active before ordering",
+        "evidence": "client.go Service.IsActive"
+      }
+    ],
+    "files": [
+      "services/orders/internal/clients/customers/client.go"
+    ]
+  },
+  "services/orders/internal/clients/inventory": {
+    "hash": "5c9ef3b119ef4c81",
+    "purpose": "Lets the order service reserve stock for ordered items.",
+    "useCases": [
+      {
+        "title": "Reserve stock for an order",
+        "evidence": "client.go Service.Reserve"
+      }
+    ],
+    "files": [
+      "services/orders/internal/clients/inventory/client.go"
+    ]
+  },
+  "services/orders/internal/config": {
+    "hash": "38dcd97938511972",
+    "purpose": "Loads the order service's runtime settings from the environment, with local defaults.",
+    "useCases": [],
+    "files": [
+      "services/orders/internal/config/config.go",
+      "services/orders/internal/config/config_test.go"
+    ]
+  },
+  "services/catalog/internal/config": {
+    "hash": "9e69c44222b20f72",
+    "purpose": "Service startup settings for the product catalog service (environment-driven configuration with local defaults).",
+    "useCases": [],
+    "files": [
+      "services/catalog/internal/config/config.go",
+      "services/catalog/internal/config/config_test.go"
+    ]
+  },
+  "services/customers/internal/config": {
+    "hash": "9e69c44222b20f72",
+    "purpose": "Service startup settings for the customer accounts service (environment-driven configuration with local defaults).",
+    "useCases": [],
+    "files": [
+      "services/customers/internal/config/config.go",
+      "services/customers/internal/config/config_test.go"
+    ]
+  },
+  "services/inventory/internal/config": {
+    "hash": "9e69c44222b20f72",
+    "purpose": "Service startup settings for the stock/inventory service (environment-driven configuration with local defaults).",
+    "useCases": [],
+    "files": [
+      "services/inventory/internal/config/config.go",
+      "services/inventory/internal/config/config_test.go"
+    ]
+  },
+  "services/payments/internal/config": {
+    "hash": "9e69c44222b20f72",
+    "purpose": "Service startup settings for the payments service (environment-driven configuration with local defaults).",
+    "useCases": [],
+    "files": [
+      "services/payments/internal/config/config.go",
+      "services/payments/internal/config/config_test.go"
+    ]
+  },
+  "services/orders/internal/saga": {
+    "hash": "1f9958c7bdb78b7d",
+    "purpose": "Coordinates the multi-step order placement process across services, running the payment step last so a failed step doesn't leave a charged but unfulfilled order.",
+    "useCases": [
+      {
+        "title": "Place an order",
+        "evidence": "saga.CreateOrder in create_order.go"
+      }
+    ],
+    "files": [
+      "services/orders/internal/saga/create_order.go",
+      "services/orders/internal/saga/create_order_test.go"
+    ]
+  },
+  "pkg/outbox": {
+    "hash": "7e8f7af689f67336",
+    "purpose": "Shared reliable-messaging plumbing that queues events and relays them to other services.",
+    "useCases": [],
+    "files": [
+      "pkg/outbox/outbox.go"
+    ]
+  },
+  "services/payments/internal/acl": {
+    "hash": "f0eed1e47f248780",
+    "purpose": "Translates between the payments service's model and the legacy shop's payment format so charges and payment statuses are understood consistently.",
+    "useCases": [
+      {
+        "title": "Pay for an order (charge a customer)",
+        "evidence": "legacy.go: ChargeRequest, Validate"
+      },
+      {
+        "title": "See the status of a payment",
+        "evidence": "legacy.go: ParseStatus, PaymentStatus"
+      }
+    ],
+    "files": [
+      "services/payments/internal/acl/legacy.go"
+    ]
+  },
+  "services/orders/internal/clients": {
+    "hash": "4643172e78b049df",
+    "purpose": "Contract tests that check the orders service's expectations of the catalog and customers services. This is testing only, not a user-facing feature.",
+    "useCases": [],
+    "files": [
+      "services/orders/internal/clients/catalog_contract_test.go",
+      "services/orders/internal/clients/customers_contract_test.go"
+    ]
+  },
+  "services/inventory/internal/httpapi": {
+    "hash": "afaef80e98d0c411",
+    "purpose": "Exposes the HTTP endpoint for looking up stock levels of products.",
+    "useCases": [
+      {
+        "title": "Check stock availability for a product",
+        "evidence": "stock_item_handlers.go: RegisterRoutes, getStockItem"
+      }
+    ],
+    "files": [
+      "services/inventory/internal/httpapi/stock_item_handlers.go"
+    ]
+  },
+  "services/orders/internal/events": {
+    "hash": "2556385ee0603c0c",
+    "purpose": "Announces to the rest of the shop that an order has been placed so other services can react to it.",
+    "useCases": [
+      {
+        "title": "Place an order and notify the rest of the shop",
+        "evidence": "order_placed.go: OrderPlaced, PublishOrderPlaced"
+      }
+    ],
+    "files": [
+      "services/orders/internal/events/events.go",
+      "services/orders/internal/events/order_placed.go"
+    ]
+  },
+  "services/inventory/internal/acl": {
+    "hash": "f5c33964e01ea8eb",
+    "purpose": "Converts stock item data between the inventory service's model and the legacy shop's format.",
+    "useCases": [
+      {
+        "title": "Check stock availability for a product",
+        "evidence": "legacy.go: LegacyStockItem, ToStockItem, ToLegacy"
+      }
+    ],
+    "files": [
+      "services/inventory/internal/acl/legacy.go"
+    ]
+  },
+  "services/orders/internal/acl": {
+    "hash": "3010369065a5fac8",
+    "purpose": "Converts order line data between the orders service's model and the legacy shop's format.",
+    "useCases": [
+      {
+        "title": "Place an order with multiple items",
+        "evidence": "legacy.go: LegacyOrderLine, ToOrderLine, ToLegacy"
+      }
+    ],
+    "files": [
+      "services/orders/internal/acl/legacy.go"
+    ]
+  },
+  "services/catalog/cmd/catalog": {
+    "hash": "e3cfb679b301503f",
+    "purpose": "Process entry point that starts the product catalog service; it contains no business features of its own.",
+    "useCases": [],
+    "files": [
+      "services/catalog/cmd/catalog/main.go"
+    ]
+  },
+  "services/customers/cmd/customers": {
+    "hash": "e3cfb679b301503f",
+    "purpose": "Process entry point that starts the customer accounts service; it contains no business features of its own.",
+    "useCases": [],
+    "files": [
+      "services/customers/cmd/customers/main.go"
+    ]
+  },
+  "services/inventory/cmd/inventory": {
+    "hash": "e3cfb679b301503f",
+    "purpose": "Process entry point that starts the stock levels service; it contains no business features of its own.",
+    "useCases": [],
+    "files": [
+      "services/inventory/cmd/inventory/main.go"
+    ]
+  },
+  "services/orders/cmd/orders": {
+    "hash": "e3cfb679b301503f",
+    "purpose": "Process entry point that starts the order service; it contains no business features of its own.",
+    "useCases": [],
+    "files": [
+      "services/orders/cmd/orders/main.go"
+    ]
+  },
+  "services/payments/cmd/payments": {
+    "hash": "e3cfb679b301503f",
+    "purpose": "Process entry point that starts the payments service; it contains no business features of its own.",
+    "useCases": [],
+    "files": [
+      "services/payments/cmd/payments/main.go"
+    ]
+  },
+  "gateway/cmd/gateway": {
+    "hash": "dceb339952f93ac6",
+    "purpose": "Process entry point that starts the API gateway; it contains no business features of its own.",
+    "useCases": [],
+    "files": [
+      "gateway/cmd/gateway/main.go"
+    ]
+  },
+  "services/inventory/internal/events": {
+    "hash": "15cc65aa00a0195b",
+    "purpose": "Keeps stock levels in step with orders by publishing inventory events and reacting when a customer's order is placed.",
+    "useCases": [
+      {
+        "title": "Reserve stock when a customer places an order",
+        "evidence": "order_placed_consumer.go / SubscribeOrderPlaced"
+      },
+      {
+        "title": "Notify other parts of the shop about stock changes",
+        "evidence": "events.go / Publish"
+      }
+    ],
+    "files": [
+      "services/inventory/internal/events/events.go",
+      "services/inventory/internal/events/order_placed_consumer.go"
+    ]
+  },
+  "services/inventory/internal/jobs": {
+    "hash": "36cd9a5a97980fa9",
+    "purpose": "Runs scheduled background jobs for inventory, such as periodic stock upkeep. Nothing in the input shows what the jobs do, so they support stock accuracy indirectly.",
+    "useCases": [],
+    "files": [
+      "services/inventory/internal/jobs/scheduler.go"
+    ]
+  },
+  "services/payments/internal/httpapi": {
+    "hash": "f419efd4b9474621",
+    "purpose": "Exposes the payment service's web endpoints so orders can be paid for and payment problems reported back clearly.",
+    "useCases": [
+      {
+        "title": "Pay for an order",
+        "evidence": "payment_handlers.go / RegisterRoutes"
+      }
+    ],
+    "files": [
+      "services/payments/internal/httpapi/payment_handlers.go"
+    ]
+  },
+  "services/orders/internal/contracts/catalog": {
+    "hash": "445cbe12e0b7b860",
+    "purpose": "Defines the product and category shapes the orders service expects from the catalog, so orders can refer to items being bought.",
+    "useCases": [],
+    "files": [
+      "services/orders/internal/contracts/catalog/contracts.go"
+    ]
+  },
+  "pkg/otelx": {
+    "hash": "ff72a29bcdc99bce",
+    "purpose": "Shared observability setup (tracing/telemetry) for the services. This is operational plumbing, not a user-facing feature.",
+    "useCases": [],
+    "files": [
+      "pkg/otelx/otelx.go"
+    ]
+  },
+  "services/orders/internal/store": {
+    "hash": "089ec4ac3a5b979b",
+    "purpose": "Opens the orders service's database connection. This is persistence plumbing with no user-facing feature of its own.",
+    "useCases": [],
+    "files": [
+      "services/orders/internal/store/db.go"
+    ]
+  },
+  "services/inventory/internal/store": {
+    "hash": "2af2601208a5eb86",
+    "purpose": "Opens the database connection that holds stock levels; plumbing with no user-facing behavior of its own.",
+    "useCases": [],
+    "files": [
+      "services/inventory/internal/store/db.go"
+    ]
+  },
+  "services/payments/internal/store": {
+    "hash": "2af2601208a5eb86",
+    "purpose": "Opens the database connection that holds payment records; plumbing with no user-facing behavior of its own.",
+    "useCases": [],
+    "files": [
+      "services/payments/internal/store/db.go"
+    ]
+  },
+  "services/catalog/internal/events": {
+    "hash": "1119c220c828867c",
+    "purpose": "Publishes product catalog events so other services can react to catalog changes.",
+    "useCases": [],
+    "files": [
+      "services/catalog/internal/events/events.go"
+    ]
+  },
+  "services/customers/internal/events": {
+    "hash": "1119c220c828867c",
+    "purpose": "Publishes customer account events so other services can react to account changes.",
+    "useCases": [],
+    "files": [
+      "services/customers/internal/events/events.go"
+    ]
+  },
+  "services/payments/internal/events": {
+    "hash": "1119c220c828867c",
+    "purpose": "Publishes payment events so the order flow can react to payment outcomes.",
+    "useCases": [],
+    "files": [
+      "services/payments/internal/events/events.go"
+    ]
+  },
+  "services/catalog/internal/store": {
+    "hash": "41dbe759db5df725",
+    "purpose": "Opens the database connection that holds the product catalog; plumbing with no user-facing behavior of its own.",
+    "useCases": [],
+    "files": [
+      "services/catalog/internal/store/db.go"
+    ]
+  },
+  "services/customers/internal/acl": {
+    "hash": "669316bed2a42a3b",
+    "purpose": "Checks customer details against the legacy system's rules so customer accounts stay valid and consistent during the move to separate services.",
+    "useCases": [
+      {
+        "title": "Register a customer account with validated details",
+        "evidence": "legacy.go / ValidateCustomer"
+      }
+    ],
+    "files": [
+      "services/customers/internal/acl/legacy.go"
+    ]
+  },
+  "services/customers/internal/store": {
+    "hash": "41dbe759db5df725",
+    "purpose": "Database connection setup for the customer accounts service. It is storage plumbing and has no user-facing feature of its own.",
+    "useCases": [],
+    "files": [
+      "services/customers/internal/store/db.go"
+    ]
+  },
+  "services/orders/internal/outbox": {
+    "hash": "366590f2a8008fcb",
+    "purpose": "Reliably forwards order events to other services, so a placed order reaches stock and payment handling even after a failure.",
+    "useCases": [
+      {
+        "title": "Place an order that reliably triggers stock reservation and payment",
+        "evidence": "outbox.go / Relay"
+      }
+    ],
+    "files": [
+      "services/orders/internal/outbox/outbox.go"
+    ]
+  },
+  "services/catalog/internal/acl": {
+    "hash": "3d30d84848c0c1dd",
+    "purpose": "Checks product prices against the legacy system's rules so the catalog only shows valid prices.",
+    "useCases": [
+      {
+        "title": "Set and maintain product prices in the catalog",
+        "evidence": "legacy.go / ValidatePrice"
+      }
+    ],
+    "files": [
+      "services/catalog/internal/acl/legacy.go"
+    ]
+  },
+  "services/orders/internal/contracts/payments": {
+    "hash": "efc147459a02a3c3",
+    "purpose": "Defines the interface the orders service uses to talk to payments, so orders can take payment from customers.",
+    "useCases": [
+      {
+        "title": "Pay for an order at checkout",
+        "evidence": "contracts.go / Gateway"
+      }
+    ],
+    "files": [
+      "services/orders/internal/contracts/payments/contracts.go"
+    ]
+  },
+  "services/orders": {
+    "hash": "05c36ed4b08938d3",
+    "purpose": "Packaging and build files for the orders service (Dockerfile, Makefile, go.mod, README). It is deployment and build material and has no user-facing feature of its own.",
+    "useCases": [],
+    "files": [
+      "services/orders/Dockerfile",
+      "services/orders/Makefile",
+      "services/orders/README.md",
+      "services/orders/go.mod",
+      "services/orders/go.sum"
+    ]
+  },
+  "services/catalog": {
+    "hash": "e49d8a0655abd89e",
+    "purpose": "Packaging and build setup for the product catalog service, which holds the products shoppers browse.",
+    "useCases": [],
+    "files": [
+      "services/catalog/Dockerfile",
+      "services/catalog/Makefile",
+      "services/catalog/README.md",
+      "services/catalog/go.mod",
+      "services/catalog/go.sum"
+    ]
+  },
+  "services/customers": {
+    "hash": "e49d8a0655abd89e",
+    "purpose": "Packaging and build setup for the customer accounts service.",
+    "useCases": [],
+    "files": [
+      "services/customers/Dockerfile",
+      "services/customers/Makefile",
+      "services/customers/README.md",
+      "services/customers/go.mod",
+      "services/customers/go.sum"
+    ]
+  },
+  "services/inventory": {
+    "hash": "e49d8a0655abd89e",
+    "purpose": "Packaging and build setup for the inventory service, which tracks stock levels.",
+    "useCases": [],
+    "files": [
+      "services/inventory/Dockerfile",
+      "services/inventory/Makefile",
+      "services/inventory/README.md",
+      "services/inventory/go.mod",
+      "services/inventory/go.sum"
+    ]
+  },
+  "services/payments": {
+    "hash": "e49d8a0655abd89e",
+    "purpose": "Packaging and build setup for the payments service, which handles payment for orders.",
+    "useCases": [],
+    "files": [
+      "services/payments/Dockerfile",
+      "services/payments/Makefile",
+      "services/payments/README.md",
+      "services/payments/go.mod",
+      "services/payments/go.sum"
+    ]
+  },
+  "ci/github-workflows": {
+    "hash": "78ed93adb6cd046c",
+    "purpose": "Continuous-integration pipeline definitions for each service and the workspace. This is build and test automation, not a user-facing feature.",
+    "useCases": [],
+    "files": [
+      "ci/github-workflows/_service-ci.yml",
+      "ci/github-workflows/catalog-service-ci.yml",
+      "ci/github-workflows/customers-service-ci.yml",
+      "ci/github-workflows/gateway-ci.yml",
+      "ci/github-workflows/inventory-service-ci.yml",
+      "ci/github-workflows/orders-service-ci.yml",
+      "ci/github-workflows/payments-service-ci.yml",
+      "ci/github-workflows/workspace-ci.yml"
+    ]
+  },
+  "gateway": {
+    "hash": "1c1d30cc8f92e3e4",
+    "purpose": "Packaging and module setup for the gateway, the single entry point that routes client requests to the backend services.",
+    "useCases": [],
+    "files": [
+      "gateway/Dockerfile",
+      "gateway/go.mod",
+      "gateway/go.sum"
+    ]
+  },
+  "deploy/azure": {
+    "hash": "183dd611e44c64da",
+    "purpose": "Infrastructure-as-code for hosting the shop's services in the cloud; deployment plumbing, not a user-facing feature.",
+    "useCases": [],
+    "files": [
+      "deploy/azure/main.bicep",
+      "deploy/azure/main.parameters.json"
+    ]
+  },
+  "pkg": {
+    "hash": "576409a732de6ab4",
+    "purpose": "Shared Go module kernel (transport-only) used by the services; pure plumbing with no business features.",
+    "useCases": [],
+    "files": [
+      "pkg/go.mod",
+      "pkg/go.sum"
+    ]
+  },
+  "contracts/openapi": {
+    "hash": "932a7e31723c4555",
+    "purpose": "Published API contracts for the catalog, customers and orders services, describing how shoppers and client apps browse products, manage accounts and place orders.",
+    "useCases": [
+      {
+        "title": "Browse the product catalog",
+        "evidence": "catalog-service.json"
+      },
+      {
+        "title": "Manage customer accounts",
+        "evidence": "customers-service.json"
+      },
+      {
+        "title": "Place and track an order",
+        "evidence": "orders-service.json"
+      }
+    ],
+    "files": [
+      "contracts/openapi/catalog-service.json",
+      "contracts/openapi/customers-service.json",
+      "contracts/openapi/orders-service.json"
+    ]
+  },
+  "contracts/events": {
+    "hash": "c078c8310fb10ebc",
+    "purpose": "Event schemas for messages exchanged between services when business events occur, such as an order being placed.",
+    "useCases": [
+      {
+        "title": "Place an order and trigger downstream fulfilment (stock reservation and payment)",
+        "evidence": "order.placed.schema.json"
+      }
+    ],
+    "files": [
+      "contracts/events/envelope.schema.json",
+      "contracts/events/order.placed.schema.json"
+    ]
+  },
+  "deploy/azure/modules": {
+    "hash": "9b07d6cf2f08521d",
+    "purpose": "Reusable cloud deployment module for running a service as a container app; deployment infrastructure only.",
+    "useCases": [],
+    "files": [
+      "deploy/azure/modules/containerapp.bicep"
+    ]
+  },
+  "services/orders/deploy": {
+    "hash": "ec3d8717b9ea10d5",
+    "purpose": "Deployment and gradual traffic cut-over configuration for the orders service; migration and deployment material, not a user feature.",
+    "useCases": [],
+    "files": [
+      "services/orders/deploy/README.md",
+      "services/orders/deploy/deploy.targets.yml",
+      "services/orders/deploy/strangler.values.yaml"
+    ]
+  },
+  "services/catalog/deploy": {
+    "hash": "579b761019b86b5e",
+    "purpose": "Deployment and traffic-cutover settings for the product catalog service. This is release plumbing, not a shopper feature.",
+    "useCases": [],
+    "files": [
+      "services/catalog/deploy/README.md",
+      "services/catalog/deploy/deploy.targets.yml",
+      "services/catalog/deploy/strangler.values.yaml"
+    ]
+  },
+  "services/customers/deploy": {
+    "hash": "579b761019b86b5e",
+    "purpose": "Deployment and traffic-cutover settings for the customer accounts service. This is release plumbing, not a shopper feature.",
+    "useCases": [],
+    "files": [
+      "services/customers/deploy/README.md",
+      "services/customers/deploy/deploy.targets.yml",
+      "services/customers/deploy/strangler.values.yaml"
+    ]
+  },
+  "services/inventory/deploy": {
+    "hash": "579b761019b86b5e",
+    "purpose": "Deployment and traffic-cutover settings for the stock-level service. This is release plumbing, not a shopper feature.",
+    "useCases": [],
+    "files": [
+      "services/inventory/deploy/README.md",
+      "services/inventory/deploy/deploy.targets.yml",
+      "services/inventory/deploy/strangler.values.yaml"
+    ]
+  },
+  "services/payments/deploy": {
+    "hash": "579b761019b86b5e",
+    "purpose": "Deployment and traffic-cutover settings for the payments service. This is release plumbing, not a shopper feature.",
+    "useCases": [],
+    "files": [
+      "services/payments/deploy/README.md",
+      "services/payments/deploy/deploy.targets.yml",
+      "services/payments/deploy/strangler.values.yaml"
+    ]
+  },
+  "deploy/observability": {
+    "hash": "eafc4748120d4cb2",
+    "purpose": "Telemetry collector configuration for monitoring the services. This is operational infrastructure, not an end-user feature.",
+    "useCases": [],
+    "files": [
+      "deploy/observability/otel-collector-config.yaml"
+    ]
+  },
+  "services/inventory/internal/contracts/orders": {
+    "hash": "1dd8a7123c4c4e94",
+    "purpose": "Defines the interface the inventory service shares with the orders service. This is integration plumbing. I did not open the file, so I can't confirm which order-related stock actions it covers.",
+    "useCases": [],
+    "files": [
+      "services/inventory/internal/contracts/orders/contracts.go"
+    ]
+  },
+  "services/catalog/internal/domain": {
+    "hash": "4370012295c95011",
+    "purpose": "Domain layer for the product catalog service; currently only a package doc stub, with no concrete product logic evidenced.",
+    "useCases": [],
+    "files": [
+      "services/catalog/internal/domain/doc.go"
+    ]
+  },
+  "services/customers/internal/domain": {
+    "hash": "4370012295c95011",
+    "purpose": "Domain layer for the customer accounts service; currently only a package doc stub, with no concrete customer logic evidenced.",
+    "useCases": [],
+    "files": [
+      "services/customers/internal/domain/doc.go"
+    ]
+  },
+  "services/inventory/internal/domain": {
+    "hash": "4370012295c95011",
+    "purpose": "Domain layer for the stock-level service; currently only a package doc stub, with no concrete inventory logic evidenced.",
+    "useCases": [],
+    "files": [
+      "services/inventory/internal/domain/doc.go"
+    ]
+  },
+  "services/orders/internal/domain": {
+    "hash": "4370012295c95011",
+    "purpose": "Domain layer for the order service; currently only a package doc stub, with no concrete order logic evidenced.",
+    "useCases": [],
+    "files": [
+      "services/orders/internal/domain/doc.go"
+    ]
+  },
+  "services/payments/internal/domain": {
+    "hash": "4370012295c95011",
+    "purpose": "Domain layer for the payments service; currently only a package doc stub, with no concrete payment logic evidenced.",
+    "useCases": [],
+    "files": [
+      "services/payments/internal/domain/doc.go"
+    ]
+  },
+  "services/orders/internal/clients/testdata/contracts/catalog": {
+    "hash": "4269fef9d9399088",
+    "purpose": "Test fixture holding a sample catalog product contract used to verify the orders service's integration with the catalog service; not a user-facing feature.",
+    "useCases": [],
+    "files": [
+      "services/orders/internal/clients/testdata/contracts/catalog/product.json"
+    ]
+  },
+  "services/orders/internal/clients/testdata/contracts/customers": {
+    "hash": "29b1aef50c0767aa",
+    "purpose": "Test fixture (contract data) for the orders service's customers client. It is not a user-facing feature.",
+    "useCases": [],
+    "files": [
+      "services/orders/internal/clients/testdata/contracts/customers/is_active.json"
+    ]
+  }
+}

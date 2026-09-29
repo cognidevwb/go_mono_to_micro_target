@@ -7,6 +7,7 @@ Edited services/customers/internal/acl/legacy.go (6 files); compiled in the end-
 ## Files this task owned
 
 - `services/customers/internal/acl/legacy.go` — Customers Service
+- `services/customers/internal/app/remote_operations.go` — Customers Service
 - `services/customers/internal/customers/customers_test.go` — Customers Service
 - `services/customers/internal/store/db.go` — Customers Service
 - `services/customers/migrations/0001_init.sql` — Customers Service

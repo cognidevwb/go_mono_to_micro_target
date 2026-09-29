@@ -9,10 +9,10 @@ also the whole cost of the cut.
 | Service | Owns | Aggregate roots | Calls | Files planned |
 | --- | --- | --- | --- | --- |
 | `orders-service` | `Order`, `OrderLine` | `Order` | `catalog-service`, `customers-service` | 22 |
-| `catalog-service` | `Category`, `Product` | `Category` | nothing | 12 |
-| `customers-service` | `Customer` | `Customer` | nothing | 12 |
-| `inventory-service` | `StockItem` | `StockItem` | nothing | 14 |
-| `payments-service` | `Payment` | `Payment` | nothing | 13 |
+| `catalog-service` | `Category`, `Product` | `Category` | nothing | 13 |
+| `customers-service` | `Customer` | `Customer` | nothing | 13 |
+| `inventory-service` | `StockItem` | `StockItem` | nothing | 17 |
+| `payments-service` | `Payment` | `Payment` | nothing | 16 |
 
 ## What becomes a network call
 
@@ -38,13 +38,4 @@ Each one below becomes a saga with an explicit compensation per step.
 | File | Purpose |
 | --- | --- |
 | `ARCHITECTURE.md` | Docs: fill the <!-- CW-SEAM[kind=decomposition-rationale] --> in ARCHITECTURE.md — WHY these bounded contexts were drawn this way (which candidates merged/split, which coupling was accepted vs redesigned) |
-
-## Monolith files this rewrites
-
-Everything else is MOVED verbatim. These are the files where the
-old shape cannot survive the cut.
-
-| File | Why |
-| --- | --- |
-| `internal/orders/service.go` | replace the cross-service unit of work in PlaceOrder with the CreateOrder saga (outbox + compensations) — writes in inventory, orders, payments |
 

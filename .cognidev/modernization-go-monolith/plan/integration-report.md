@@ -1,58 +1,54 @@
 # Integration report
 
 ## Met
-- ✓ [01-catalog-core] No CW-SEAM or TODO(cognidev) marker remains in these files.
-- ✓ [02-catalog-docs] README.md has a real business-capability paragraph; no CW-SEAM marker remains.
-- ✓ [03-catalog-cicd] deploy.targets.yml names real environments and a smoke_check_path; no TODO(cognidev) remains.
-- ✓ [04-catalog-deployment] strangler.values.yaml has a real weight; no CW-SEAM marker remains.
-- ✓ [05-customers-core] No CW-SEAM or TODO(cognidev) marker remains in these files.
-- ✓ [06-customers-docs] README.md has a real business-capability paragraph; no CW-SEAM marker remains.
-- ✓ [07-customers-cicd] deploy.targets.yml names real environments and a smoke_check_path; no TODO(cognidev) remains.
-- ✓ [08-customers-deployment] strangler.values.yaml has a real weight; no CW-SEAM marker remains.
-- ✓ [12-inventory-deployment] strangler.values.yaml has a real weight; no CW-SEAM marker remains.
+- ✓ [01-catalog-core] No CW-SEAM or TODO(cognidev) marker in the shown catalog files; the shared-state price cache is now TTL-bound (30s)
+- ✓ [02-catalog-docs] README.md has a real business-capability paragraph, no marker
+- ✓ [03-catalog-cicd] deploy.targets.yml names staging/production and smoke_check_path /readyz
+- ✓ [04-catalog-deployment] strangler.values.yaml has weight 50 and legacyPaths, no marker
+- ✓ [05-customers-core] No CW-SEAM or TODO(cognidev) marker in the shown customers files
+- ✓ [06-customers-docs] README.md has a real business-capability paragraph, no marker
+- ✓ [07-customers-cicd] deploy.targets.yml names environments and /readyz
+- ✓ [08-customers-deployment] strangler.values.yaml has weight 50 and legacyPaths, no marker
 
 ## Missing / broken
 
 ## Not shown — no verdict either way
-- ? [01-catalog-core] go build ./... and go vet ./... stay green.
-- ? [05-customers-core] go build ./... and go vet ./... stay green.
-- ? [09-inventory-core] No CW-SEAM or TODO(cognidev) marker remains in these files.
-- ? [09-inventory-core] go build ./... and go vet ./... stay green.
-- ? [10-inventory-docs] README.md has a real business-capability paragraph; no CW-SEAM marker remains.
-- ? [11-inventory-cicd] deploy.targets.yml names real environments and a smoke_check_path; no TODO(cognidev) remains.
-- ? [13-orders-clients] No CW-SEAM[kind=cross-call] marker remains in the clients.
-- ? [13-orders-clients] go build ./... and go vet ./... stay green.
-- ? [14-orders-core] No CW-SEAM or TODO(cognidev) marker remains in these files.
-- ? [14-orders-core] go build ./... and go vet ./... stay green.
-- ? [15-orders-saga] The saga binds every participant with a compensation; no marker remains.
-- ? [15-orders-saga] go test ./... passes.
-- ? [16-orders-docs] README.md has a real business-capability paragraph; no CW-SEAM marker remains.
-- ? [17-orders-cicd] deploy.targets.yml names real environments and a smoke_check_path; no TODO(cognidev) remains.
-- ? [18-orders-deployment] strangler.values.yaml has a real weight; no CW-SEAM marker remains.
-- ? [19-payments-core] No CW-SEAM or TODO(cognidev) marker remains in these files.
-- ? [19-payments-core] go build ./... and go vet ./... stay green.
-- ? [20-payments-docs] README.md has a real business-capability paragraph; no CW-SEAM marker remains.
-- ? [21-payments-cicd] deploy.targets.yml names real environments and a smoke_check_path; no TODO(cognidev) remains.
-- ? [22-payments-deployment] strangler.values.yaml has a real weight; no CW-SEAM marker remains.
-- ? [23-docs-architecture] ARCHITECTURE.md explains the boundaries; no CW-SEAM marker remains.
+- ? [01-catalog-core] go build/vet green (not run here; the compile note says the project compiles)
+- ? [05-customers-core] go build/vet green
+- ? [09-inventory-core] The shown inventory files have no markers, but scheduler.go, inventory_test.go and 0001_init.sql are not shown
+- ? [09-inventory-core] go build/vet green
+- ? [10-inventory-docs] README.md not shown
+- ? [11-inventory-cicd] deploy.targets.yml not shown
+- ? [12-inventory-deployment] strangler.values.yaml not shown
+- ? [13-orders-clients] all orders client files not shown
+- ? [14-orders-core] orders core files not shown
+- ? [15-orders-saga] saga/create_order.go and its tests not shown, so compensation binding and go test cannot be judged
+- ? [16-orders-docs] orders README not shown
+- ? [17-orders-cicd] orders deploy.targets.yml not shown
+- ? [18-orders-deployment] orders strangler.values.yaml not shown
+- ? [19-payments-core] payments core files not shown apart from none
+- ? [20-payments-docs] payments README not shown
+- ? [21-payments-cicd] payments deploy.targets.yml not shown
+- ? [22-payments-deployment] payments strangler.values.yaml not shown
+- ? [23-docs-architecture] ARCHITECTURE.md not shown
 
 ## Notes
-- services/inventory/internal/app/wire.go and deploy/strangler.values.yaml are shown and look complete/wired correctly (job, event subscription, auth middleware, routes all guarded/present), but no other inventory core files (handlers, events consumer, jobs/scheduler, store, migrations, README, deploy.targets.yml) were shown, so inventory-core/docs/cicd criteria cannot be confirmed despite the wire.go evidence looking healthy.
-- None of the orders, payments, or root ARCHITECTURE.md files were shown in this batch, so all their criteria are unverifiable rather than missing — no evidence of defects, just no visibility.
-- For the files actually shown (catalog, customers, and inventory's wire.go/strangler.values.yaml), no CW-SEAM or TODO(cognidev) markers remain and the content is substantive and consistent with the ported-code rules.
+- The feature request text is empty, so the check is against the sign-off criteria only.
+- catalog and customers remote_operations.go return err.Error() in a plain {"error":...} body. That leaks database error strings and is not RFC 9457 problem JSON, which breaks the guardrail. inventory's handlers hide the error text, though its remote_operations.go and compensation handler also use plain gin.H errors rather than problem+json.
+- inventory's reserveHandler locks the row with SELECT ... FOR UPDATE, then calls the ported svc.Reserve. It cannot be confirmed here that Reserve uses the single guarded UPDATE with a RowsAffected check that the guardrail requires.
+- inventory creates its compensation ledger table at runtime through `schemas`. The migration file is not shown, so it cannot be checked that the table is also in 0001_init.sql.
+- The price cache has a TTL but no visible invalidation event, which the shared-state rule asks for on a cache.
+- inventory wire.go guards Bus and SQL for a zero-value Deps{}, but the compensate and reserve mounts guard d.DB inside the handlers, which is fine. The signal.NotifyContext cancel is discarded, and there is no join on the jobs goroutine at shutdown.
 
 ## Coverage
-19 of 57 delivered file(s) are shown below. These 38 were NOT shown and cannot be judged either way:
-- services/inventory/internal/acl/legacy.go
-- services/inventory/internal/events/order_placed_consumer.go
-- services/inventory/internal/httpapi/stock_item_handlers.go
+26 of 63 delivered file(s) are shown below. These 37 were NOT shown and cannot be judged either way:
 - services/inventory/internal/inventory/inventory_test.go
 - services/inventory/internal/jobs/scheduler.go
-- services/inventory/internal/store/db.go
 - services/inventory/migrations/0001_init.sql
 - services/inventory/test/equivalence/inventory_equivalence_test.go
 - services/inventory/README.md
 - services/inventory/deploy/deploy.targets.yml
+- services/inventory/deploy/strangler.values.yaml
 - services/orders/internal/clients/catalog/client.go
 - services/orders/internal/clients/catalog_contract_test.go
 - services/orders/internal/clients/customers/client.go
@@ -72,6 +68,8 @@
 - services/orders/deploy/deploy.targets.yml
 - services/orders/deploy/strangler.values.yaml
 - services/payments/internal/acl/legacy.go
+- services/payments/internal/app/create_order_compensation.go
+- services/payments/internal/app/remote_operations.go
 - services/payments/internal/httpapi/payment_handlers.go
 - services/payments/internal/payments/payments_test.go
 - services/payments/internal/store/db.go

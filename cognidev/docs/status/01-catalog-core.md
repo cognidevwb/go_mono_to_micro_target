@@ -7,6 +7,7 @@ Edited services/catalog/internal/acl/legacy.go (7 files); compiled in the end-of
 ## Files this task owned
 
 - `services/catalog/internal/acl/legacy.go` — Catalog Service
+- `services/catalog/internal/app/remote_operations.go` — Catalog Service
 - `services/catalog/internal/catalog/catalog_test.go` — Catalog Service
 - `services/catalog/internal/catalog/service.go` — Catalog Service
 - `services/catalog/internal/store/db.go` — Catalog Service

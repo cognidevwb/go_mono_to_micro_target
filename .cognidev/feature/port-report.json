@@ -92,7 +92,7 @@
     {
       "items": [],
       "kind": "wiring",
-      "lines_generated": 19,
+      "lines_generated": 29,
       "lines_ported_verbatim": 0,
       "llm_seam_points": 0,
       "path": "services/catalog/internal/app/wire.go",
@@ -190,7 +190,7 @@
     {
       "items": [],
       "kind": "wiring",
-      "lines_generated": 19,
+      "lines_generated": 29,
       "lines_ported_verbatim": 0,
       "llm_seam_points": 0,
       "path": "services/customers/internal/app/wire.go",
@@ -276,7 +276,7 @@
     {
       "items": [],
       "kind": "wiring",
-      "lines_generated": 24,
+      "lines_generated": 34,
       "lines_ported_verbatim": 0,
       "llm_seam_points": 0,
       "path": "services/inventory/internal/app/wire.go",
@@ -302,7 +302,7 @@
         "TopicOrderPlaced"
       ],
       "kind": "contract",
-      "lines_generated": 6,
+      "lines_generated": 12,
       "lines_ported_verbatim": 0,
       "llm_seam_points": 0,
       "path": "services/inventory/internal/contracts/orders/contracts.go",
@@ -388,7 +388,7 @@
     {
       "items": [],
       "kind": "wiring",
-      "lines_generated": 20,
+      "lines_generated": 30,
       "lines_ported_verbatim": 0,
       "llm_seam_points": 0,
       "path": "services/payments/internal/app/wire.go",
@@ -518,7 +518,7 @@
     {
       "items": [],
       "kind": "wiring",
-      "lines_generated": 30,
+      "lines_generated": 40,
       "lines_ported_verbatim": 0,
       "llm_seam_points": 0,
       "path": "services/orders/internal/app/wire.go",
@@ -542,7 +542,7 @@
     {
       "items": [],
       "kind": "client",
-      "lines_generated": 53,
+      "lines_generated": 85,
       "lines_ported_verbatim": 0,
       "llm_seam_points": 2,
       "path": "services/orders/internal/clients/catalog/client.go",
@@ -568,7 +568,7 @@
         "Category"
       ],
       "kind": "contract",
-      "lines_generated": 21,
+      "lines_generated": 27,
       "lines_ported_verbatim": 0,
       "llm_seam_points": 0,
       "path": "services/orders/internal/contracts/catalog/contracts.go",
@@ -580,7 +580,7 @@
     {
       "items": [],
       "kind": "client",
-      "lines_generated": 43,
+      "lines_generated": 74,
       "lines_ported_verbatim": 0,
       "llm_seam_points": 1,
       "path": "services/orders/internal/clients/customers/client.go",
@@ -598,7 +598,7 @@
     {
       "items": [],
       "kind": "client",
-      "lines_generated": 43,
+      "lines_generated": 68,
       "lines_ported_verbatim": 0,
       "llm_seam_points": 1,
       "path": "services/orders/internal/clients/inventory/client.go",
@@ -616,7 +616,7 @@
     {
       "items": [],
       "kind": "client",
-      "lines_generated": 51,
+      "lines_generated": 76,
       "lines_ported_verbatim": 0,
       "llm_seam_points": 1,
       "path": "services/orders/internal/clients/payments/client.go",
@@ -654,13 +654,13 @@
     "estimated_llm_edit_lines": 28,
     "files_mapped": 14,
     "files_written": 46,
-    "lines_generated_deterministic": 404,
+    "lines_generated_deterministic": 579,
     "lines_ported_verbatim": 954,
     "llm_seam_points": 12,
-    "pct_deterministic": 97,
+    "pct_deterministic": 98,
     "sagas": 1,
     "services": 5,
-    "total_lines": 1358
+    "total_lines": 1533
   },
   "tool": "port-monolith-go",
   "wiring": {

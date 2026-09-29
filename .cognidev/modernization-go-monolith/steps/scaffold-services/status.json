@@ -1,6 +1,6 @@
 {
-  "elapsedMs": 12652,
-  "finishedAt": 1790392802,
+  "elapsedMs": 14391,
+  "finishedAt": 1790651935,
   "inputs": [],
   "kind": "rust-binary",
   "outputs": [
@@ -9,91 +9,91 @@
       "kind": null,
       "name": "services",
       "optional": false,
-      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/services/"
+      "path": "./services/"
     },
     {
       "exists": true,
       "kind": null,
       "name": "gateway",
       "optional": false,
-      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/gateway/"
+      "path": "./gateway/"
     },
     {
       "exists": true,
       "kind": null,
       "name": "pkg",
       "optional": false,
-      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/pkg/"
+      "path": "./pkg/"
     },
     {
       "exists": true,
       "kind": null,
       "name": "go",
       "optional": false,
-      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/go.work"
+      "path": "./go.work"
     },
     {
       "exists": true,
       "kind": "report",
       "name": "ARCHITECTURE",
       "optional": true,
-      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/ARCHITECTURE.md"
+      "path": "./ARCHITECTURE.md"
     },
     {
       "exists": true,
       "kind": "report",
       "name": "STATE-FLOW",
       "optional": true,
-      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/STATE-FLOW.md"
+      "path": "./STATE-FLOW.md"
     },
     {
       "exists": true,
       "kind": "report",
       "name": "SEQUENCE-DIAGRAMS",
       "optional": true,
-      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/SEQUENCE-DIAGRAMS.md"
+      "path": "./SEQUENCE-DIAGRAMS.md"
     },
     {
       "exists": true,
       "kind": null,
       "name": ".env",
       "optional": true,
-      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/.env.example"
+      "path": "./.env.example"
     },
     {
       "exists": true,
       "kind": "report",
       "name": "RUNBOOK",
       "optional": true,
-      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/RUNBOOK.md"
+      "path": "./RUNBOOK.md"
     },
     {
       "exists": true,
       "kind": "report",
       "name": "CALL-GRAPH",
       "optional": true,
-      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/CALL-GRAPH.md"
+      "path": "./CALL-GRAPH.md"
     },
     {
       "exists": false,
       "kind": "report",
       "name": "ACCESSIBILITY",
       "optional": true,
-      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/ACCESSIBILITY.md"
+      "path": "./ACCESSIBILITY.md"
     },
     {
       "exists": true,
       "kind": "docs",
       "name": "adr",
       "optional": true,
-      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/docs/adr/"
+      "path": "./docs/adr/"
     },
     {
       "exists": true,
       "kind": null,
       "name": "scaffold-report",
       "optional": true,
-      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/.cognidev/feature/scaffold-report.json"
+      "path": "./.cognidev/feature/scaffold-report.json"
     }
   ],
   "status": "Ok",

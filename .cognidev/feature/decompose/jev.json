@@ -28,11 +28,11 @@
         },
         "owns__Category": {
           "first": {
-            "noul": 0.95,
+            "noul": 0.94,
             "type": "noul"
           },
           "verdict": {
-            "p": 0.95,
+            "p": 0.94,
             "verdict": "yes"
           }
         },
@@ -138,11 +138,11 @@
         },
         "owns__Customer": {
           "first": {
-            "noul": 0.94,
+            "noul": 0.93,
             "type": "noul"
           },
           "verdict": {
-            "p": 0.94,
+            "p": 0.93,
             "verdict": "yes"
           }
         },
@@ -158,11 +158,11 @@
         },
         "owns__OrderLine": {
           "first": {
-            "noul": 0.02,
+            "noul": 0.03,
             "type": "noul"
           },
           "verdict": {
-            "p": 0.02,
+            "p": 0.03,
             "verdict": "no"
           }
         },
@@ -213,16 +213,16 @@
             "probabilities": {
               "into_catalog": 0.0,
               "into_customers": 0.0,
-              "into_orders": 0.03,
+              "into_orders": 0.04,
               "into_payments": 0.0,
-              "own": 0.97
+              "own": 0.96
             },
             "type": "choice"
           },
           "verdict": {
             "choice": "own",
             "confidence": 0.95,
-            "p": 0.97,
+            "p": 0.96,
             "verdict": "choice"
           }
         },
@@ -288,11 +288,11 @@
         },
         "owns__StockItem": {
           "first": {
-            "noul": 0.95,
+            "noul": 0.96,
             "type": "noul"
           },
           "verdict": {
-            "p": 0.95,
+            "p": 0.96,
             "verdict": "yes"
           }
         }
@@ -309,20 +309,20 @@
         "boundary": {
           "first": {
             "choice": "own",
-            "confidence": 0.96,
+            "confidence": 0.95,
             "probabilities": {
               "into_catalog": 0.0,
               "into_customers": 0.0,
               "into_inventory": 0.0,
-              "into_orders": 0.03,
-              "own": 0.97
+              "into_orders": 0.04,
+              "own": 0.96
             },
             "type": "choice"
           },
           "verdict": {
             "choice": "own",
-            "confidence": 0.96,
-            "p": 0.97,
+            "confidence": 0.95,
+            "p": 0.96,
             "verdict": "choice"
           }
         },
@@ -348,11 +348,11 @@
         },
         "owns__Order": {
           "first": {
-            "noul": 0.02,
+            "noul": 0.03,
             "type": "noul"
           },
           "verdict": {
-            "p": 0.02,
+            "p": 0.03,
             "verdict": "no"
           }
         },
@@ -428,26 +428,26 @@
         },
         "compensable__0__0": {
           "first": {
-            "noul": 0.88,
+            "noul": 0.89,
             "type": "noul"
           },
           "verdict": {
-            "p": 0.88,
+            "p": 0.89,
             "verdict": "yes"
           }
         },
         "compensable__0__1": {
           "first": {
-            "noul": 0.66,
+            "noul": 0.64,
             "type": "noul"
           },
           "reask": {
-            "noul": 0.52,
+            "noul": 0.56,
             "type": "noul"
           },
           "verdict": {
             "verdict": "unresolved",
-            "why": "P(yes)=0.52 stayed between 0.3 and 0.7 after the re-ask"
+            "why": "P(yes)=0.56 stayed between 0.3 and 0.7 after the re-ask"
           }
         },
         "owns__Category": {
@@ -462,21 +462,21 @@
         },
         "owns__Customer": {
           "first": {
-            "noul": 0.03,
+            "noul": 0.04,
             "type": "noul"
           },
           "verdict": {
-            "p": 0.03,
+            "p": 0.04,
             "verdict": "no"
           }
         },
         "owns__Order": {
           "first": {
-            "noul": 0.96,
+            "noul": 0.97,
             "type": "noul"
           },
           "verdict": {
-            "p": 0.96,
+            "p": 0.97,
             "verdict": "yes"
           }
         },
@@ -569,7 +569,7 @@
         "candidate": "inventory",
         "confidence": {
           "confidence": 0.95,
-          "p": 0.97
+          "p": 0.96
         }
       },
       {
@@ -584,8 +584,8 @@
         "answer": "own",
         "candidate": "payments",
         "confidence": {
-          "confidence": 0.96,
-          "p": 0.97
+          "confidence": 0.95,
+          "p": 0.96
         }
       }
     ],
@@ -646,7 +646,7 @@
       "stands": "no compensation designed for this step",
       "step": "s.payments.Charge",
       "unit": "PlaceOrder",
-      "why": "P(yes)=0.52 stayed between 0.3 and 0.7 after the re-ask"
+      "why": "P(yes)=0.56 stayed between 0.3 and 0.7 after the re-ask"
     }
   ],
   "overridden_by_rule": [],

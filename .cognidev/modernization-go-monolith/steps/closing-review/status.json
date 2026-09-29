@@ -1,6 +1,6 @@
 {
-  "elapsedMs": 10,
-  "finishedAt": 1790395128,
+  "elapsedMs": 15,
+  "finishedAt": 1790652943,
   "inputs": [],
   "kind": "rust-binary",
   "outputs": [
@@ -9,14 +9,14 @@
       "kind": "report",
       "name": "NEXT-STEPS",
       "optional": false,
-      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/NEXT-STEPS.md"
+      "path": "./NEXT-STEPS.md"
     },
     {
       "exists": true,
       "kind": null,
       "name": "closing-review",
       "optional": false,
-      "path": "/Users/rajasekharkarawalla/Downloads/go-samples/runs/monolith-shop-jev/.cognidev/feature/closing-review.json"
+      "path": "./.cognidev/feature/closing-review.json"
     }
   ],
   "status": "Ok",

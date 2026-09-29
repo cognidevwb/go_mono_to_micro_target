@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 
@@ -22,16 +23,25 @@ func baseURL() string {
 	return "http://inventory-service:8080"
 }
 
-// ErrNotFound is returned when inventory-service has no stock item for the given product.
-var ErrNotFound = errors.New("inventory: stock item not found")
-
-type reserveRequest struct {
-	ProductID uint `json:"product_id"`
-	Quantity  int  `json:"quantity"`
-}
-
-type reserveResponse struct {
-	Reserved bool `json:"reserved"`
+// remoteError is the error the in-process call returned, as inventory-service
+// answered it: the message in its JSON body ({"error": …}, or a problem's
+// detail/title), unwrapped, so a caller shows exactly what the monolith showed.
+// Use it for every answer of 400 or above, 404 included.
+func remoteError(resp *http.Response) error {
+	body, _ := io.ReadAll(io.LimitReader(resp.Body, 64<<10))
+	var e struct {
+		Error  string `json:"error"`
+		Detail string `json:"detail"`
+		Title  string `json:"title"`
+	}
+	if json.Unmarshal(body, &e) == nil {
+		for _, m := range []string{e.Error, e.Detail, e.Title} {
+			if m != "" {
+				return errors.New(m)
+			}
+		}
+	}
+	return fmt.Errorf("inventory-service: status %d", resp.StatusCode)
 }
 
 // Service is inventory-service's Service, seen from orders: every method is a remote call.
@@ -44,38 +54,34 @@ func newService() *Service {
 	return &Service{baseURL: baseURL(), client: httpx.NewClient()}
 }
 
-// Reserve calls inventory-service's POST /v1/stockitem/reserve. tx is kept in
-// the signature to mirror the provider's API, but the write now happens
-// remotely: it is no longer part of this transaction.
+// Reserve posts to inventory-service's POST /v1/inventory/reserve. The remote
+// service owns the stock rows, so the caller's tx is not used. Reserving is not
+// idempotent, so the call is never retried.
 func (c *Service) Reserve(tx *gorm.DB, productID uint, qty int) (bool, error) {
-	body, err := json.Marshal(reserveRequest{ProductID: productID, Quantity: qty})
+	payload, err := json.Marshal(map[string]any{"product_id": productID, "qty": qty})
 	if err != nil {
 		return false, err
 	}
-	req, err := http.NewRequestWithContext(context.Background(), http.MethodPost, c.baseURL+"/v1/stockitem/reserve", bytes.NewReader(body))
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodPost, c.baseURL+"/v1/inventory/reserve", bytes.NewReader(payload))
 	if err != nil {
 		return false, err
 	}
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := c.client.Do(req)
 	if err != nil {
-		return false, fmt.Errorf("inventory: reserve stock: %w", err)
+		return false, err
 	}
 	defer resp.Body.Close()
-	switch resp.StatusCode {
-	case http.StatusOK:
-		var out reserveResponse
-		if err := json.NewDecoder(resp.Body).Decode(&out); err != nil {
-			return false, fmt.Errorf("inventory: decode reserve response: %w", err)
-		}
-		return out.Reserved, nil
-	case http.StatusConflict:
-		return false, nil
-	case http.StatusNotFound:
-		return false, ErrNotFound
-	default:
-		return false, fmt.Errorf("inventory: reserve stock: unexpected status %d", resp.StatusCode)
+	if resp.StatusCode >= 400 {
+		return false, remoteError(resp)
 	}
+	var out struct {
+		Reserved bool `json:"reserved"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&out); err != nil {
+		return false, err
+	}
+	return out.Reserved, nil
 }
 
 func NewService(db *gorm.DB) *Service {

@@ -1,6 +1,5 @@
 # Strangler-fig traffic for inventory-service. The gateway sends `weight` percent of
 # the listed legacy paths here; the rest still reach the monolith.
-weight: 80
+weight: 25
 legacyPaths:
-  - /v1/stockitem
-  - /v1/stockitem/*
+  - /api/inventory
